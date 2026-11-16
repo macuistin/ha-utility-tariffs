@@ -181,6 +181,12 @@ SENSORS = (
         device_class=SensorDeviceClass.TIMESTAMP,
         value=_window("start", highest=True),
     ),
+    TariffSensorDescription(
+        key="dearest_window_end",
+        translation_key="dearest_window_end",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value=_window("end", highest=True),
+    ),
 )
 
 
