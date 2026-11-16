@@ -100,6 +100,9 @@
       },
       "bill_coverage": {
         "name": "Bill data coverage"
+      },
+      "savings_this_period": {
+        "name": "Savings this bill period"
       }
     },
     "binary_sensor": {
@@ -112,15 +115,25 @@
     "step": {
       "init": {
         "title": "Options",
-        "description": "How long the cheapest and dearest windows are, and the energy meters your bill is worked out from. A meter is a sensor in kWh that only ever rises, such as your smart meter's import and export totals. Leave both empty to show prices only.",
+        "description": "How long the cheapest and dearest windows are, the energy meters your bill is worked out from, and your battery. A meter is a sensor in kWh that only ever rises, such as your smart meter's import and export totals. Leave them empty to show prices only. The savings need the whole home's use, and a battery needs its charge and size.",
         "data": {
           "window_minutes": "Window length (minutes)",
           "import_energy_entity": "Energy imported from the grid",
-          "export_energy_entity": "Energy exported to the grid"
+          "export_energy_entity": "Energy exported to the grid",
+          "house_energy_entity": "Energy used by the whole home",
+          "battery_discharge_energy_entity": "Energy taken out of the battery",
+          "battery_soc_entity": "Battery charge (percent)",
+          "battery_capacity_kwh": "Battery size (kWh)",
+          "battery_wear_per_kwh": "Battery wear per kWh"
         },
         "data_description": {
           "import_energy_entity": "Needed for the bill. Read every minute.",
-          "export_energy_entity": "Optional. Credits what you export."
+          "export_energy_entity": "Optional. Credits what you export.",
+          "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
+          "battery_discharge_energy_entity": "Optional. Takes battery wear off the savings.",
+          "battery_soc_entity": "Optional. With the battery size, values the energy the battery holds.",
+          "battery_capacity_kwh": "Optional. Usable size of the battery.",
+          "battery_wear_per_kwh": "Optional. What each kWh taken out of the battery costs in wear, in the tariff's currency."
         }
       }
     }

@@ -8,7 +8,7 @@ from homeassistant.const import Platform
 from homeassistant.util import dt as dt_util
 
 from .accountant import EnergyAccountant
-from .const import CONF_EXPORT_ENERGY, CONF_IMPORT_ENERGY
+from .const import CONF_BATTERY_SOC, CONF_IMPORT_ENERGY, METER_TARGETS
 from .coordinator import TariffConfigEntry, TariffCoordinator
 from .energy_store import EnergyStore
 from .services import async_register_services
@@ -44,7 +44,7 @@ async def _async_start_accounting(
     """Keep the energy history when the user has chosen a meter to follow."""
     meters = {
         key: entry.options[key]
-        for key in (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY)
+        for key in (*METER_TARGETS, CONF_BATTERY_SOC)
         if entry.options.get(key)
     }
     if CONF_IMPORT_ENERGY not in meters:

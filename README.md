@@ -15,6 +15,16 @@ the current bill period. You get the bill so far, the energy imported this perio
 the period the history covers. A meter that updates only every half hour or day books each step in
 the minute it appears, so the bill by rate band can differ slightly from your supplier's.
 
+## Savings
+
+Add a sensor for the energy the whole home uses and you also get "Savings this bill period": what
+the home would have paid buying all of its energy from the grid, less what it paid, with export
+credit counted. The standing charge cancels, because both bills carry it. For a battery, add its
+size and its charge sensor, and the value of the energy it holds more or less than when the bill
+period began is added or taken off. A sensor for the energy taken out of the battery, and a wear
+cost per kWh, take wear off. Without a record of what was bought for the battery, stored energy is
+valued at the cheapest rate band.
+
 ## Energy dashboard
 
 The import price and export price sensors can be used as the "entity with the current price" for

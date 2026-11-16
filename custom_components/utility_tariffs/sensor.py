@@ -17,11 +17,12 @@ from homeassistant.components.sensor import (
 from homeassistant.util import dt as dt_util
 
 from .bill_sensor import BILL_SENSORS, BillSensor
-from .const import CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
+from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
 from .lib.tariff import price_rating
 from .lib.tariff.price_stats import RATINGS
+from .savings_sensor import SavingsSensor
 from .windows import current_window
 
 if TYPE_CHECKING:
@@ -192,6 +193,8 @@ async def async_setup_entry(
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
     if coordinator.accountant is not None:
         async_add_entities(BillSensor(coordinator, description) for description in BILL_SENSORS)
+        if entry.options.get(CONF_HOUSE_ENERGY):
+            async_add_entities([SavingsSensor(coordinator)])
 
 
 class TariffSensor(TariffEntity, SensorEntity):
