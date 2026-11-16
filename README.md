@@ -6,6 +6,17 @@ energy sensors, what solar and a battery save and which plan would have cost lea
 
 Status: early development. Nothing is installable yet.
 
+## Energy dashboard
+
+The import price and export price sensors can be used as the "entity with the current price" for
+a grid connection in the Energy dashboard, and as the entity for export compensation.
+
+- Both report the price per kWh in the tariff's currency, such as `EUR/kWh`, and move at every
+  half hour.
+- The export price is `0` when the tariff pays nothing for export, so it is always a number.
+- The dashboard lists only price entities in your Home Assistant currency (Settings, System,
+  General). A tariff in another currency does not appear in the picker.
+
 ## How it is built
 
 - All tariff, price, window, ranking, savings and billing code is written and tested in
