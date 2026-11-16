@@ -36,6 +36,14 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Changing plan
+
+Open the integration, choose the three dots, then **Reconfigure**, and pick another country,
+supplier, plan or area. The sensors keep their entity IDs, history and place in the Energy
+dashboard and your automations, and the saved energy history is priced again under the new plan.
+The device and sensor names follow the new plan, but only the entity IDs matter to automations.
+Choosing a plan another entry already follows is refused.
+
 ## Entities and actions
 
 Each followed tariff is one device. Prices are in the tariff's currency per kWh.

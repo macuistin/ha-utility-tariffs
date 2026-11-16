@@ -14,6 +14,7 @@ CONF_COUNTRY = "country"
 CONF_PROVIDER = "provider"
 CONF_TARIFF = "tariff"
 CONF_AREA = "area"
+CONF_ENTITY_KEY = "entity_key"  # fixed when the entry is made, so a new plan keeps its entities
 CONF_NAME = "name"  # the title shown for the tariff, kept so a renamed plan does not rename it
 
 CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows

@@ -32,7 +32,8 @@
     "abort": {
       "cannot_connect": "The tariff store could not be read. Check the connection and try again.",
       "no_tariffs": "This supplier has no plan with prices in force today.",
-      "already_configured": "This plan is already set up."
+      "already_configured": "This plan is already set up.",
+      "reconfigure_successful": "The plan was changed. The sensors keep their names and history."
     }
   },
   "entity": {

@@ -6,7 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from homeassistant.config_entries import SOURCE_USER
+from homeassistant.config_entries import SOURCE_RECONFIGURE, SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -39,6 +39,7 @@ async def test_a_plan_with_areas_is_chosen_in_four_steps(
         "tariff": "plan",
         "area": "urban",
         "name": "P Energy Plan (Urban)",
+        "entity_key": "IE/p/plan/urban",
     }
     assert result["result"].unique_id == "IE/p/plan/urban"
 
@@ -88,6 +89,12 @@ async def test_an_unreachable_store_with_nothing_cached_aborts(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "cannot_connect"
+
+
+async def _reconfigure(hass: HomeAssistant, entry):
+    return await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id}
+    )
 
 
 async def _to(hass: HomeAssistant, *steps: tuple[str, str]):
@@ -155,3 +162,90 @@ async def test_a_plan_whose_file_cannot_be_read_aborts_at_the_area(
     result = await _to(hass, ("country", "IE"), ("provider", "p"), ("tariff", "plan"))
 
     assert result["reason"] == "cannot_connect"
+
+
+async def test_changing_plan_keeps_the_entities_and_their_ids(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    from homeassistant.helpers import entity_registry as er
+
+    first = await _to(
+        hass, ("country", "IE"), ("provider", "p"), ("tariff", "plan"), ("area", "urban")
+    )
+    entry = first["result"]
+    await hass.async_block_till_done()
+    registry = er.async_get(hass)
+    before = {
+        e.unique_id: e.entity_id
+        for e in er.async_entries_for_config_entry(registry, entry.entry_id)
+    }
+    assert before
+
+    result = await _reconfigure(hass, entry)
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"provider": "p"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "flat"})
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.unique_id == "IE/p/flat/all"
+    assert entry.data["tariff"] == "flat"
+    assert entry.title == "P Energy Flat"
+    after = {
+        e.unique_id: e.entity_id
+        for e in er.async_entries_for_config_entry(registry, entry.entry_id)
+    }
+    assert after == before
+
+
+async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    from homeassistant.helpers import entity_registry as er
+
+    old = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="IE/p/plan/urban",
+        data={
+            "country": "IE",
+            "provider": "p",
+            "tariff": "plan",
+            "area": "urban",
+            "name": "P Energy Plan (Urban)",
+        },
+    )
+    old.add_to_hass(hass)
+    await hass.config_entries.async_setup(old.entry_id)
+    await hass.async_block_till_done()
+    registry = er.async_get(hass)
+    before = {
+        e.unique_id: e.entity_id for e in er.async_entries_for_config_entry(registry, old.entry_id)
+    }
+    assert all(uid.startswith("IE/p/plan/urban_") for uid in before)
+
+    result = await _reconfigure(hass, old)
+    for key, value in (("country", "IE"), ("provider", "p"), ("tariff", "flat")):
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
+    await hass.async_block_till_done()
+
+    assert old.data["entity_key"] == "IE/p/plan/urban"
+    after = {
+        e.unique_id: e.entity_id for e in er.async_entries_for_config_entry(registry, old.entry_id)
+    }
+    assert after == before
+
+
+async def test_changing_to_a_plan_already_followed_is_refused(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    first = await _to(hass, ("country", "IE"), ("provider", "p"), ("tariff", "flat"))
+    second = await _to(
+        hass, ("country", "IE"), ("provider", "p"), ("tariff", "plan"), ("area", "urban")
+    )
+    result = await _reconfigure(hass, second["result"])
+    for key, value in (("country", "IE"), ("provider", "p"), ("tariff", "flat")):
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
+
+    assert first["type"] is FlowResultType.CREATE_ENTRY
+    assert result["reason"] == "already_configured"
