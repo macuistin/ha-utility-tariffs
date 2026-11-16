@@ -53,7 +53,7 @@ max-branches = 10
 "tests/*" = ["E501", "C901", "PLR0912", "PLR0913", "PLR0915", "FBT001", "FBT002"]
 # Copied from the tariff store by scripts/copy_tariffstore.py, whose own lint orders imports by
 # its package names. Reformatting them here would make every copy differ from its source.
-"tests/lib/*/*.py" = ["E501", "I001", "B905", "B008"]
+"tests/lib/*/*.py" = ["E501", "I001", "B905", "B008", "F401"]
 
 [tool.mypy]
 python_version = "3.14"
