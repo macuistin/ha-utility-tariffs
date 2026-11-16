@@ -45,3 +45,13 @@ def test_a_package_imports_only_the_standard_library_and_its_allowed_packages(na
             elif level >= 2:
                 sibling = (module or "").split(".")[0]
                 assert sibling in ALLOWED[name], f"{where} reaches into lib/{sibling}"
+
+
+def test_the_helper_imports_nothing_of_the_integration_outside_lib():
+    """The helper is copied between integrations, so it knows no domain, constant or entity."""
+    for path in sorted((PKG / "helper").glob("*.py")):
+        for level, module, line in _imports(path):
+            if level >= 2:
+                assert (module or "").startswith("lib"), f"{path.name}:{line} imports {module}"
+            else:
+                assert not (module or "").startswith("custom_components"), f"{path.name}:{line}"
