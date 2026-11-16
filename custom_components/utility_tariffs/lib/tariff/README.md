@@ -16,6 +16,7 @@ read option keys.
   about 400 days (see below)
 - `find_window`, `WindowSearch`, `Window`: the cheapest or dearest stretch of a given length in a price series (see below)
 - `savings`, `Savings`, `Battery`: what solar and a battery saved over some days (see below)
+- `definition_savings`, `DefinitionSavings`, `SavingsOptions`: the same saving for a tariff held as a `TariffDefinition`, over the bill period so far (see below)
 - `StoredEnergy`, `stored_energy_change`, `value_per_stored_kwh`: the value of stored energy
 - `price_stats`, `price_rating`, `PriceStats`: the lowest, highest and time-weighted average price over a range, and a five-step rating of a price within that range
 - `marginal_prices`, `price_curve`, `MarginalPrices`, `PriceSlot`: what one more kWh costs in each band, and the all-in import and export price over a time range (see below)
@@ -200,6 +201,12 @@ the system saved. Two bills are priced under the same tariff: the whole house lo
 grid, and what was paid. The standing charge and levy cancel. The export credit is on the paid
 side only. A `Battery` adds the value of the change in stored energy (grid energy bought for the
 battery at its average cost, else the cheapest rate) and takes off wear per kWh discharged.
+
+`definition_savings(history, definition, through, options=None)` is (`SavingsOptions` holds the battery and the `PeriodRules`) the same sum for a
+`TariffDefinition`, priced with `price_period` over the bill period holding `through`. The baseline
+is a history of the same days with the house load as the only import. Money is `Decimal`, rounded
+to the cent. Stored energy is valued at the all-in import price of the band each grid-to-battery
+slot fell in, else at the cheapest band. It raises `ValueError` without a house load.
 
 Solar only and battery only need no special case: with no battery the stored value is 0 and the
 discharge is 0. A house load reading is required, and the call raises `ValueError` without one.
