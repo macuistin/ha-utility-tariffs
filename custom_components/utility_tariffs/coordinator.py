@@ -11,7 +11,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from homeassistant.core import callback
 from homeassistant.helpers.event import async_track_time_change, async_track_utc_time_change
@@ -19,7 +19,14 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .const import CONF_AREA, CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, DOMAIN
-from .lib.tariff import PriceSlot, TariffDefinition, no_holidays, price_curve
+from .lib.tariff import (
+    PriceSlot,
+    PriceStats,
+    TariffDefinition,
+    no_holidays,
+    price_curve,
+    price_stats,
+)
 from .lib.tariffstore import StoreError
 from .store import store_access
 
@@ -32,6 +39,7 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 HORIZON_DAYS = 2  # today and tomorrow, so the next change is always in view
+PAST_DAYS = 1  # yesterday, so the previous price is known just after midnight
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
 type TariffConfigEntry = ConfigEntry[TariffCoordinator]
 
@@ -61,6 +69,24 @@ class TariffData:
             ):
                 return slot
         return None
+
+
+    def previous_change(self, moment: datetime) -> PriceSlot | None:
+        """The last slot before *moment* whose import price differs from the one in force."""
+        current = self.slot_at(moment)
+        for slot in reversed(self.slots):
+            if slot.end <= moment and (
+                current is None or (slot.import_band, slot.import_price)
+                != (current.import_band, current.import_price)
+            ):
+                return slot
+        return None
+
+    def day_stats(self, moment: datetime, flow: Literal["import", "export"]) -> PriceStats | None:
+        """The prices over the local day holding *moment*, in the tariff's time zone."""
+        local = moment.astimezone(self.definition.timezone)
+        start = datetime.combine(local.date(), datetime.min.time(), self.definition.timezone)
+        return price_stats(self.slots, start, start + timedelta(days=1), flow)
 
 
 class TariffCoordinator(DataUpdateCoordinator[TariffData]):
@@ -126,7 +152,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         except StoreError:
             is_holiday, holidays_known = no_holidays, False
         midnight = datetime.min.time()
-        start = datetime.combine(today, midnight, definition.timezone)
+        start = datetime.combine(today - timedelta(days=PAST_DAYS), midnight, definition.timezone)
         end = datetime.combine(
             today + timedelta(days=HORIZON_DAYS), midnight, definition.timezone
         )

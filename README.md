@@ -26,6 +26,24 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Entities and actions
+
+Each followed tariff is one device. Prices are in the tariff's currency per kWh.
+
+| Entity | Meaning |
+| --- | --- |
+| Import price, Export price | The price in force now, all taxes and discounts in |
+| Import rate band | The name of the band in force now |
+| Previous import price, Next import price, Next price change | The price before the current one, the one after it, and when it starts |
+| Import price rating | Where the current price sits in today's range: very low, low, normal, high or very high. A flat tariff is always normal |
+| Lowest, highest and average import price today | Over the local day. The average is weighted by time. The export versions are off until you enable them |
+| Cheapest window start and end, Dearest window start, Cheapest window active | The best stretch of the length set in the options, from now to the end of tomorrow |
+
+The `get_prices` action returns every price from yesterday to the end of tomorrow that overlaps a
+range, with the import and export price and band, and says whether the range is fully covered. The
+`find_window` action finds the cheapest or dearest stretch for a load of a given power. Both return
+their answer, so use them with `response_variable`.
+
 ## How it is built
 
 - All tariff, price, window, ranking, savings and billing code is written and tested in

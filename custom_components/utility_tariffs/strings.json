@@ -49,6 +49,37 @@
       "next_import_price": {
         "name": "Next import price"
       },
+      "previous_import_price": {
+        "name": "Previous import price"
+      },
+      "import_price_rating": {
+        "name": "Import price rating",
+        "state": {
+          "very_low": "Very low",
+          "low": "Low",
+          "normal": "Normal",
+          "high": "High",
+          "very_high": "Very high"
+        }
+      },
+      "lowest_import_price_today": {
+        "name": "Lowest import price today"
+      },
+      "highest_import_price_today": {
+        "name": "Highest import price today"
+      },
+      "average_import_price_today": {
+        "name": "Average import price today"
+      },
+      "lowest_export_price_today": {
+        "name": "Lowest export price today"
+      },
+      "highest_export_price_today": {
+        "name": "Highest export price today"
+      },
+      "average_export_price_today": {
+        "name": "Average export price today"
+      },
       "next_price_change": {
         "name": "Next price change"
       },
@@ -128,6 +159,24 @@
           "description": "The window must finish by this time."
         }
       }
+    },
+    "get_prices": {
+      "name": "Get prices",
+      "description": "Returns the import and export price of every stretch of time in a range, from yesterday to the end of tomorrow.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tariff",
+          "description": "The tariff to read."
+        },
+        "start": {
+          "name": "Start",
+          "description": "The first moment wanted. Defaults to now."
+        },
+        "end": {
+          "name": "End",
+          "description": "The end of the range. Defaults to 24 hours after the start."
+        }
+      }
     }
   },
   "selector": {
@@ -144,6 +193,9 @@
     },
     "not_loaded": {
       "message": "That tariff is not loaded."
+    },
+    "end_before_start": {
+      "message": "The end must be after the start."
     }
   }
 }

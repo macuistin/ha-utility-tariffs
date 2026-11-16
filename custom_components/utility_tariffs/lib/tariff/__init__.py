@@ -7,7 +7,16 @@ from .compile import Locale, definition_from_config
 from .config import TariffConfig, cheapest_period
 from .definition import SCHEMA_VERSION, DefinitionError, TariffDefinition
 from .definition_parse import load_definition, parse_definition
-from .engine import BillInputs, CheckFailed, Line, PricedBill, price_bill, verify_checks
+from .demand import peak_kw_by_window
+from .engine import (
+    BillInputs,
+    CheckFailed,
+    Line,
+    MissingPeak,
+    PricedBill,
+    price_bill,
+    verify_checks,
+)
 from .index import (
     ChecksumMismatch,
     StaticSource,
@@ -31,6 +40,7 @@ from .period_bill import (
 )
 from .periods import RatePeriod
 from .price_curve import MarginalPrices, PriceSlot, marginal_prices, price_curve
+from .price_stats import PriceStats, price_rating, price_stats
 from .reprice import BillPeriod, Repriced, Rounding, import_by_band, reprice
 from .savings import Battery, Savings, savings
 from .slot_history import SlotHistory
@@ -66,7 +76,9 @@ __all__ = [
     "BillInputs",
     "CheckFailed",
     "Line",
+    "MissingPeak",
     "PricedBill",
+    "peak_kw_by_window",
     "price_bill",
     "verify_checks",
     "BillPeriod",
@@ -78,6 +90,9 @@ __all__ = [
     "PriceSlot",
     "marginal_prices",
     "price_curve",
+    "PriceStats",
+    "price_rating",
+    "price_stats",
     "Battery",
     "Savings",
     "savings",
