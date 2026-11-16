@@ -7,6 +7,7 @@ from .compile import Locale, definition_from_config
 from .config import TariffConfig, cheapest_period
 from .definition import SCHEMA_VERSION, DefinitionError, TariffDefinition
 from .definition_parse import load_definition, parse_definition
+from .definition_savings import DefinitionSavings, SavingsOptions, definition_savings
 from .demand import peak_kw_by_window
 from .engine import (
     BillInputs,
@@ -66,6 +67,9 @@ __all__ = [
     "export_band_at",
     "export_by_band",
     "no_holidays",
+    "DefinitionSavings",
+    "SavingsOptions",
+    "definition_savings",
     "PeriodBill",
     "PeriodRules",
     "bill_period_bounds",
