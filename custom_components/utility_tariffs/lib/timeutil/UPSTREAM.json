@@ -1,7 +1,7 @@
 {
   "repository": "macuistin/utility-tariffs",
   "path": "lib/timeutil",
-  "commit": "8e577ef5a8e0e2da40decea7c6c586ac380cb5ed",
+  "commit": "746c6e6d4f86e2b84ded4e9754d2ac54d7a14689",
   "files": {
     "__init__.py": "7bc01b475eed416d0b0ed03383a920a1a4f76c627899f546dd4ae4b0caa4f9be",
     "real_time.py": "73e42bd4377bd32608e364c73dbc2874d92df290ada0d0c89cf3dc30fa6544da"

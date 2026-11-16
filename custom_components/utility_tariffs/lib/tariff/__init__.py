@@ -7,7 +7,16 @@ from .compile import Locale, definition_from_config
 from .config import TariffConfig, cheapest_period
 from .definition import SCHEMA_VERSION, DefinitionError, TariffDefinition
 from .definition_parse import load_definition, parse_definition
-from .engine import BillInputs, CheckFailed, Line, PricedBill, price_bill, verify_checks
+from .demand import peak_kw_by_window
+from .engine import (
+    BillInputs,
+    CheckFailed,
+    Line,
+    MissingPeak,
+    PricedBill,
+    price_bill,
+    verify_checks,
+)
 from .index import (
     ChecksumMismatch,
     StaticSource,
@@ -67,7 +76,9 @@ __all__ = [
     "BillInputs",
     "CheckFailed",
     "Line",
+    "MissingPeak",
     "PricedBill",
+    "peak_kw_by_window",
     "price_bill",
     "verify_checks",
     "BillPeriod",

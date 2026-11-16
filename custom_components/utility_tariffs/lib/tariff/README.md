@@ -78,12 +78,38 @@ applies (`effective_from` included, `effective_to` excluded), the prices, the cu
 inputs, the bill as a tree and worked bills it must reproduce (`checks`).
 
 - Money is a decimal string. A JSON number with a decimal point, `NaN` and `Infinity` are refused.
-- The bill is a tree of a closed set of node kinds: `energy_by_band`, `export_credit`, `per_day`,
-  `per_period`, `adjust`, `tax` and `sum`. Nesting sets the order and the tax base. A `sum` holds
+- The bill is a tree of a closed set of node kinds: `energy_by_band`, `tiered_energy`,
+  `export_credit`, `per_day`, `per_kwh`, `demand`, `per_period`, `minimum`, `maximum`, `adjust`, `tax` and `sum`. Nesting sets the order and the tax base. A `sum` holds
   its children by name, so no list position matters. An unknown kind or field is refused.
 - `bill.period` has a `start_day`, and optional `months` and `start_month`. Each is a whole
   number or `{"input": name}`. A `per_period` amount is for the whole period, or for each month
   of it with `"per": "month"`.
+- `per_kwh` charges an `amount` for each kWh imported (the default) or, with `"on": "export"`,
+  exported. It is for levies, riders and fuel adjustments, and a negative amount is a credit.
+- `demand` charges a `price` for each kW of the highest half-hour import in a `window`, a name
+  the caller gives the peak under. It has optional `hours`, `days`, `months` and `holidays`, written
+  like a band's, and with no `hours` it covers the whole day. `per` is `month` (the default, once
+  for each month of the bill period) or `period`. The engine reads no slots, so pass
+  `BillInputs(peak_kw={window: kW})`, and `peak_kw_by_window(days, definition)` reads it from the
+  slot history. A bill with a demand node and no peak raises `MissingPeak`, never prices zero. A
+  check gives its peak as `peak_kw`. Half-hour slots are the finest resolution, so a tariff that
+  measures 15-minute demand reads a lower peak than its supplier does.
+- `bill.netting` is `none` (the default) or `band`. With `band`, export kWh first offset the import
+  kWh of the import band with the same name, inside the one bill, and only what is left is priced:
+  import in each band after the offset, and the export that no import absorbed, at its export band
+  price. A plain export figure nets in the band named like the base export price. Every export band
+  needs an import band of its name. There is no banking: a surplus is paid, never carried to the
+  next bill.
+- `minimum` and `maximum` wrap one node and set a floor or a cap on its amount. `amount` is for
+  the whole `period` (the default), one `month` or one `day`, and the engine multiplies it by
+  the months or days of the bill. Nesting says what they cover, so a floor inside a `tax` is taxed.
+- `tiered_energy` prices all import kWh by block instead of by band. `blocks` are named, each with
+  `from_kwh`, an optional `upto_kwh` and a `price`. They must start at 0 and meet end to start,
+  and only the last has no `upto_kwh`. `limits` says what the kWh limits are written for: the
+  whole `period` (the default), one `month` of it or one `day`, and the engine multiplies them by
+  the months or days of the bill. Zones do not price kWh under it. With `bands`, a list of import
+  band names, a node prices only the kWh in those bands, so each band or group of bands has a
+  tier table of its own. A band that no table names is not priced, so name every band once.
 - A zone has a unique priority, and the applicable zone of highest priority wins.
 - `export` has a `base` price and may have `zones`, written like the import zones, for an export
   price that changes with the time of day. With no zones the export price is flat.
