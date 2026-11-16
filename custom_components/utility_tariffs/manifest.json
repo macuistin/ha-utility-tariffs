@@ -4,7 +4,7 @@
   "codeowners": [
     "@macuistin"
   ],
-  "config_flow": false,
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/macuistin/ha-utility-tariffs",
   "integration_type": "service",

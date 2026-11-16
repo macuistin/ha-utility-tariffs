@@ -1,0 +1,38 @@
+find_window:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: utility_tariffs
+    duration:
+      required: true
+      example: "02:00:00"
+      selector:
+        duration:
+    flow:
+      default: import
+      selector:
+        select:
+          options:
+            - import
+            - export
+          translation_key: flow
+    highest:
+      default: false
+      selector:
+        boolean:
+    power_kw:
+      default: 1
+      selector:
+        number:
+          min: 0.001
+          max: 1000
+          step: any
+          unit_of_measurement: kW
+    earliest_start:
+      selector:
+        datetime:
+    latest_end:
+      selector:
+        datetime:

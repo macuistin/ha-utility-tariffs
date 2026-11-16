@@ -1,0 +1,134 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Choose a country",
+        "description": "Only countries whose tariffs the open store holds are listed.",
+        "data": {
+          "country": "Country"
+        }
+      },
+      "provider": {
+        "title": "Choose a supplier",
+        "data": {
+          "provider": "Supplier"
+        }
+      },
+      "tariff": {
+        "title": "Choose a plan",
+        "description": "Plans with prices in force today.",
+        "data": {
+          "tariff": "Plan"
+        }
+      },
+      "area": {
+        "title": "Choose an area",
+        "description": "This plan has different prices in different areas.",
+        "data": {
+          "area": "Area"
+        }
+      }
+    },
+    "abort": {
+      "cannot_connect": "The tariff store could not be read. Check the connection and try again.",
+      "no_tariffs": "This supplier has no plan with prices in force today.",
+      "already_configured": "This plan is already set up."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "import_price": {
+        "name": "Import price"
+      },
+      "export_price": {
+        "name": "Export price"
+      },
+      "import_band": {
+        "name": "Import rate band"
+      },
+      "next_import_price": {
+        "name": "Next import price"
+      },
+      "next_price_change": {
+        "name": "Next price change"
+      },
+      "cheapest_window_start": {
+        "name": "Cheapest window start"
+      },
+      "cheapest_window_end": {
+        "name": "Cheapest window end"
+      },
+      "dearest_window_start": {
+        "name": "Dearest window start"
+      }
+    },
+    "binary_sensor": {
+      "cheapest_window_active": {
+        "name": "Cheapest window active"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Windows",
+        "description": "How long the cheapest and dearest windows are.",
+        "data": {
+          "window_minutes": "Window length (minutes)"
+        }
+      }
+    }
+  },
+  "services": {
+    "find_window": {
+      "name": "Find window",
+      "description": "Finds the cheapest or dearest stretch of a given length in the next two days of prices, and what it would cost for a load of a given power.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tariff",
+          "description": "The tariff to search."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the load runs."
+        },
+        "flow": {
+          "name": "Direction",
+          "description": "Import prices what you pay, export what you are paid."
+        },
+        "highest": {
+          "name": "Dearest",
+          "description": "Find the dearest window instead of the cheapest."
+        },
+        "power_kw": {
+          "name": "Power",
+          "description": "The load in kilowatts. The cost is for a load of this size."
+        },
+        "earliest_start": {
+          "name": "Earliest start",
+          "description": "The window may not start before this. Defaults to now."
+        },
+        "latest_end": {
+          "name": "Latest end",
+          "description": "The window must finish by this time."
+        }
+      }
+    }
+  },
+  "selector": {
+    "flow": {
+      "options": {
+        "import": "Import",
+        "export": "Export"
+      }
+    }
+  },
+  "exceptions": {
+    "unknown_entry": {
+      "message": "No Utility Tariffs entry {entry}."
+    },
+    "not_loaded": {
+      "message": "That tariff is not loaded."
+    }
+  }
+}

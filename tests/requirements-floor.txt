@@ -1,0 +1,7 @@
+# Tests on the minimum Home Assistant in hacs.json.
+#
+# Kept out of the repository root so Dependabot, which reads requirements files there, never bumps
+# it. Change it only when the floor in hacs.json changes.
+#
+# pins homeassistant==2026.5.0
+pytest-homeassistant-custom-component==0.13.329
