@@ -1,4 +1,4 @@
-"""Whether the cheapest window is under way now."""
+"""Whether the cheapest or the dearest window is under way now."""
 
 from __future__ import annotations
 
@@ -24,13 +24,19 @@ async def async_setup_entry(
     entry: TariffConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    async_add_entities([CheapestWindowActive(entry.runtime_data, "cheapest_window_active")])
+    data = entry.runtime_data
+    async_add_entities(
+        [
+            CheapestWindowActive(data, "cheapest_window_active"),
+            DearestWindowActive(data, "dearest_window_active"),
+        ]
+    )
 
 
-class CheapestWindowActive(TariffEntity, BinarySensorEntity):
-    """On while the current cheapest window is under way."""
+class _WindowActive(TariffEntity, BinarySensorEntity):
+    """On while the current window is under way. A window already begun counts as current."""
 
-    _attr_translation_key = "cheapest_window_active"
+    _highest = False
 
     @property
     def is_on(self) -> bool | None:
@@ -38,5 +44,18 @@ class CheapestWindowActive(TariffEntity, BinarySensorEntity):
             CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
         )
         now = dt_util.now()
-        window = current_window(self.coordinator.data, now, minutes)
+        window = current_window(self.coordinator.data, now, minutes, highest=self._highest)
         return None if window is None else window.start <= now < window.end
+
+
+class CheapestWindowActive(_WindowActive):
+    """On while the current cheapest window is under way."""
+
+    _attr_translation_key = "cheapest_window_active"
+
+
+class DearestWindowActive(_WindowActive):
+    """On while the current dearest window is under way."""
+
+    _attr_translation_key = "dearest_window_active"
+    _highest = True

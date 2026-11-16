@@ -17,8 +17,8 @@ from tests.test_sensor import NOON, _setup, _state
 TIMES = "2026-11-14 22:00:00+00:00"
 
 
-def _binary(hass: HomeAssistant) -> str:
-    state = hass.states.get("binary_sensor.p_energy_plan_urban_cheapest_window_active")
+def _binary(hass: HomeAssistant, which: str = "cheapest") -> str:
+    state = hass.states.get(f"binary_sensor.p_energy_plan_urban_{which}_window_active")
     assert state is not None
     return state.state
 
@@ -42,6 +42,20 @@ async def test_the_dearest_window_may_already_be_under_way(
 
     # Two hours ending after 12:05 and starting on the half hour: the earliest at the day price.
     assert _state(hass, "dearest_window_start") == "2026-11-14T10:30:00+00:00"
+
+
+async def test_a_dearest_window_under_way_has_a_past_start_a_future_end_and_is_active(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass)
+
+    # The start is behind us because the window began at 10:30, so the end and the active sensor
+    # say it is current, not a later one.
+    assert _state(hass, "dearest_window_start") == "2026-11-14T10:30:00+00:00"
+    assert _state(hass, "dearest_window_end") == "2026-11-14T12:30:00+00:00"
+    assert _binary(hass, "dearest") == "on"
+    assert _binary(hass, "cheapest") == "off"
 
 
 async def test_the_window_is_active_once_it_has_started_and_stays_the_answer(

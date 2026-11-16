@@ -92,6 +92,9 @@
       "dearest_window_start": {
         "name": "Dearest window start"
       },
+      "dearest_window_end": {
+        "name": "Dearest window end"
+      },
       "bill_so_far": {
         "name": "Bill so far"
       },
@@ -108,6 +111,9 @@
     "binary_sensor": {
       "cheapest_window_active": {
         "name": "Cheapest window active"
+      },
+      "dearest_window_active": {
+        "name": "Dearest window active"
       }
     }
   },
