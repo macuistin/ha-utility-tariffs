@@ -21,3 +21,6 @@ DEFAULT_WINDOW_MINUTES = 120
 MIN_WINDOW_MINUTES = 30
 MAX_WINDOW_MINUTES = 720
 WINDOW_STEP_MINUTES = 30
+
+CONF_IMPORT_ENERGY = "import_energy_entity"  # the user's meter: kWh imported, only ever rising
+CONF_EXPORT_ENERGY = "export_energy_entity"  # the user's meter: kWh exported, only ever rising

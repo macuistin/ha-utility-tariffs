@@ -6,6 +6,15 @@ energy sensors, what solar and a battery save and which plan would have cost lea
 
 Status: early development. Nothing is installable yet.
 
+## Bill so far
+
+In the integration's options, choose the sensors that count the energy you import and export, such
+as your smart meter's totals (kWh, Wh or MWh, only ever rising). Every minute the rise since the
+last reading is booked into a half-hourly history, which is saved and priced under the tariff for
+the current bill period. You get the bill so far, the energy imported this period and how much of
+the period the history covers. A meter that updates only every half hour or day books each step in
+the minute it appears, so the bill by rate band can differ slightly from your supplier's.
+
 ## Energy dashboard
 
 The import price and export price sensors can be used as the "entity with the current price" for

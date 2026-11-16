@@ -15,6 +15,8 @@ from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     CountrySelector,
     CountrySelectorConfig,
+    EntitySelector,
+    EntitySelectorConfig,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
@@ -27,6 +29,8 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_AREA,
     CONF_COUNTRY,
+    CONF_EXPORT_ENERGY,
+    CONF_IMPORT_ENERGY,
     CONF_NAME,
     CONF_PROVIDER,
     CONF_TARIFF,
@@ -62,8 +66,8 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry: ConfigEntry) -> WindowOptionsFlow:
-        return WindowOptionsFlow()
+    def async_get_options_flow(config_entry: ConfigEntry) -> TariffOptionsFlow:
+        return TariffOptionsFlow()
 
     def __init__(self) -> None:
         self._chosen: dict[str, str] = {}
@@ -144,24 +148,33 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(title=title, data={**self._chosen, CONF_NAME: title})
 
 
-class WindowOptionsFlow(OptionsFlowWithReload):
-    """The length of the cheapest and dearest windows. Saving reloads the entry."""
+_METERS = (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY)
+
+
+class TariffOptionsFlow(OptionsFlowWithReload):
+    """The window length and the energy meters to follow. Saving reloads the entry."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
-            return self.async_create_entry(data={CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])})
-        current = self.config_entry.options.get(CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES)
-        schema = _schema(
-            {
-                vol.Required(CONF_WINDOW_MINUTES, default=current): NumberSelector(
-                    NumberSelectorConfig(
-                        min=MIN_WINDOW_MINUTES,
-                        max=MAX_WINDOW_MINUTES,
-                        step=WINDOW_STEP_MINUTES,
-                        mode=NumberSelectorMode.BOX,
-                        unit_of_measurement="min",
-                    )
-                )
-            }
+            data: dict[str, Any] = {CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])}
+            data.update({k: user_input[k] for k in _METERS if user_input.get(k)})
+            return self.async_create_entry(data=data)
+        options = self.config_entry.options
+        current = options.get(CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES)
+        meter = EntitySelector(
+            EntitySelectorConfig(domain="sensor", device_class="energy")
         )
-        return self.async_show_form(step_id="init", data_schema=schema)
+        fields: dict[Any, Any] = {
+            vol.Required(CONF_WINDOW_MINUTES, default=current): NumberSelector(
+                NumberSelectorConfig(
+                    min=MIN_WINDOW_MINUTES,
+                    max=MAX_WINDOW_MINUTES,
+                    step=WINDOW_STEP_MINUTES,
+                    mode=NumberSelectorMode.BOX,
+                    unit_of_measurement="min",
+                )
+            )
+        }
+        for key in _METERS:
+            fields[vol.Optional(key, description={"suggested_value": options.get(key)})] = meter
+        return self.async_show_form(step_id="init", data_schema=_schema(fields))

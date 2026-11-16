@@ -16,6 +16,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.util import dt as dt_util
 
+from .bill_sensor import BILL_SENSORS, BillSensor
 from .const import CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
@@ -134,6 +135,8 @@ async def async_setup_entry(
 ) -> None:
     coordinator = entry.runtime_data
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
+    if coordinator.accountant is not None:
+        async_add_entities(BillSensor(coordinator, description) for description in BILL_SENSORS)
 
 
 class TariffSensor(TariffEntity, SensorEntity):
