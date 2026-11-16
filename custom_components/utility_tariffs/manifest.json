@@ -1,0 +1,15 @@
+{
+  "domain": "utility_tariffs",
+  "name": "Utility Tariffs",
+  "codeowners": [
+    "@macuistin"
+  ],
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://github.com/macuistin/ha-utility-tariffs",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/macuistin/ha-utility-tariffs/issues",
+  "requirements": [],
+  "version": "0.1.0a1"
+}
