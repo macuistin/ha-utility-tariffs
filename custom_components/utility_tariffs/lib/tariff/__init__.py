@@ -31,6 +31,7 @@ from .period_bill import (
 )
 from .periods import RatePeriod
 from .price_curve import MarginalPrices, PriceSlot, marginal_prices, price_curve
+from .price_stats import PriceStats, price_rating, price_stats
 from .reprice import BillPeriod, Repriced, Rounding, import_by_band, reprice
 from .savings import Battery, Savings, savings
 from .slot_history import SlotHistory
@@ -78,6 +79,9 @@ __all__ = [
     "PriceSlot",
     "marginal_prices",
     "price_curve",
+    "PriceStats",
+    "price_rating",
+    "price_stats",
     "Battery",
     "Savings",
     "savings",

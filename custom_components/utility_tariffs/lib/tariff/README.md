@@ -17,6 +17,7 @@ read option keys.
 - `find_window`, `WindowSearch`, `Window`: the cheapest or dearest stretch of a given length in a price series (see below)
 - `savings`, `Savings`, `Battery`: what solar and a battery saved over some days (see below)
 - `StoredEnergy`, `stored_energy_change`, `value_per_stored_kwh`: the value of stored energy
+- `price_stats`, `price_rating`, `PriceStats`: the lowest, highest and time-weighted average price over a range, and a five-step rating of a price within that range
 - `marginal_prices`, `price_curve`, `MarginalPrices`, `PriceSlot`: what one more kWh costs in each band, and the all-in import and export price over a time range (see below)
 
 ## Half-hourly slots
