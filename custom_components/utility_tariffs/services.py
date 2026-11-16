@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from .coordinator import TariffConfigEntry
 
 SERVICE_FIND_WINDOW = "find_window"
+SERVICE_GET_PRICES = "get_prices"
 ATTR_ENTRY = "config_entry_id"
 FLOWS = ("import", "export")
 
@@ -33,6 +34,14 @@ FIND_WINDOW_SCHEMA: Any = vol.Schema(
         vol.Optional("power_kw", default=1.0): vol.All(vol.Coerce(float), vol.Range(min=0.001)),
         vol.Optional("earliest_start"): cv.datetime,
         vol.Optional("latest_end"): cv.datetime,
+    }
+)
+
+GET_PRICES_SCHEMA: Any = vol.Schema(
+    {
+        vol.Required(ATTR_ENTRY): cv.string,
+        vol.Optional("start"): cv.datetime,
+        vol.Optional("end"): cv.datetime,
     }
 )
 
@@ -83,11 +92,47 @@ async def _find_window(call: ServiceCall) -> ServiceResponse:
     }
 
 
+async def _get_prices(call: ServiceCall) -> ServiceResponse:
+    """The held prices that overlap the range, cut to it. Defaults to the next 24 hours."""
+    entry = _entry(call.hass, call.data[ATTR_ENTRY])
+    data = entry.runtime_data.data
+    start = _aware(call.data.get("start")) or dt_util.now()
+    end = _aware(call.data.get("end")) or start + timedelta(days=1)
+    if end <= start:
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="end_before_start")
+    slots = [slot for slot in data.slots if slot.end > start and slot.start < end]
+    covered = bool(slots) and slots[0].start <= start and slots[-1].end >= end
+    return {
+        "currency": data.definition.currency,
+        "unit": f"{data.definition.currency}/kWh",
+        "complete": covered,
+        "holidays_known": data.holidays_known,
+        "prices": [
+            {
+                "start": max(slot.start, start).isoformat(),
+                "end": min(slot.end, end).isoformat(),
+                "import_price": float(slot.import_price),
+                "export_price": float(slot.export_price),
+                "import_band": slot.import_band,
+                "export_band": slot.export_band,
+            }
+            for slot in slots
+        ],
+    }
+
+
 def async_register_services(hass: HomeAssistant) -> None:
     hass.services.async_register(
         DOMAIN,
         SERVICE_FIND_WINDOW,
         _find_window,
         schema=FIND_WINDOW_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_GET_PRICES,
+        _get_prices,
+        schema=GET_PRICES_SCHEMA,
         supports_response=SupportsResponse.ONLY,
     )

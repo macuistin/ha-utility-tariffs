@@ -36,3 +36,17 @@ find_window:
     latest_end:
       selector:
         datetime:
+
+get_prices:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: utility_tariffs
+    start:
+      selector:
+        datetime:
+    end:
+      selector:
+        datetime:

@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -19,6 +19,8 @@ from homeassistant.util import dt as dt_util
 from .const import CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
+from .lib.tariff import price_rating
+from .lib.tariff.price_stats import RATINGS
 from .windows import current_window
 
 if TYPE_CHECKING:
@@ -63,6 +65,29 @@ def _next(field: str) -> Callable[[TariffData, datetime, int], str | float | dat
     return read
 
 
+def _previous(data: TariffData, now: datetime, _minutes: int) -> float | None:
+    slot = data.previous_change(now)
+    return None if slot is None else _price(slot.import_price)
+
+
+def _day(
+    flow: Literal["import", "export"], field: str
+) -> Callable[[TariffData, datetime, int], float | None]:
+    def read(data: TariffData, now: datetime, _minutes: int) -> float | None:
+        stats = data.day_stats(now, flow)
+        return None if stats is None else _price(getattr(stats, field))
+
+    return read
+
+
+def _rating(data: TariffData, now: datetime, _minutes: int) -> str | None:
+    slot = data.slot_at(now)
+    stats = data.day_stats(now, "import")
+    if slot is None or stats is None:
+        return None
+    return price_rating(slot.import_price, stats)
+
+
 def _window(
     edge: str, *, highest: bool = False
 ) -> Callable[[TariffData, datetime, int], datetime | None]:
@@ -99,6 +124,36 @@ SENSORS = (
         suggested_display_precision=4,
         per_kwh=True,
         value=_next("import_price"),
+    ),
+    TariffSensorDescription(
+        key="previous_import_price",
+        translation_key="previous_import_price",
+        suggested_display_precision=4,
+        per_kwh=True,
+        value=_previous,
+    ),
+    TariffSensorDescription(
+        key="import_price_rating",
+        translation_key="import_price_rating",
+        device_class=SensorDeviceClass.ENUM,
+        options=list(RATINGS),
+        value=_rating,
+    ),
+    *(
+        TariffSensorDescription(
+            key=f"{prefix}_{flow}_price_today",
+            translation_key=f"{prefix}_{flow}_price_today",
+            suggested_display_precision=4,
+            per_kwh=True,
+            entity_registry_enabled_default=flow == "import",
+            value=_day(flow, field),
+        )
+        for flow in ("import", "export")
+        for prefix, field in (
+            ("lowest", "lowest"),
+            ("highest", "highest"),
+            ("average", "average"),
+        )
     ),
     TariffSensorDescription(
         key="next_price_change",
