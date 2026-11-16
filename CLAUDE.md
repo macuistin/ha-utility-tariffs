@@ -28,6 +28,7 @@ Assistant glue (cache files, timers, repairs, storage, entities) is written here
 | `custom_components/utility_tariffs/lib/` | Copied packages. `lib/README.md` has the rules and the allowed imports |
 | `custom_components/utility_tariffs/helper/` | Home Assistant glue meant to be shared with the GivEnergy integration: no domain or constants of its own, no tariff maths. Cache access first, then updater and slot storage |
 | `scripts/copy_tariffstore.py` | Copies the packages and their tests from a checkout of the store |
+| `custom_components/utility_tariffs/{meter,accountant,energy_store,bill,bill_sensor}.py` | The bill from the user's own meters: `meter.py` reads a rising kWh sensor into rises, `accountant.py` books them every minute into the slot history, `energy_store.py` saves it per entry, `bill.py` prices the period with `price_period`, `bill_sensor.py` shows it. Only when an import meter is set in the options |
 | `tests/` | Unit tests. `tests/lib/` holds the copied tests |
 | `.github/workflows/` | `tests.yml`, `hassfest.yml`, `hacs.yml`, `tariffstore-copy.yml` (weekly copy pull request) |
 

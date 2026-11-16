@@ -10,6 +10,7 @@ import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
+from homeassistant.util import ulid as ulid_util
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
     async_fire_time_changed,
@@ -27,11 +28,14 @@ DATA = {
 }
 
 
-async def _setup(hass: HomeAssistant, data: dict[str, str] = DATA) -> MockConfigEntry:
+async def _setup(
+    hass: HomeAssistant, data: dict[str, str] = DATA, options: dict[str, str] | None = None,
+    entry_id: str | None = None,
+) -> MockConfigEntry:
     await hass.config.async_set_time_zone("Europe/Dublin")
     entry = MockConfigEntry(
         domain=DOMAIN, unique_id="/".join(data[k] for k in ("country", "provider", "tariff", "area")),
-        data=data, title=data["name"],
+        data=data, title=data["name"], options=options or {}, entry_id=entry_id or ulid_util.ulid_now(),
     )
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)

@@ -8,6 +8,7 @@ current slot from the held prices, so the coordinator also wakes them at every h
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import HomeAssistant
 
+    from .accountant import EnergyAccountant
     from .helper.store_access import TariffStoreAccess
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,6 +43,7 @@ class TariffData:
     definition: TariffDefinition
     slots: tuple[PriceSlot, ...]
     holidays_known: bool  # False when the store holds no public holidays for the period
+    is_holiday: Callable[[date], bool] = no_holidays
 
     def slot_at(self, moment: datetime) -> PriceSlot | None:
         for slot in self.slots:
@@ -75,6 +78,8 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             hass, _LOGGER, config_entry=entry, name=DOMAIN, update_interval=None
         )
         self._access = access if access is not None else store_access(hass)
+        # Set at start-up when the user has chosen an energy meter. None means no bill is kept.
+        self.accountant: EnergyAccountant | None = None
 
     async def _async_setup(self) -> None:
         """Read again every night, and wake the sensors at every half hour."""
@@ -134,4 +139,4 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             slots = await self.hass.async_add_executor_job(
                 price_curve, definition, start, end, no_holidays
             )
-        return TariffData(definition, slots, holidays_known)
+        return TariffData(definition, slots, holidays_known, is_holiday)
