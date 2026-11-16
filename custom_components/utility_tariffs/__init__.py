@@ -7,11 +7,18 @@ from typing import TYPE_CHECKING
 from homeassistant.const import Platform
 
 from .coordinator import TariffConfigEntry, TariffCoordinator
+from .services import async_register_services
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.typing import ConfigType
 
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    async_register_services(hass)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: TariffConfigEntry) -> bool:

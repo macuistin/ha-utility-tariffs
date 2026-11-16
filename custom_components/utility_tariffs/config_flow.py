@@ -5,17 +5,38 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithReload,
+)
+from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     CountrySelector,
     CountrySelectorConfig,
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
 )
 from homeassistant.util import dt as dt_util
 
-from .const import CONF_AREA, CONF_COUNTRY, CONF_NAME, CONF_PROVIDER, CONF_TARIFF, DOMAIN
+from .const import (
+    CONF_AREA,
+    CONF_COUNTRY,
+    CONF_NAME,
+    CONF_PROVIDER,
+    CONF_TARIFF,
+    CONF_WINDOW_MINUTES,
+    DEFAULT_WINDOW_MINUTES,
+    DOMAIN,
+    MAX_WINDOW_MINUTES,
+    MIN_WINDOW_MINUTES,
+    WINDOW_STEP_MINUTES,
+)
 from .lib.tariffstore import StoreError
 from .store import store_access
 
@@ -38,6 +59,11 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
     """Four short steps, each limited to what the store holds."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> WindowOptionsFlow:
+        return WindowOptionsFlow()
 
     def __init__(self) -> None:
         self._chosen: dict[str, str] = {}
@@ -116,3 +142,26 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         await self.async_set_unique_id(unique)
         self._abort_if_unique_id_configured()
         return self.async_create_entry(title=title, data={**self._chosen, CONF_NAME: title})
+
+
+class WindowOptionsFlow(OptionsFlowWithReload):
+    """The length of the cheapest and dearest windows. Saving reloads the entry."""
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            return self.async_create_entry(data={CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])})
+        current = self.config_entry.options.get(CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES)
+        schema = _schema(
+            {
+                vol.Required(CONF_WINDOW_MINUTES, default=current): NumberSelector(
+                    NumberSelectorConfig(
+                        min=MIN_WINDOW_MINUTES,
+                        max=MAX_WINDOW_MINUTES,
+                        step=WINDOW_STEP_MINUTES,
+                        mode=NumberSelectorMode.BOX,
+                        unit_of_measurement="min",
+                    )
+                )
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)

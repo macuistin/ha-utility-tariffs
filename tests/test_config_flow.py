@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -86,4 +87,71 @@ async def test_an_unreachable_store_with_nothing_cached_aborts(
     result = await _start(hass)
 
     assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+
+
+async def _to(hass: HomeAssistant, *steps: tuple[str, str]):
+    result = await _start(hass)
+    for key, value in steps:
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
+    return result
+
+
+async def test_a_store_that_fails_after_the_country_aborts_at_the_supplier(
+    hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+    from custom_components.utility_tariffs.lib.tariffstore import StoreError
+
+    async def fail(self, *args, **kwargs):
+        raise StoreError("down")
+
+    monkeypatch.setattr(TariffStoreAccess, "async_providers", fail)
+    result = await _to(hass, ("country", "IE"))
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+
+
+async def test_a_store_that_fails_when_listing_plans_aborts(
+    hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+    from custom_components.utility_tariffs.lib.tariffstore import StoreError
+
+    async def fail(self, *args, **kwargs):
+        raise StoreError("down")
+
+    monkeypatch.setattr(TariffStoreAccess, "async_tariffs", fail)
+    result = await _to(hass, ("country", "IE"), ("provider", "p"))
+
+    assert result["reason"] == "cannot_connect"
+
+
+async def test_a_supplier_with_no_plan_in_force_aborts(
+    hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+
+    async def none(self, *args, **kwargs):
+        return {}
+
+    monkeypatch.setattr(TariffStoreAccess, "async_tariffs", none)
+    result = await _to(hass, ("country", "IE"), ("provider", "p"))
+
+    assert result["reason"] == "no_tariffs"
+
+
+async def test_a_plan_whose_file_cannot_be_read_aborts_at_the_area(
+    hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+    from custom_components.utility_tariffs.lib.tariffstore import StoreError
+
+    async def fail(self, *args, **kwargs):
+        raise StoreError("down")
+
+    monkeypatch.setattr(TariffStoreAccess, "async_areas", fail)
+    result = await _to(hass, ("country", "IE"), ("provider", "p"), ("tariff", "plan"))
+
     assert result["reason"] == "cannot_connect"

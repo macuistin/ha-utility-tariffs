@@ -130,3 +130,52 @@ async def test_every_sensor_has_a_unique_id_from_the_plan(
     entity = er.async_get(hass).async_get(f"sensor.p_energy_plan_urban_{key}")
     assert entity is not None
     assert entity.unique_id == f"IE/p/plan/urban_{key}"
+
+
+async def test_a_store_that_fails_later_keeps_the_prices_already_held(
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    use_store: Callable[..., Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+    from custom_components.utility_tariffs.lib.tariffstore import StoreError
+
+    freezer.move_to(NOON)
+    entry = await _setup(hass)
+
+    async def fail(self, *args, **kwargs):
+        raise StoreError("down")
+
+    monkeypatch.setattr(TariffStoreAccess, "async_definition", fail)
+    await entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    assert entry.state is ConfigEntryState.LOADED
+    assert _state(hass, "import_price") == "0.3"
+
+
+async def test_the_store_is_read_again_every_night_after_midnight(
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    use_store: Callable[..., Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+
+    freezer.move_to("2026-11-14 23:59:00+00:00")
+    await _setup(hass)
+    reads: list[object] = []
+    original = TariffStoreAccess.async_definition
+
+    async def counted(self, *args, **kwargs):
+        reads.append(args)
+        return await original(self, *args, **kwargs)
+
+    monkeypatch.setattr(TariffStoreAccess, "async_definition", counted)
+    freezer.move_to("2026-11-15 00:05:00+00:00")
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    assert len(reads) == 1
+    assert _state(hass, "next_price_change") == "2026-11-15T08:00:00+00:00"

@@ -15,3 +15,9 @@ CONF_PROVIDER = "provider"
 CONF_TARIFF = "tariff"
 CONF_AREA = "area"
 CONF_NAME = "name"  # the title shown for the tariff, kept so a renamed plan does not rename it
+
+CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows
+DEFAULT_WINDOW_MINUTES = 120
+MIN_WINDOW_MINUTES = 30
+MAX_WINDOW_MINUTES = 720
+WINDOW_STEP_MINUTES = 30

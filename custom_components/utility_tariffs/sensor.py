@@ -16,8 +16,10 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.util import dt as dt_util
 
+from .const import CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
+from .windows import current_window
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -30,7 +32,7 @@ PARALLEL_UPDATES = 0
 class TariffSensorDescription(SensorEntityDescription):
     """A sensor and how to read its value from the tariff at a moment."""
 
-    value: Callable[[TariffData, datetime], str | float | datetime | None]
+    value: Callable[[TariffData, datetime, int], str | float | datetime | None]
     per_kwh: bool = False  # the unit is the tariff's currency per kWh
 
 
@@ -38,8 +40,8 @@ def _price(value: Decimal | None) -> float | None:
     return None if value is None else float(value)
 
 
-def _current(field: str) -> Callable[[TariffData, datetime], str | float | None]:
-    def read(data: TariffData, now: datetime) -> str | float | None:
+def _current(field: str) -> Callable[[TariffData, datetime, int], str | float | None]:
+    def read(data: TariffData, now: datetime, _minutes: int) -> str | float | None:
         slot = data.slot_at(now)
         if slot is None:
             return None
@@ -49,14 +51,24 @@ def _current(field: str) -> Callable[[TariffData, datetime], str | float | None]
     return read
 
 
-def _next(field: str) -> Callable[[TariffData, datetime], str | float | datetime | None]:
-    def read(data: TariffData, now: datetime) -> str | float | datetime | None:
+def _next(field: str) -> Callable[[TariffData, datetime, int], str | float | datetime | None]:
+    def read(data: TariffData, now: datetime, _minutes: int) -> str | float | datetime | None:
         slot = data.next_change(now)
         if slot is None:
             return None
         if field == "start":
             return slot.start
         return _price(getattr(slot, field))
+
+    return read
+
+
+def _window(
+    edge: str, *, highest: bool = False
+) -> Callable[[TariffData, datetime, int], datetime | None]:
+    def read(data: TariffData, now: datetime, minutes: int) -> datetime | None:
+        window = current_window(data, now, minutes, highest=highest)
+        return None if window is None else getattr(window, edge)
 
     return read
 
@@ -94,6 +106,24 @@ SENSORS = (
         device_class=SensorDeviceClass.TIMESTAMP,
         value=_next("start"),
     ),
+    TariffSensorDescription(
+        key="cheapest_window_start",
+        translation_key="cheapest_window_start",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value=_window("start"),
+    ),
+    TariffSensorDescription(
+        key="cheapest_window_end",
+        translation_key="cheapest_window_end",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value=_window("end"),
+    ),
+    TariffSensorDescription(
+        key="dearest_window_start",
+        translation_key="dearest_window_start",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value=_window("start", highest=True),
+    ),
 )
 
 
@@ -123,4 +153,7 @@ class TariffSensor(TariffEntity, SensorEntity):
 
     @property
     def native_value(self) -> str | float | datetime | None:
-        return self.entity_description.value(self.coordinator.data, dt_util.now())
+        minutes = self.coordinator.config_entry.options.get(
+            CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
+        )
+        return self.entity_description.value(self.coordinator.data, dt_util.now(), minutes)
