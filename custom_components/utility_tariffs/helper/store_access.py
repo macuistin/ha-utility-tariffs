@@ -129,6 +129,12 @@ class TariffStoreAccess:
     ) -> dict[str, str]:
         return await self._run(partial(self._store.areas, country, provider, tariff, on))
 
+    async def async_is_holiday(
+        self, country: str, region: str | None = None
+    ) -> Callable[[date], bool]:
+        """Whether a day is a public holiday there. Raises StoreError when none are held."""
+        return await self._run(partial(self._store.is_holiday, country, region))
+
     async def async_definition(  # noqa: PLR0913
         self,
         country: str,

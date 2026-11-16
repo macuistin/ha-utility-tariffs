@@ -1,0 +1,39 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Choose a country",
+        "description": "Only countries whose tariffs the open store holds are listed.",
+        "data": { "country": "Country" }
+      },
+      "provider": {
+        "title": "Choose a supplier",
+        "data": { "provider": "Supplier" }
+      },
+      "tariff": {
+        "title": "Choose a plan",
+        "description": "Plans with prices in force today.",
+        "data": { "tariff": "Plan" }
+      },
+      "area": {
+        "title": "Choose an area",
+        "description": "This plan has different prices in different areas.",
+        "data": { "area": "Area" }
+      }
+    },
+    "abort": {
+      "cannot_connect": "The tariff store could not be read. Check the connection and try again.",
+      "no_tariffs": "This supplier has no plan with prices in force today.",
+      "already_configured": "This plan is already set up."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "import_price": { "name": "Import price" },
+      "export_price": { "name": "Export price" },
+      "import_band": { "name": "Import rate band" },
+      "next_import_price": { "name": "Next import price" },
+      "next_price_change": { "name": "Next price change" }
+    }
+  }
+}

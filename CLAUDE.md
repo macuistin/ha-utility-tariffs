@@ -24,7 +24,7 @@ Assistant glue (cache files, timers, repairs, storage, entities) is written here
 
 | Path | Role |
 | --- | --- |
-| `custom_components/utility_tariffs/` | The integration |
+| `custom_components/utility_tariffs/` | The integration: `config_flow.py` (country, supplier, plan, area), `coordinator.py` (the tariff and two days of prices, read nightly), `sensor.py`, `entity.py` |
 | `custom_components/utility_tariffs/lib/` | Copied packages. `lib/README.md` has the rules and the allowed imports |
 | `custom_components/utility_tariffs/helper/` | Home Assistant glue meant to be shared with the GivEnergy integration: no domain or constants of its own, no tariff maths. Cache access first, then updater and slot storage |
 | `scripts/copy_tariffstore.py` | Copies the packages and their tests from a checkout of the store |
@@ -33,7 +33,10 @@ Assistant glue (cache files, timers, repairs, storage, entities) is written here
 
 ## Commands
 
-The code uses Python 3.14 syntax. Make the virtualenv with `uv venv --python 3.14 .venv`.
+The code uses Python 3.14 syntax. Make the virtualenv with `uv venv --python 3.14 .venv`, then
+`uv pip install -r requirements-test.txt`. Every test runs on a real Home Assistant through
+`pytest-homeassistant-custom-component`, so there are no stubs. `tests/requirements-floor.txt` is the
+minimum Home Assistant in `hacs.json`. `strings.json` and `translations/en.json` stay identical.
 
 ```bash
 ruff check custom_components tests scripts
