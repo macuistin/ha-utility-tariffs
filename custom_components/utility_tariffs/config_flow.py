@@ -28,8 +28,13 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_AREA,
+    CONF_BATTERY_CAPACITY,
+    CONF_BATTERY_DISCHARGE_ENERGY,
+    CONF_BATTERY_SOC,
+    CONF_BATTERY_WEAR,
     CONF_COUNTRY,
     CONF_EXPORT_ENERGY,
+    CONF_HOUSE_ENERGY,
     CONF_IMPORT_ENERGY,
     CONF_NAME,
     CONF_PROVIDER,
@@ -76,9 +81,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         access = store_access(self.hass)
         try:
-            held = [
-                code for code, row in (await access.async_countries()).items() if "path" in row
-            ]
+            held = [code for code, row in (await access.async_countries()).items() if "path" in row]
         except STORE_ERRORS:
             return self.async_abort(reason="cannot_connect")
         if user_input is not None:
@@ -101,7 +104,9 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             self._chosen[CONF_PROVIDER] = user_input[CONF_PROVIDER]
             self._names["provider"] = providers[user_input[CONF_PROVIDER]]
             return await self.async_step_tariff()
-        return self.async_show_form(step_id="provider", data_schema=_choice(CONF_PROVIDER, providers))
+        return self.async_show_form(
+            step_id="provider", data_schema=_choice(CONF_PROVIDER, providers)
+        )
 
     async def async_step_tariff(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         access = store_access(self.hass)
@@ -148,22 +153,18 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(title=title, data={**self._chosen, CONF_NAME: title})
 
 
-_METERS = (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY)
+_METERS = (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY, CONF_HOUSE_ENERGY, CONF_BATTERY_DISCHARGE_ENERGY)
+_NUMBERS = {CONF_BATTERY_CAPACITY: "kWh", CONF_BATTERY_WEAR: None}
 
 
 class TariffOptionsFlow(OptionsFlowWithReload):
-    """The window length and the energy meters to follow. Saving reloads the entry."""
+    """The window length, the energy meters to follow and the battery. Saving reloads the entry."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
-            data: dict[str, Any] = {CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])}
-            data.update({k: user_input[k] for k in _METERS if user_input.get(k)})
-            return self.async_create_entry(data=data)
+            return self.async_create_entry(data=_saved(user_input))
         options = self.config_entry.options
         current = options.get(CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES)
-        meter = EntitySelector(
-            EntitySelectorConfig(domain="sensor", device_class="energy")
-        )
         fields: dict[Any, Any] = {
             vol.Required(CONF_WINDOW_MINUTES, default=current): NumberSelector(
                 NumberSelectorConfig(
@@ -175,6 +176,28 @@ class TariffOptionsFlow(OptionsFlowWithReload):
                 )
             )
         }
+        meter = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="energy"))
         for key in _METERS:
             fields[vol.Optional(key, description={"suggested_value": options.get(key)})] = meter
+        charge = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="battery"))
+        fields[
+            vol.Optional(
+                CONF_BATTERY_SOC, description={"suggested_value": options.get(CONF_BATTERY_SOC)}
+            )
+        ] = charge
+        for key, unit in _NUMBERS.items():
+            config = NumberSelectorConfig(min=0, step="any", mode=NumberSelectorMode.BOX)
+            if unit:
+                config["unit_of_measurement"] = unit
+            fields[vol.Optional(key, description={"suggested_value": options.get(key)})] = (
+                NumberSelector(config)
+            )
         return self.async_show_form(step_id="init", data_schema=_schema(fields))
+
+
+def _saved(user_input: dict[str, Any]) -> dict[str, Any]:
+    """The options to keep: the window, and every meter and battery setting that was filled in."""
+    data: dict[str, Any] = {CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])}
+    data.update({k: user_input[k] for k in (*_METERS, CONF_BATTERY_SOC) if user_input.get(k)})
+    data.update({k: float(user_input[k]) for k in _NUMBERS if user_input.get(k) is not None})
+    return data

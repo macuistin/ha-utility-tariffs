@@ -64,6 +64,11 @@ class EnergyStore:
             self._saved_slot = slot
             self.schedule_save()
 
+    def record_soc(self, moment: datetime, percent: float) -> None:
+        """Note the battery charge. A reading outside 0 to 100 is not a charge and is ignored."""
+        if 0 <= percent <= 100:
+            self.history.record_soc(moment, percent)
+
     def schedule_save(self) -> None:
         if self._loaded:
             self._store.async_delay_save(self._payload, _SAVE_DELAY_SECONDS)

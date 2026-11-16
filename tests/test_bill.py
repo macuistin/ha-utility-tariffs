@@ -110,6 +110,7 @@ async def test_the_options_flow_saves_and_clears_the_meters(
         result["flow_id"],
         {"window_minutes": 120, CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER},
     )
+    await hass.async_block_till_done()  # the reload the save schedules
     assert result["data"] == {
         "window_minutes": 120,
         CONF_IMPORT_ENERGY: METER,
@@ -121,6 +122,8 @@ async def test_the_options_flow_saves_and_clears_the_meters(
         result["flow_id"], {"window_minutes": 120}
     )
     assert result["data"] == {"window_minutes": 120}
+    await hass.async_block_till_done()
+    assert await hass.config_entries.async_unload(entry.entry_id)
 
 
 async def test_the_history_survives_a_restart_and_goes_with_the_plan(
