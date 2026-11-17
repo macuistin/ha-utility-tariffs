@@ -6,4 +6,4 @@
 # pins homeassistant==2026.5.0
 pytest-homeassistant-custom-component==0.13.329
 # The tariff libraries, at the commit the manifest pins.
-utility-tariffs-lib==0.1.0
+utility-tariffs-lib==0.2.0

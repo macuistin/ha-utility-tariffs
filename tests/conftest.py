@@ -7,10 +7,11 @@ from pathlib import Path
 
 import pytest
 from homeassistant.core import HomeAssistant
-from utility_tariffs_lib.tariffstore import FolderCache, Store, folder_reader
+from utility_tariffs_lib.tariffstore import AsyncFolderCache, AsyncStore, folder_reader
 
 from custom_components.utility_tariffs import config_flow, coordinator
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
+from tests.helpers import async_reader
 from tests.support.building import build_store
 from tests.support.fixtures import flat, tariff, write_store
 
@@ -29,7 +30,9 @@ def use_store(
     build_store(folder)
 
     def use(reader: Callable[[str], bytes] | None = None) -> Path:
-        store = Store(reader or folder_reader(folder), FolderCache(tmp_path / "cache"))
+        store = AsyncStore(
+            async_reader(reader or folder_reader(folder)), AsyncFolderCache(tmp_path / "cache")
+        )
         access = TariffStoreAccess(hass, store)
         monkeypatch.setattr(config_flow, "store_access", lambda _hass: access)
         monkeypatch.setattr(coordinator, "store_access", lambda _hass: access)

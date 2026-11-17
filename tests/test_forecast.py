@@ -14,9 +14,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from utility_tariffs_lib.tariffstore import (
-    MemoryCache,
-    PriceStore,
-    Store,
+    AsyncMemoryCache,
+    AsyncPriceStore,
+    AsyncStore,
     folder_reader,
     prices,
 )
@@ -24,6 +24,7 @@ from utility_tariffs_lib.tariffstore import (
 from custom_components.utility_tariffs import coordinator
 from custom_components.utility_tariffs.const import DOMAIN
 from custom_components.utility_tariffs.helper.store_access import PriceStoreAccess
+from tests.helpers import async_reader
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
 from tests.test_sensor import DATA, NOON, _setup, _state
@@ -63,7 +64,7 @@ class Feed:
             except KeyError:
                 raise OSError("404") from None
 
-        access = PriceStoreAccess(hass, PriceStore(read, MemoryCache()))
+        access = PriceStoreAccess(hass, AsyncPriceStore(async_reader(read), AsyncMemoryCache()))
         monkeypatch.setattr(coordinator, "price_access", lambda _hass: access)
 
     def publish(self, first: date, last: date) -> None:
@@ -79,7 +80,7 @@ def feed(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
              "p/agile/1.json": flat("1", bill=AGILE_BILL)}
     folder = write_store(tmp_path, files)
     build_store(folder)
-    store = Store(folder_reader(folder), MemoryCache())
+    store = AsyncStore(async_reader(folder_reader(folder)), AsyncMemoryCache())
     from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 
     access = TariffStoreAccess(hass, store)
