@@ -6,7 +6,7 @@ import json
 
 from tests.helpers import PKG, ROOT
 
-MARKER = "utility-tariffs-lib @ "
+MARKER = "utility-tariffs-lib@"
 
 
 def _pins(text: str) -> set[str]:
