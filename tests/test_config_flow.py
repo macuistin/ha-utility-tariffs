@@ -260,3 +260,25 @@ async def test_changing_to_a_plan_already_followed_is_refused(
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
 
     assert result["reason"] == "already_configured"
+
+
+async def test_the_bill_dates_are_saved_as_options(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    result = await _to(hass, ("country", "IE"), ("provider", "p"), ("tariff", "flat"))
+    entry = result["result"]
+    flow = await hass.config_entries.options.async_init(entry.entry_id)
+    flow = await hass.config_entries.options.async_configure(
+        flow["flow_id"],
+        {
+            "window_minutes": 120,
+            "bill_start_day": 16,
+            "bill_months": "2",
+            "bill_start_month": 2,
+        },
+    )
+
+    assert flow["type"] is FlowResultType.CREATE_ENTRY
+    assert flow["data"]["bill_start_day"] == 16
+    assert flow["data"]["bill_months"] == 2
+    assert flow["data"]["bill_start_month"] == 2

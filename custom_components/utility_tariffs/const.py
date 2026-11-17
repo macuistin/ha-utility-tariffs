@@ -21,6 +21,13 @@ CONF_ENTITY_KEY = "entity_key"  # fixed when the entry is made, so a new plan ke
 CONF_MANUAL = "manual"  # the household's own rates, held in the entry, not read from the store
 CONF_NAME = "name"  # the title shown for the tariff, kept so a renamed plan does not rename it
 
+# Where a bill period starts and how long it runs. Unset, the tariff's own dates are used.
+CONF_BILL_START_DAY = "bill_start_day"  # day of the month a bill starts, 1 to 28
+CONF_BILL_MONTHS = "bill_months"  # calendar months in one bill: 1, 2, 3, 4, 6 or 12
+CONF_BILL_START_MONTH = "bill_start_month"  # a month a bill starts in, so two-month bills line up
+BILL_MONTHS = (1, 2, 3, 4, 6, 12)  # the lengths that divide a year
+MAX_BILL_START_DAY = 28
+
 CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows
 DEFAULT_WINDOW_MINUTES = 120
 MIN_WINDOW_MINUTES = 30

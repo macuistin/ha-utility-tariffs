@@ -75,7 +75,12 @@ class BillSensor(TariffEntity, SensorEntity):
         accountant = self.coordinator.accountant
         if accountant is None:
             return None
-        return bill_so_far(accountant.store.history, self.coordinator.data, dt_util.now())
+        return bill_so_far(
+            accountant.store.history,
+            self.coordinator.data,
+            self.coordinator.config_entry.options,
+            dt_util.now(),
+        )
 
     @property
     def native_value(self) -> float | None:

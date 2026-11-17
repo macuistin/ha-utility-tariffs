@@ -166,3 +166,36 @@ async def test_an_unreadable_saved_history_starts_fresh(
     await _setup(hass, options={CONF_IMPORT_ENERGY: METER}, entry_id="fixed")
 
     assert float(_state(hass, "import_this_bill_period")) == 0.0
+
+
+async def test_the_bill_dates_the_user_sets_replace_the_tariffs(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)  # 14 November
+    _set(hass, METER, 100.0)
+    await _setup(
+        hass,
+        options={
+            CONF_IMPORT_ENERGY: METER,
+            "bill_start_day": 10,
+            "bill_months": 2,
+            "bill_start_month": 1,
+        },
+    )
+
+    attributes = hass.states.get("sensor.utility_tariff_bill_so_far").attributes
+    assert attributes["period_start"] == "2026-11-10"
+    assert attributes["next_period_start"] == "2027-01-10"
+    assert attributes["days_in_period"] == 61
+
+
+async def test_without_set_dates_the_tariffs_own_apply(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER})
+
+    attributes = hass.states.get("sensor.utility_tariff_bill_so_far").attributes
+    assert attributes["period_start"] == "2026-11-01"
+    assert attributes["next_period_start"] == "2026-12-01"

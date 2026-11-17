@@ -36,6 +36,15 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Bill dates
+
+In the integration's options you can set the day of the month a bill starts (1 to 28) and how many
+months one bill covers (1, 2, 3, 4, 6 or 12). For a bill longer than a month, also give a month a
+bill starts in, so the periods line up with your supplier's: a two-month bill that starts on
+16 February has start day 16 and start month 2. Anything left empty follows the tariff, and a day
+count is not offered because suppliers bill by calendar month. The bill so far and the saving this
+bill period both use these dates.
+
 ## Your own rates
 
 When your plan is not in the store, choose **Type in my own rates** at setup, or in Reconfigure.
