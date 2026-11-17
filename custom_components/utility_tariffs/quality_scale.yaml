@@ -2,10 +2,8 @@
 # A rule is `done`, `todo`, or `exempt` with a comment. tests/test_quality_scale.py checks this file
 # and that manifest.json claims no tier the file does not support.
 #
-# Gold is claimed in manifest.json. Platinum is not, because two rules are open:
-# - async-dependency and inject-websession: the library's store client is blocking Python, run in
-#   an executor, and fed pages through Home Assistant's web session by a bridge. The fix is an
-#   async client in macuistin/utility-tariffs.
+# Every rule is done or exempt, and manifest.json claims platinum. tests/test_quality_scale.py
+# checks the claim against this file.
 rules:
   # Bronze
   action-setup: done
@@ -78,8 +76,12 @@ rules:
     status: exempt
     comment: One tariff makes one device, and it never changes.
   # Platinum
-  async-dependency: todo
-  inject-websession: todo
+  async-dependency:
+    status: done
+    comment: utility-tariffs-lib 0.2.0 reads the store with an async client. No executor job does I/O.
+  inject-websession:
+    status: done
+    comment: The store client reads through Home Assistant's shared aiohttp session.
   strict-typing:
     status: done
     comment: mypy strict runs in CI, and the library ships py.typed.

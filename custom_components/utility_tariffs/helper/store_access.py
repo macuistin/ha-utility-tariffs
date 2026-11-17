@@ -1,15 +1,16 @@
 """
 store_access.py - reads the open tariff store for the screens and the update timer.
 
-The store client (`utility_tariffs_lib.tariffstore`) is plain blocking Python.
-This wraps it for Home Assistant:
+The store client (`utility_tariffs_lib.tariffstore.AsyncStore`) is async and takes the web session
+it reads through, so nothing here blocks the event loop and no thread is involved:
 
-- Every call runs in an executor job, never on the event loop.
 - Files are fetched through Home Assistant's shared web session, so the host's proxy and
-  certificate settings apply. The client's reader is a plain function, so it hands each request
-  to the event loop and waits in the executor thread.
+  certificate settings apply.
 - What was read is kept in a folder under `.storage`, named by the caller, so a tariff in use is
-  downloaded once and can be read again with no network.
+  downloaded once and can be read again with no network. The folder's file work runs in a worker
+  thread inside the cache.
+- Calls take turns, one at a time per install, because the daily update check, the plan ranking
+  and a setup screen can ask for the same file together and share one cache folder.
 
 Only static file paths are requested. Nothing about the install, its place or its usage is sent.
 Home Assistant imports are lazy, so the unit tests do not need them.
@@ -20,14 +21,19 @@ from __future__ import annotations
 import asyncio
 import logging
 import weakref
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import date
-from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from utility_tariffs_lib.tariff import TariffDefinition, parse_definition
-from utility_tariffs_lib.tariffstore import FolderCache, PriceStore, Store, StoreError
+from utility_tariffs_lib.tariffstore import (
+    AsyncFolderCache,
+    AsyncPriceStore,
+    AsyncStore,
+    StoreError,
+    session_reader,
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -43,36 +49,17 @@ def _home_assistant_session(hass: HomeAssistant) -> Any:
     return async_get_clientsession(hass)
 
 
-def session_reader(
+def _reader(
     hass: HomeAssistant,
-    base: str,
-    get_session: Callable[[HomeAssistant], Any] = _home_assistant_session,
-) -> Callable[[str], bytes]:
-    """A `read(path)` for the store client that fetches through Home Assistant's web session.
+    base_url: str,
+    get_session: Callable[[HomeAssistant], Any] | None = None,
+) -> Callable[[str], Awaitable[bytes]]:
+    """A reader that fetches through Home Assistant's web session. Raises ValueError unless the
+    store is https. A failed request is an OSError to the client, which answers from its cache."""
+    from aiohttp import ClientError
 
-    It blocks, so it is only called from an executor thread. A network failure raises OSError,
-    which the client turns into a StoreError and answers from its cache.
-    """
-    if not base.startswith("https://"):
-        raise ValueError("the tariff store is read over https only")
-
-    async def fetch(url: str) -> bytes:
-        from aiohttp import ClientError, ClientTimeout
-
-        timeout = ClientTimeout(total=REQUEST_TIMEOUT_S)
-        try:
-            async with get_session(hass).get(url, timeout=timeout) as reply:
-                reply.raise_for_status()
-                body: bytes = await reply.read()
-                return body
-        except ClientError as err:
-            raise OSError(str(err)) from err
-
-    def read(path: str) -> bytes:
-        future = asyncio.run_coroutine_threadsafe(fetch(f"{base.rstrip('/')}/{path}"), hass.loop)
-        return future.result(REQUEST_TIMEOUT_S + 5)
-
-    return read
+    session = (get_session or _home_assistant_session)(hass)
+    return session_reader(session, base_url, timeout=REQUEST_TIMEOUT_S, errors=(ClientError,))
 
 
 _LOCKS: weakref.WeakKeyDictionary[Any, asyncio.Lock] = weakref.WeakKeyDictionary()
@@ -87,16 +74,16 @@ def _lock_of(hass: Any) -> asyncio.Lock:
 class TariffStoreAccess:
     """The store as the screens use it: awaitable calls that never block the event loop."""
 
-    def __init__(self, hass: HomeAssistant, store: Store) -> None:
+    def __init__(self, hass: HomeAssistant, store: AsyncStore) -> None:
         self._hass = hass
         self._store = store
 
     @classmethod
     def for_home_assistant(cls, hass: HomeAssistant, base_url: str, cache_folder: str) -> Self:
         """The store at *base_url*, cached in a folder of that name under `.storage`."""
-        store = Store(
-            session_reader(hass, base_url),
-            FolderCache(Path(hass.config.path(".storage", cache_folder))),
+        store = AsyncStore(
+            _reader(hass, base_url),
+            AsyncFolderCache(Path(hass.config.path(".storage", cache_folder))),
         )
         return cls(hass, store)
 
@@ -105,12 +92,9 @@ class TariffStoreAccess:
         """True when the last read was answered from the cache because the store was unreachable."""
         return self._store.offline
 
-    async def _run(self, call: Callable[[], _T]) -> _T:
-        # One read at a time per install. The daily update check and the plan ranking both read
-        # the store, and the client and its cache folder are not safe to use from two threads.
+    async def _run(self, call: Callable[[], Awaitable[_T]]) -> _T:
         async with _lock_of(self._hass):
-            result: _T = await self._hass.async_add_executor_job(call)
-            return result
+            return await call()
 
     async def async_refresh(self) -> None:
         """Read the countries index again on the next call, whatever its age."""
@@ -120,28 +104,28 @@ class TariffStoreAccess:
         return await self._run(self._store.countries)
 
     async def async_providers(self, country: str) -> dict[str, str]:
-        return await self._run(partial(self._store.providers, country))
+        return await self._run(lambda: self._store.providers(country))
 
     async def async_tariffs(self, country: str, provider: str, on: date) -> dict[str, str]:
-        return await self._run(partial(self._store.tariffs, country, provider, on=on))
+        return await self._run(lambda: self._store.tariffs(country, provider, on=on))
 
     async def async_areas(
         self, country: str, provider: str, tariff: str, on: date
     ) -> dict[str, str]:
-        return await self._run(partial(self._store.areas, country, provider, tariff, on))
+        return await self._run(lambda: self._store.areas(country, provider, tariff, on))
 
     async def async_is_holiday(
         self, country: str, region: str | None = None
     ) -> Callable[[date], bool]:
         """Whether a day is a public holiday there. Raises StoreError when none are held."""
-        return await self._run(partial(self._store.is_holiday, country, region))
+        return await self._run(lambda: self._store.is_holiday(country, region))
 
     async def async_revision_starts(  # noqa: PLR0913
         self, country: str, provider: str, tariff: str, on: date, until: date
     ) -> list[tuple[date, int]]:
         """(first day, revision) of each revision that starts after *on*, up to *until*."""
         return await self._run(
-            partial(self._store.revision_starts, country, provider, tariff, on, until)
+            lambda: self._store.revision_starts(country, provider, tariff, on, until)
         )
 
     async def async_definition(  # noqa: PLR0913
@@ -155,24 +139,25 @@ class TariffStoreAccess:
     ) -> TariffDefinition:
         """The checked, parsed definition of one area of a tariff on a day."""
         document = await self._run(
-            partial(self._store.definition, country, provider, tariff, on,
-                    area=area, export=export)
+            lambda: self._store.definition(
+                country, provider, tariff, on, area=area, export=export
+            )
         )
         return parse_definition(document)
 
 
 class PriceStoreAccess:
-    """The dynamic prices as the coordinator uses them, read one call at a time off the loop."""
+    """The dynamic prices as the coordinator uses them, read one call at a time."""
 
-    def __init__(self, hass: HomeAssistant, store: PriceStore) -> None:
+    def __init__(self, hass: HomeAssistant, store: AsyncPriceStore) -> None:
         self._hass = hass
         self._store = store
 
     @classmethod
     def for_home_assistant(cls, hass: HomeAssistant, base_url: str, cache_folder: str) -> Self:
-        store = PriceStore(
-            session_reader(hass, base_url),
-            FolderCache(Path(hass.config.path(".storage", cache_folder))),
+        store = AsyncPriceStore(
+            _reader(hass, base_url),
+            AsyncFolderCache(Path(hass.config.path(".storage", cache_folder))),
         )
         return cls(hass, store)
 
@@ -181,12 +166,7 @@ class PriceStoreAccess:
     ) -> tuple[list[dict[str, Any]], list[date]]:
         """(day files held, days missing) from *first* to *last*."""
         async with _lock_of(self._hass):
-            found: tuple[list[dict[str, Any]], list[date]] = (
-                await self._hass.async_add_executor_job(
-                    partial(self._store.days, country, feed, area, first, last)
-                )
-            )
-            return found
+            return await self._store.days(country, feed, area, first, last)
 
 
-__all__ = ["PriceStoreAccess", "StoreError", "TariffStoreAccess", "session_reader"]
+__all__ = ["PriceStoreAccess", "StoreError", "TariffStoreAccess"]
