@@ -20,6 +20,12 @@ from .bill_sensor import BILL_SENSORS, BillSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
+from .forecast_sensor import (
+    NextPeriodSensor,
+    NextTariffChangeSensor,
+    PriceForecastSensor,
+    PriceLevelSensor,
+)
 from .lib.tariff import price_rating
 from .lib.tariff.price_stats import RATINGS
 from .plan_sensor import CheapestPlanSavingSensor, PlanRankSensor
@@ -198,6 +204,14 @@ async def async_setup_entry(
 ) -> None:
     coordinator = entry.runtime_data
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
+    async_add_entities([
+        PriceForecastSensor(coordinator),
+        NextTariffChangeSensor(coordinator),
+        NextPeriodSensor(coordinator, high=False),
+        NextPeriodSensor(coordinator, high=True),
+    ])
+    if coordinator.data.on_a_feed:  # a fixed tariff has no price that is low or high by chance
+        async_add_entities([PriceLevelSensor(coordinator)])
     if coordinator.accountant is not None:
         async_add_entities([PlanRankSensor(coordinator), CheapestPlanSavingSensor(coordinator)])
         async_add_entities(BillSensor(coordinator, description) for description in BILL_SENSORS)

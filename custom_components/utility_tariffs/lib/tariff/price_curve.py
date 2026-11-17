@@ -23,6 +23,7 @@ from .bands import band_at, export_band_at, no_holidays
 from .defaults import SLOT_SECONDS
 from .definition import ExportPrices, ImportPrices, TariffDefinition
 from .engine import BillInputs, price_bill
+from .price_series import series_names
 
 # Large, so the cent rounding of a line moves the price by less than a millionth.
 _STEP = Decimal(1_000_000)
@@ -48,6 +49,8 @@ class PriceSlot:
     export_band: str
     import_price: Decimal
     export_price: Decimal
+    # "fixed" for a band price in the document, "published" for a price read from a feed
+    source: str = "fixed"
 
 
 def marginal_prices(definition: TariffDefinition) -> MarginalPrices:
@@ -101,7 +104,9 @@ def _bill(
     imported: Mapping[str, Decimal],
     exported: Decimal | Mapping[str, Decimal],
 ) -> Decimal:
-    return price_bill(definition, BillInputs(_DAYS, _DAYS, imported, exported)).total
+    zero = {name: Decimal(0) for name in series_names(definition)}
+    inputs = BillInputs(_DAYS, _DAYS, imported, exported, import_cost_by_series=zero)
+    return price_bill(definition, inputs).total
 
 
 def _export(definition: TariffDefinition, name: str) -> Decimal | Mapping[str, Decimal]:
@@ -134,4 +139,4 @@ def _same(left: PriceSlot, right: PriceSlot) -> bool:
 
 def _joined(left: PriceSlot, right: PriceSlot) -> PriceSlot:
     return PriceSlot(left.start, right.end, left.import_band, left.export_band,
-                     left.import_price, left.export_price)
+                     left.import_price, left.export_price, left.source)

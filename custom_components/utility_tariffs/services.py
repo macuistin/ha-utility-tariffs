@@ -16,6 +16,7 @@ from .bill import bill_so_far
 from .bill_summary import render_bill_html
 from .const import CONF_NAME, DOMAIN
 from .lib.tariff import WindowSearch, find_window
+from .windows import end_of_tomorrow
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -81,7 +82,7 @@ async def _find_window(call: ServiceCall) -> ServiceResponse:
         highest=call.data["highest"],
         power_kw=Decimal(str(call.data["power_kw"])),
         earliest_start=_aware(call.data.get("earliest_start")) or dt_util.now(),
-        latest_end=_aware(call.data.get("latest_end")),
+        latest_end=_aware(call.data.get("latest_end")) or end_of_tomorrow(data, dt_util.now()),
     )
     window = await call.hass.async_add_executor_job(find_window, data.slots, search)
     if window is None:
@@ -108,10 +109,12 @@ async def _get_prices(call: ServiceCall) -> ServiceResponse:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="end_before_start")
     slots = [slot for slot in data.slots if slot.end > start and slot.start < end]
     covered = bool(slots) and slots[0].start <= start and slots[-1].end >= end
+    known = data.known_until(start)
     return {
         "currency": data.definition.currency,
         "unit": f"{data.definition.currency}/kWh",
         "complete": covered,
+        "known_until": None if known is None else known.isoformat(),
         "holidays_known": data.holidays_known,
         "prices": [
             {
@@ -121,6 +124,7 @@ async def _get_prices(call: ServiceCall) -> ServiceResponse:
                 "export_price": float(slot.export_price),
                 "import_band": slot.import_band,
                 "export_band": slot.export_band,
+                "source": slot.source,
             }
             for slot in slots
         ],

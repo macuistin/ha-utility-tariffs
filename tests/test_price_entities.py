@@ -91,11 +91,12 @@ async def test_get_prices_returns_each_stretch_cut_to_the_range(
 
     assert reply["currency"] == "EUR" and reply["unit"] == "EUR/kWh"
     assert reply["complete"] is True
+    assert reply["known_until"] == "2026-11-28T00:00:00+00:00"
     assert reply["prices"] == [
         {"start": "2026-11-14T22:00:00+00:00", "end": "2026-11-14T23:00:00+00:00",
-         "import_price": 0.3, "export_price": 0.0, "import_band": "Day", "export_band": "Export"},
+         "import_price": 0.3, "export_price": 0.0, "import_band": "Day", "export_band": "Export", "source": "fixed"},
         {"start": "2026-11-14T23:00:00+00:00", "end": "2026-11-15T01:00:00+00:00",
-         "import_price": 0.15, "export_price": 0.0, "import_band": "Night", "export_band": "Export"},
+         "import_price": 0.15, "export_price": 0.0, "import_band": "Night", "export_band": "Export", "source": "fixed"},
     ]
 
 
@@ -118,11 +119,11 @@ async def test_get_prices_says_when_the_range_goes_past_the_held_prices(
     entry = await _setup(hass)
 
     reply = await _prices(
-        hass, entry.entry_id, start="2026-11-15 20:00:00", end="2026-11-17 06:00:00"
+        hass, entry.entry_id, start="2026-11-27 20:00:00", end="2026-12-01 06:00:00"
     )
 
     assert reply["complete"] is False
-    assert reply["prices"][-1]["end"] == "2026-11-16T00:00:00+00:00"
+    assert reply["prices"][-1]["end"] == "2026-11-28T00:00:00+00:00"
 
 
 async def test_get_prices_for_a_range_with_no_prices_is_empty_not_complete(

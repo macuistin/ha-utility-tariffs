@@ -178,3 +178,12 @@ def test_a_plan_with_banded_export_is_priced_by_band() -> None:
     zoned = price_ranges(usage, banded)
     flat = price_ranges(usage, plain)
     assert zoned < flat
+
+
+def test_a_plan_on_a_price_feed_is_left_out_not_priced() -> None:
+    from custom_components.utility_tariffs.lib.tariff import parse_definition
+    from tests.lib.tariff.test_price_series import dynamic_document
+
+    feed = Candidate("agile", "Agile", parse_definition(dynamic_document()))
+    result = search(_usage(Window(Unit.WEEKS, 4)), _candidate("current"), [feed, _candidate("a")])
+    assert result.skipped == 1 and result.compared == 2
