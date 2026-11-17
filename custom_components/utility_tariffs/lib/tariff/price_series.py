@@ -8,14 +8,15 @@ price day files in the store) and adds up kWh times price. The engine takes that
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from collections.abc import Iterable, Iterator, Mapping, Sequence
+from dataclasses import dataclass, fields, is_dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from .defaults import SLOT_SECONDS
+from .definition import SeriesEnergy, TariffDefinition
 
 _UTC = timezone.utc
 
@@ -90,3 +91,47 @@ def series_cost(
     covers. The total is not rounded: the bill node rounds it."""
     length = timedelta(seconds=slot_seconds)
     return sum((kwh * _slot_price(series, start, length) for start, kwh in slots), Decimal(0))
+
+
+def feed_of(series: str) -> str:
+    """The feed id a series name stands for. A series name has underscores where the feed has
+    hyphens (`octopus_agile` is the feed `octopus-agile`), and the tariff's area key is the feed's
+    area."""
+    return series.replace("_", "-")
+
+
+def _walk(value: object) -> Iterator[object]:
+    if is_dataclass(value) and not isinstance(value, type):
+        yield value
+        for item in fields(value):
+            yield from _walk(getattr(value, item.name))
+    elif isinstance(value, Mapping):
+        for child in value.values():
+            yield from _walk(child)
+    elif isinstance(value, tuple | list):
+        for child in value:
+            yield from _walk(child)
+
+
+def series_names(definition: TariffDefinition) -> tuple[str, ...]:
+    """The price series the bill tree names, in the order they are found. Empty for a tariff with
+    fixed prices."""
+    found = [node.series for node in _walk(definition.total) if isinstance(node, SeriesEnergy)]
+    return tuple(dict.fromkeys(found))
+
+
+def series_runs(days: Sequence[Mapping[str, Any]]) -> list[PriceSeries]:
+    """One series for each unbroken run of days, earliest first. A gap, or a day of another
+    interval, ends a run, so the days a feed has is still usable when one day is missing."""
+    runs: list[list[Mapping[str, Any]]] = []
+    for doc in sorted(days, key=lambda d: str(d["date"])):
+        if runs:
+            try:
+                series_from_days([*runs[-1], doc])
+            except ValueError:
+                runs.append([doc])
+            else:
+                runs[-1].append(doc)
+        else:
+            runs.append([doc])
+    return [series_from_days(run) for run in runs]

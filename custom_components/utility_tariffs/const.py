@@ -12,6 +12,9 @@ DEFAULT_STORE_URL = (
     "https://raw.githubusercontent.com/macuistin/utility-tariffs/main/tariffs/electricity"
 )
 CACHE_FOLDER = f"{DOMAIN}_store"
+# The half-hourly prices of a dynamic tariff, from the store's `prices` branch.
+PRICE_STORE_URL = "https://raw.githubusercontent.com/macuistin/utility-tariffs/prices"
+PRICE_CACHE_FOLDER = f"{DOMAIN}_prices"
 
 CONF_COUNTRY = "country"
 CONF_PROVIDER = "provider"
@@ -33,6 +36,15 @@ DEFAULT_WINDOW_MINUTES = 120
 MIN_WINDOW_MINUTES = 30
 MAX_WINDOW_MINUTES = 720
 WINDOW_STEP_MINUTES = 30
+
+# What counts as a low and a high price: a price at or below the low percentile of the prices
+# known, or at or above the high one. Changed live from number entities, no reload.
+CONF_LOW_PERCENTILE = "low_percentile"
+CONF_HIGH_PERCENTILE = "high_percentile"
+DEFAULT_LOW_PERCENTILE = 10
+DEFAULT_HIGH_PERCENTILE = 90
+MAX_LOW_PERCENTILE = 49
+MIN_HIGH_PERCENTILE = 51
 
 CONF_IMPORT_ENERGY = "import_energy_entity"  # the user's meter: kWh imported, only ever rising
 CONF_EXPORT_ENERGY = "export_energy_entity"  # the user's meter: kWh exported, only ever rising

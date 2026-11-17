@@ -108,10 +108,12 @@ async def _get_prices(call: ServiceCall) -> ServiceResponse:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="end_before_start")
     slots = [slot for slot in data.slots if slot.end > start and slot.start < end]
     covered = bool(slots) and slots[0].start <= start and slots[-1].end >= end
+    known = data.known_until(start)
     return {
         "currency": data.definition.currency,
         "unit": f"{data.definition.currency}/kWh",
         "complete": covered,
+        "known_until": None if known is None else known.isoformat(),
         "holidays_known": data.holidays_known,
         "prices": [
             {
@@ -121,6 +123,7 @@ async def _get_prices(call: ServiceCall) -> ServiceResponse:
                 "export_price": float(slot.export_price),
                 "import_band": slot.import_band,
                 "export_band": slot.export_band,
+                "source": slot.source,
             }
             for slot in slots
         ],

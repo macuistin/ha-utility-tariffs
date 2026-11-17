@@ -102,6 +102,16 @@ class Finding(StoreCase):
         self.assertEqual(self.store.revision("IE", "p", "flat", date(2026, 5, 31))[0], 1)
         self.assertEqual(self.store.revision("IE", "p", "flat", date(2026, 6, 1))[0], 2)
 
+    def test_revisions_that_start_later_are_listed_for_a_forecast(self) -> None:
+        starts = self.store.revision_starts("IE", "p", "flat", date(2026, 5, 1), date(2026, 12, 31))
+        self.assertEqual(starts, [(date(2026, 6, 1), 2)])
+        self.assertEqual(self.store.revision_starts("IE", "p", "flat", date(2026, 5, 1),
+                                                    date(2026, 5, 31)), [])
+        self.assertEqual(self.store.revision_starts("IE", "p", "flat", date(2026, 6, 1),
+                                                    date(2026, 12, 31)), [])
+        with self.assertRaisesRegex(StoreError, "no tariff p/nothing"):
+            self.store.revision_starts("IE", "p", "nothing", DAY, DAY)
+
 
 class Fetching(StoreCase):
     def test_a_tariff_file_is_checked_and_downloaded_once(self) -> None:

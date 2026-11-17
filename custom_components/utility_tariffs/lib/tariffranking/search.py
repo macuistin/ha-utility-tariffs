@@ -6,7 +6,8 @@ engine. The window is a number of weeks, or a number of whole bills of the curre
 re-pricing of measured usage, never a forecast, and it never writes: this module imports only the
 tariff library.
 
-A plan with no export price is priced with the export rate the user gave for it, or is left out
+A plan on a price feed is left out, since the history holds no feed prices. A plan with no
+export price is priced with the export rate the user gave for it, or is left out
 when none was given (`needs_export_rate`). The current plan is always priced as saved, since an
 export rate of 0 is a real choice for it.
 """
@@ -19,7 +20,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from enum import Enum
 
-from ..tariff import BillInputs, SlotHistory, TariffDefinition, price_bill
+from ..tariff import BillInputs, SlotHistory, TariffDefinition, price_bill, series_names
 from ..tariff.bands import export_by_band, import_by_band, no_holidays
 from ..tariff.period_bill import bill_period_bounds
 
@@ -149,6 +150,9 @@ def search(usage: Usage, current: Candidate, others: Sequence[Candidate]) -> Sea
     priced: list[tuple[Candidate, Decimal]] = []
     for candidate in [current, *others]:
         definition = candidate.definition
+        if series_names(definition) and candidate.key != current.key:
+            skipped += 1  # a price feed has no band prices, and its cost needs the published prices
+            continue
         if needs_export_rate(definition) and candidate.key != current.key:
             if candidate.export_rate is None:
                 skipped += 1

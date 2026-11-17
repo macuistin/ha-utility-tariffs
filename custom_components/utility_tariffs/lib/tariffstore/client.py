@@ -248,6 +248,19 @@ class Store:
             raise StoreError(f"{code}/{provider}/{tariff}: no revision is in force on {on}")
         return number, entry["revisions"][str(number)]
 
+    def revision_starts(self, code: str, provider: str, tariff: str, on: date,  # noqa: PLR0913
+                        until: date) -> list[tuple[date, int]]:
+        """(first day, revision number) of every revision that starts after `on`, up to and
+        including `until`, earliest first. The revision in force on `on` is not listed."""
+        try:
+            entry = self.country(code)["providers"][provider]["tariffs"][tariff]
+        except KeyError:
+            raise StoreError(f"{code}: no tariff {provider}/{tariff}") from None
+        found = [(date.fromisoformat(r["effective_from"]), int(number))
+                 for number, r in entry["revisions"].items()
+                 if on < date.fromisoformat(r["effective_from"]) <= until]
+        return sorted(found)
+
     # Fetching
 
     def tariff(self, code: str, provider: str, tariff: str, on: date) -> tuple[int, Doc]:

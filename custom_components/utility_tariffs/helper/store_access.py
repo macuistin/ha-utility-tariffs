@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from ..lib.tariff import TariffDefinition, parse_definition
-from ..lib.tariffstore import FolderCache, Store, StoreError
+from ..lib.tariffstore import FolderCache, PriceStore, Store, StoreError
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -135,6 +135,14 @@ class TariffStoreAccess:
         """Whether a day is a public holiday there. Raises StoreError when none are held."""
         return await self._run(partial(self._store.is_holiday, country, region))
 
+    async def async_revision_starts(  # noqa: PLR0913
+        self, country: str, provider: str, tariff: str, on: date, until: date
+    ) -> list[tuple[date, int]]:
+        """(first day, revision) of each revision that starts after *on*, up to *until*."""
+        return await self._run(
+            partial(self._store.revision_starts, country, provider, tariff, on, until)
+        )
+
     async def async_definition(  # noqa: PLR0913
         self,
         country: str,
@@ -152,4 +160,32 @@ class TariffStoreAccess:
         return parse_definition(document)
 
 
-__all__ = ["StoreError", "TariffStoreAccess", "session_reader"]
+class PriceStoreAccess:
+    """The dynamic prices as the coordinator uses them, read one call at a time off the loop."""
+
+    def __init__(self, hass: HomeAssistant, store: PriceStore) -> None:
+        self._hass = hass
+        self._store = store
+
+    @classmethod
+    def for_home_assistant(cls, hass: HomeAssistant, base_url: str, cache_folder: str) -> Self:
+        store = PriceStore(
+            session_reader(hass, base_url),
+            FolderCache(Path(hass.config.path(".storage", cache_folder))),
+        )
+        return cls(hass, store)
+
+    async def async_days(  # noqa: PLR0913
+        self, country: str, feed: str, area: str, first: date, last: date
+    ) -> tuple[list[dict[str, Any]], list[date]]:
+        """(day files held, days missing) from *first* to *last*."""
+        async with _lock_of(self._hass):
+            found: tuple[list[dict[str, Any]], list[date]] = (
+                await self._hass.async_add_executor_job(
+                    partial(self._store.days, country, feed, area, first, last)
+                )
+            )
+            return found
+
+
+__all__ = ["PriceStoreAccess", "StoreError", "TariffStoreAccess", "session_reader"]

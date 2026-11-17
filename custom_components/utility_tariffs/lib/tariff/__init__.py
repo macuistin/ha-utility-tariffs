@@ -42,8 +42,26 @@ from .period_bill import (
 )
 from .periods import RatePeriod
 from .price_curve import MarginalPrices, PriceSlot, marginal_prices, price_curve
-from .price_series import MissingPrice, PriceSeries, series_cost, series_from_days
-from .price_stats import PriceStats, price_rating, price_stats
+from .price_series import (
+    MissingPrice,
+    PriceSeries,
+    feed_of,
+    series_cost,
+    series_from_days,
+    series_names,
+    series_runs,
+)
+from .price_stats import (
+    HistoryPercentiles,
+    PriceStats,
+    history_percentiles,
+    next_at_or_below,
+    price_level,
+    price_percentiles,
+    price_rating,
+    price_stats,
+)
+from .price_timeline import Revision, known_until, price_timeline, series_curve, series_factor
 from .reprice import BillPeriod, Repriced, Rounding, import_by_band, reprice
 from .savings import Battery, Savings, savings
 from .slot_history import SlotHistory
@@ -101,6 +119,19 @@ __all__ = [
     "PriceSlot",
     "marginal_prices",
     "price_curve",
+    "HistoryPercentiles",
+    "Revision",
+    "feed_of",
+    "history_percentiles",
+    "known_until",
+    "next_at_or_below",
+    "price_level",
+    "price_percentiles",
+    "price_timeline",
+    "series_curve",
+    "series_factor",
+    "series_names",
+    "series_runs",
     "PriceStats",
     "price_rating",
     "price_stats",

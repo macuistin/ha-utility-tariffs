@@ -161,6 +161,26 @@
       },
       "cheapest_plan_saving": {
         "name": "Cheapest plan saving"
+      },
+      "price_forecast": {
+        "name": "Price forecast"
+      },
+      "next_tariff_change": {
+        "name": "Next tariff change"
+      },
+      "next_low_price": {
+        "name": "Next low price"
+      },
+      "next_high_price": {
+        "name": "Next high price"
+      },
+      "price_level": {
+        "name": "Price level",
+        "state": {
+          "low": "Low",
+          "mid": "Mid",
+          "high": "High"
+        }
       }
     },
     "binary_sensor": {
@@ -169,6 +189,14 @@
       },
       "dearest_window_active": {
         "name": "Dearest window active"
+      }
+    },
+    "number": {
+      "low_percentile": {
+        "name": "Low price percentile"
+      },
+      "high_percentile": {
+        "name": "High price percentile"
       }
     }
   },
@@ -242,7 +270,7 @@
     },
     "get_prices": {
       "name": "Get prices",
-      "description": "Returns the import and export price of every stretch of time in a range, from yesterday to the end of tomorrow.",
+      "description": "Returns the import and export price of every stretch of time in a range, over every revision the store holds. For a tariff on a price feed it stops where the prices are published, and says so.",
       "fields": {
         "config_entry_id": {
           "name": "Tariff",
@@ -295,6 +323,10 @@
     "cheaper_plan": {
       "title": "A cheaper plan is available",
       "description": "Priced over your last whole bill, {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
+    },
+    "prices_not_published": {
+      "title": "Tomorrow's prices are not published yet",
+      "description": "{tariff} reads half-hourly prices, and tomorrow's are still missing late in the evening. The prices already held keep working. The next read is tonight at half past each hour or after midnight. If this continues, the price feed may be down."
     }
   }
 }
