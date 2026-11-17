@@ -11,6 +11,7 @@ from .accountant import EnergyAccountant
 from .const import CONF_BATTERY_SOC, CONF_IMPORT_ENERGY, METER_TARGETS
 from .coordinator import TariffConfigEntry, TariffCoordinator
 from .energy_store import EnergyStore
+from .plan_ranker import PlanRanker
 from .services import async_register_services
 
 if TYPE_CHECKING:
@@ -54,6 +55,8 @@ async def _async_start_accounting(
     entry.async_on_unload(await accountant.async_start())
     entry.async_on_unload(store.async_save)
     coordinator.accountant = accountant
+    coordinator.ranker = PlanRanker(coordinator)
+    coordinator.ranker.async_start()
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: TariffConfigEntry) -> None:

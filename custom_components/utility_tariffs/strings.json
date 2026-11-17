@@ -155,6 +155,12 @@
       },
       "savings_this_period": {
         "name": "Savings this bill period"
+      },
+      "plan_rank": {
+        "name": "Plan rank"
+      },
+      "cheapest_plan_saving": {
+        "name": "Cheapest plan saving"
       }
     },
     "binary_sensor": {
@@ -270,6 +276,12 @@
     },
     "end_before_start": {
       "message": "The end must be after the start."
+    }
+  },
+  "issues": {
+    "cheaper_plan": {
+      "title": "A cheaper plan is available",
+      "description": "Priced over your last whole bill, {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
     }
   }
 }

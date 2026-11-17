@@ -36,6 +36,20 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Cheaper plans
+
+When an import meter is set, the integration prices your last whole bill under every other plan of
+your country and area in the store, every night shortly after midnight, and ranks them. **Plan
+rank** is where your plan stands (1 is the cheapest), with the cheapest few plans and their bills
+in its attributes. **Cheapest plan saving** is what the cheapest plan would have saved, and is 0
+when yours is cheapest. When the saving is at least 5% of your bill, a repair notice names the
+plan.
+
+This re-prices what you used. It is not a forecast, it never switches your plan, and it does not
+know exit fees, contract terms or whether a plan is open to you. A plan that lists no export price
+is priced with your plan's export rate. Plans that hold only other areas, or cannot be read, are
+left out and counted. To follow a plan, use Reconfigure.
+
 ## Bill dates
 
 In the integration's options you can set the day of the month a bill starts (1 to 28) and how many

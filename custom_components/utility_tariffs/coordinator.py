@@ -45,6 +45,7 @@ if TYPE_CHECKING:
 
     from .accountant import EnergyAccountant
     from .helper.store_access import TariffStoreAccess
+    from .plan_ranker import PlanRanker
 
 _LOGGER = logging.getLogger(__name__)
 HORIZON_DAYS = 2  # today and tomorrow, so the next change is always in view
@@ -115,6 +116,12 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         self._access = access if access is not None else store_access(hass)
         # Set at start-up when the user has chosen an energy meter. None means no bill is kept.
         self.accountant: EnergyAccountant | None = None
+        # Set with the accountant: the ranking of every store plan over the last whole bill.
+        self.ranker: PlanRanker | None = None
+
+    @property
+    def access(self) -> TariffStoreAccess:
+        return self._access
 
     async def _async_setup(self) -> None:
         """Read again every night, and wake the sensors at every half hour."""
