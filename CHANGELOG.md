@@ -3,6 +3,14 @@
 Each release has a section here. The release workflow publishes the section for the version in
 `manifest.json` as the release notes, so write it before you run the workflow.
 
+## 1.0.1
+
+**Changed**
+
+- Installs the tariff library from PyPI, pinned to one release, instead of shipping a copy.
+- Reads the tariff store with an async client through Home Assistant's own web session.
+- Declares the Platinum quality scale tier.
+
 ## 1.0.0
 
 First release.
@@ -15,8 +23,6 @@ First release.
 - Savings for the bill period, with a home meter and an optional battery.
 - Import and export price entities that work in the Energy dashboard.
 - The cheapest plan for the usage you measured.
-- Reads the tariff store with an async client through Home Assistant's own web session, and
-  installs the tariff library from PyPI. The integration declares the Platinum quality scale tier.
 - Diagnostics you can download for a bug report, with your area and energy sensor names removed.
 - Icons for the price and window entities, help text for the setup fields, and installation,
   configuration, troubleshooting and removal steps in the README.
