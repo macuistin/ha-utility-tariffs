@@ -1,0 +1,400 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Vælg en tarif",
+        "description": "Vælg en plan fra det åbne lager, eller indtast dine egne priser.",
+        "menu_options": {
+          "store": "Vælg en plan fra lageret",
+          "manual": "Indtast mine egne priser"
+        }
+      },
+      "provider": {
+        "title": "Vælg en leverandør",
+        "data": {
+          "provider": "Leverandør"
+        },
+        "data_description": {
+          "provider": "Din elleverandør."
+        }
+      },
+      "tariff": {
+        "title": "Vælg en plan",
+        "description": "Planer med priser, der gælder i dag.",
+        "data": {
+          "tariff": "Plan"
+        },
+        "data_description": {
+          "tariff": "Den plan, du er på. Kun planer med priser, der gælder i dag, vises."
+        }
+      },
+      "area": {
+        "title": "Vælg et område",
+        "description": "Denne plan har forskellige priser i forskellige områder.",
+        "data": {
+          "area": "Område"
+        },
+        "data_description": {
+          "area": "Vælg dit forsyningsområde. Det står som regel i navnet på dit netselskab eller på din regning."
+        }
+      },
+      "store": {
+        "title": "Vælg et land",
+        "description": "Kun lande, hvis tariffer det åbne lager rummer, vises.",
+        "data": {
+          "country": "Land"
+        },
+        "data_description": {
+          "country": "Det land, hvis leverandører du vil vælge imellem."
+        }
+      },
+      "manual": {
+        "title": "Dine egne priser",
+        "description": "Priser, som de står på din regning. Tidsstyrede priser, fx en natpris, tilføjes bagefter.",
+        "data": {
+          "name": "Navn",
+          "country": "Land",
+          "currency": "Valutakode",
+          "base_rate_name": "Navn på hovedprisen",
+          "base_rate": "Hovedpris",
+          "export_rate": "Eksportpris",
+          "standing_charge": "Abonnement",
+          "levy": "Månedligt gebyr",
+          "discount_rate": "Rabat på energi",
+          "vat_rate": "Moms",
+          "vat_included": "Priserne er inkl. moms",
+          "bill_start_day": "Dag i måneden, hvor en regning starter"
+        },
+        "data_description": {
+          "name": "Et navn til tariffen, som vises som integrationens titel.",
+          "country": "Forsyningens land.",
+          "currency": "Den tre bogstaver lange valutakode, fx EUR eller GBP.",
+          "base_rate_name": "Det navn, der vises for den pris, der gælder, når ingen tidsstyret pris gælder.",
+          "base_rate": "Prisen for én kWh til hovedprisen, som den står på din regning. Fx 0,30.",
+          "export_rate": "Hvad du får for én eksporteret kWh. Lad den stå på 0, hvis du ikke får noget.",
+          "standing_charge": "Det faste gebyr pr. dag, før moms, medmindre du angiver, at priserne er inkl. moms.",
+          "levy": "Et fast gebyr pr. måned, fx en afgift til offentlig service. Lad den stå på 0, hvis der ikke er nogen.",
+          "discount_rate": "En procentdel, der trækkes fra energiomkostningen, fx en rabat for hurtig betaling.",
+          "vat_rate": "Momssatsen i procent. Lad den stå på 0, hvis dine priser allerede er inkl. moms.",
+          "vat_included": "Slå til, når priserne ovenfor er dem, du betaler, inklusive moms.",
+          "bill_start_day": "Den dag i måneden, hvor din leverandørs regningsperiode starter, 1 til 28."
+        }
+      },
+      "manual_more": {
+        "title": "Tidsstyrede priser",
+        "description": "Tilføj en pris, der gælder på bestemte tidspunkter, fx en natpris. Hvor priser overlapper, gælder den billigste.",
+        "menu_options": {
+          "manual_period": "Tilføj en tidsstyret pris",
+          "manual_done": "Afslut"
+        }
+      },
+      "manual_period": {
+        "title": "Tilføj en tidsstyret pris",
+        "data": {
+          "name": "Navn",
+          "rate": "Pris",
+          "start": "Fra",
+          "end": "Til"
+        },
+        "data_description": {
+          "name": "Et navn til denne tidsstyrede pris, fx Nat.",
+          "rate": "Prisen for én kWh, mens denne pris gælder.",
+          "start": "Det tidspunkt, hvor denne pris starter hver dag.",
+          "end": "Det tidspunkt, hvor denne pris slutter. Det kan være før starten, for en pris, der løber natten over."
+        }
+      }
+    },
+    "abort": {
+      "cannot_connect": "Tarifdatabasen kunne ikke læses. Tjek forbindelsen, og prøv igen.",
+      "no_tariffs": "Denne leverandør har ingen plan med priser, der gælder i dag.",
+      "single_instance_allowed": "Kun én tarif kan følges. Brug Omkonfigurer for at skifte plan.",
+      "already_configured": "Denne plan er allerede sat op.",
+      "reconfigure_successful": "Planen er ændret. Sensorerne beholder deres navne og historik."
+    },
+    "error": {
+      "invalid_tariff": "Disse priser kan ikke bruges. Tjek valutakoden og værdierne.",
+      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "valid_from": {
+        "name": "Priser gælder fra"
+      },
+      "valid_to": {
+        "name": "Priser gælder til"
+      },
+      "prices_last_read": {
+        "name": "Priser sidst læst"
+      },
+      "tariff_summary": {
+        "name": "Tarifoversigt"
+      },
+      "import_price": {
+        "name": "Importpris"
+      },
+      "export_price": {
+        "name": "Eksportpris"
+      },
+      "import_band": {
+        "name": "Importprisgruppe"
+      },
+      "next_import_price": {
+        "name": "Næste importpris"
+      },
+      "previous_import_price": {
+        "name": "Forrige importpris"
+      },
+      "import_price_rating": {
+        "name": "Vurdering af importpris",
+        "state": {
+          "very_low": "Meget lav",
+          "low": "Lav",
+          "normal": "Normal",
+          "high": "Høj",
+          "very_high": "Meget høj"
+        }
+      },
+      "lowest_import_price_today": {
+        "name": "Laveste importpris i dag"
+      },
+      "highest_import_price_today": {
+        "name": "Højeste importpris i dag"
+      },
+      "average_import_price_today": {
+        "name": "Gennemsnitlig importpris i dag"
+      },
+      "lowest_export_price_today": {
+        "name": "Laveste eksportpris i dag"
+      },
+      "highest_export_price_today": {
+        "name": "Højeste eksportpris i dag"
+      },
+      "average_export_price_today": {
+        "name": "Gennemsnitlig eksportpris i dag"
+      },
+      "next_price_change": {
+        "name": "Næste prisændring"
+      },
+      "cheapest_window_start": {
+        "name": "Start på billigste tidsrum"
+      },
+      "cheapest_window_end": {
+        "name": "Slut på billigste tidsrum"
+      },
+      "dearest_window_start": {
+        "name": "Start på dyreste tidsrum"
+      },
+      "dearest_window_end": {
+        "name": "Slut på dyreste tidsrum"
+      },
+      "bill_so_far": {
+        "name": "Regning indtil nu"
+      },
+      "period_import": {
+        "name": "Import i denne regningsperiode"
+      },
+      "bill_coverage": {
+        "name": "Datadækning for regningen"
+      },
+      "savings_this_period": {
+        "name": "Besparelse i denne regningsperiode"
+      },
+      "plan_rank": {
+        "name": "Plans rangering"
+      },
+      "cheapest_plan_saving": {
+        "name": "Besparelse ved billigste plan"
+      },
+      "price_forecast": {
+        "name": "Prisprognose"
+      },
+      "next_tariff_change": {
+        "name": "Næste tarifændring"
+      },
+      "next_low_price": {
+        "name": "Næste lave pris"
+      },
+      "next_high_price": {
+        "name": "Næste høje pris"
+      },
+      "price_level": {
+        "name": "Prisniveau",
+        "state": {
+          "low": "Lav",
+          "mid": "Middel",
+          "high": "Høj"
+        }
+      }
+    },
+    "binary_sensor": {
+      "tomorrow_prices_available": {
+        "name": "Morgendagens priser er tilgængelige"
+      },
+      "store_offline": {
+        "name": "Tarifdatabasen er offline"
+      },
+      "cheapest_window_active": {
+        "name": "Billigste tidsrum er aktivt"
+      },
+      "dearest_window_active": {
+        "name": "Dyreste tidsrum er aktivt"
+      }
+    },
+    "number": {
+      "low_percentile": {
+        "name": "Percentil for lav pris"
+      },
+      "high_percentile": {
+        "name": "Percentil for høj pris"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Indstillinger",
+        "description": "Hvor lange de billigste og dyreste tidsrum er, de energimålere, din regning beregnes ud fra, og dit batteri. En måler er en sensor i kWh, der kun stiger, fx din smartmålers import- og eksporttotaler. Lad dem stå tomme for kun at vise priser. Besparelserne kræver hele hjemmets forbrug, og et batteri kræver sin opladning og størrelse.",
+        "data": {
+          "window_minutes": "Tidsrummets længde (minutter)",
+          "import_energy_entity": "Energi importeret fra nettet",
+          "export_energy_entity": "Energi eksporteret til nettet",
+          "house_energy_entity": "Energi brugt af hele hjemmet",
+          "battery_discharge_energy_entity": "Energi taget ud af batteriet",
+          "battery_soc_entity": "Batteriets opladning (procent)",
+          "battery_capacity_kwh": "Batteriets størrelse (kWh)",
+          "battery_wear_per_kwh": "Batterislid pr. kWh",
+          "bill_start_day": "Dag i måneden, hvor en regning starter",
+          "bill_months": "Måneder på én regning",
+          "bill_start_month": "En måned, hvor en regning starter",
+          "refresh_now": "Læs tarifdatabasen igen nu",
+          "clear_cache": "Slet først de gemte tarifilfiler"
+        },
+        "data_description": {
+          "refresh_now": "Læser lagerets indeks og din plan igen, når du gemmer, i stedet for at vente til i aften. Brug det, efter at lageret har udgivet en ændring.",
+          "clear_cache": "Sletter de gemte kopier af tariffen og dens priser og læser dem derefter igen fra lageret. Brug det, hvis priserne ser forkerte ud. Lageret skal kunne nås.",
+          "import_energy_entity": "Nødvendig for regningen. Læses hvert minut.",
+          "export_energy_entity": "Valgfri. Krediterer det, du eksporterer.",
+          "house_energy_entity": "Nødvendig for besparelserne. En måler for al den energi, hjemmet brugte, fra nettet, solen og batteriet.",
+          "battery_discharge_energy_entity": "Valgfri. Trækker batterislid fra besparelserne.",
+          "battery_soc_entity": "Valgfri. Sammen med batteriets størrelse værdisætter den energien i batteriet.",
+          "battery_capacity_kwh": "Valgfri. Batteriets anvendelige størrelse.",
+          "battery_wear_per_kwh": "Valgfri. Hvad hver kWh taget ud af batteriet koster i slid, i tariffens valuta.",
+          "bill_start_day": "1 til 28. Lad den stå tom for at følge tariffen.",
+          "bill_months": "1, 2, 3, 4, 6 eller 12. Lad den stå tom for at følge tariffen.",
+          "bill_start_month": "Kun for regninger på mere end en måned, så de passer til din leverandørs. Fx 2 for en regning på to måneder, der starter i februar."
+        }
+      }
+    },
+    "error": {
+      "clear_while_offline": "Lageret kan ikke nås, så sletning af de gemte filer ville ikke efterlade nogen priser. Prøv igen, når det kan nås."
+    }
+  },
+  "services": {
+    "find_window": {
+      "name": "Find tidsrum",
+      "description": "Finder det billigste eller dyreste tidsrum af en given længde i de næste to dages priser og hvad det ville koste for en belastning med en given effekt.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Den tarif, der skal søges i."
+        },
+        "duration": {
+          "name": "Varighed",
+          "description": "Hvor længe belastningen kører."
+        },
+        "flow": {
+          "name": "Retning",
+          "description": "Import prisfastsætter det, du betaler, eksport det, du får."
+        },
+        "highest": {
+          "name": "Dyreste",
+          "description": "Find det dyreste tidsrum i stedet for det billigste."
+        },
+        "power_kw": {
+          "name": "Effekt",
+          "description": "Belastningen i kilowatt. Prisen gælder for en belastning af denne størrelse."
+        },
+        "earliest_start": {
+          "name": "Tidligste start",
+          "description": "Tidsrummet må ikke starte før dette. Standard er nu."
+        },
+        "latest_end": {
+          "name": "Seneste slut",
+          "description": "Tidsrummet skal slutte inden dette tidspunkt."
+        }
+      }
+    },
+    "get_prices": {
+      "name": "Hent priser",
+      "description": "Returnerer import- og eksportprisen for hvert tidsrum i et interval, over alle de revisioner, lageret rummer. For en tarif på en prisfeed stopper den, hvor priserne er offentliggjort, og siger det.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Den tarif, der skal læses."
+        },
+        "start": {
+          "name": "Start",
+          "description": "Det første ønskede tidspunkt. Standard er nu."
+        },
+        "end": {
+          "name": "Slut",
+          "description": "Intervallets slutning. Standard er 24 timer efter starten."
+        }
+      }
+    },
+    "bill_summary": {
+      "name": "Regningsoversigt",
+      "description": "Returnerer regningen indtil nu som en HTML-side med total og periode. Den kræver en energiimportmåler i indstillingerne. Brug den i en e-mail, en notifikation eller et kort.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Den tarif, hvis regning der skal vises."
+        }
+      }
+    }
+  },
+  "selector": {
+    "flow": {
+      "options": {
+        "import": "Import",
+        "export": "Eksport"
+      }
+    }
+  },
+  "exceptions": {
+    "unknown_entry": {
+      "message": "Ingen Utility Tariffs-post {entry}."
+    },
+    "not_loaded": {
+      "message": "Den tarif er ikke indlæst."
+    },
+    "end_before_start": {
+      "message": "Slutningen skal være efter starten."
+    },
+    "no_meter": {
+      "message": "Angiv først en energiimportmåler i indstillingerne. Regningen beregnes ud fra den."
+    },
+    "store_unreadable": {
+      "message": "Tarifdatabasen kunne ikke læses: {error}"
+    }
+  },
+  "issues": {
+    "plan_ending": {
+      "title": "Din plans priser udløber",
+      "description": "Lageret angiver, at priserne for {tariff} udløber den {date}, og har ingen senere priser. Tjek planens aktuelle vilkår hos din leverandør. Hvis planen er ændret, så brug Omkonfigurer til at følge den nye."
+    },
+    "store_unreached": {
+      "title": "Tarifdatabasen er ikke blevet nået i {days} dage",
+      "description": "{tariff} kører på de priser, der er gemt på denne installation. De kan være forældede. Tjek forbindelsen, eller læs lageret igen fra integrationens indstillinger."
+    },
+    "cheaper_plan": {
+      "title": "En billigere plan er tilgængelig",
+      "description": "Beregnet over din seneste hele regning ville {plan} have kostet {saving} mindre end din plan. Det er en sammenligning af tidligere forbrug, ikke en prognose. Tjek planens aktuelle vilkår hos leverandøren, før du skifter, og brug derefter Omkonfigurer til at følge den."
+    },
+    "prices_not_published": {
+      "title": "Morgendagens priser er ikke offentliggjort endnu",
+      "description": "{tariff} læser halvtimespriser, og morgendagens mangler stadig sent på aftenen. De priser, der allerede er gemt, virker stadig. Næste aflæsning er i aften hver halve time eller efter midnat. Hvis det fortsætter, kan prisfeedet være nede."
+    }
+  }
+}

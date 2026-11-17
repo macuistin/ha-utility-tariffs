@@ -1,0 +1,400 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Roghnaigh taraif",
+        "description": "Roghnaigh plean as an stór oscailte, nó clóscríobh isteach do ráta féin.",
+        "menu_options": {
+          "store": "Roghnaigh plean as an stór",
+          "manual": "Mo ráta féin a chlóscríobh isteach"
+        }
+      },
+      "provider": {
+        "title": "Roghnaigh soláthraí",
+        "data": {
+          "provider": "Soláthraí"
+        },
+        "data_description": {
+          "provider": "Do sholáthraí leictreachais."
+        }
+      },
+      "tariff": {
+        "title": "Roghnaigh plean",
+        "description": "Pleananna a bhfuil praghsanna i bhfeidhm inniu acu.",
+        "data": {
+          "tariff": "Plean"
+        },
+        "data_description": {
+          "tariff": "An plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu."
+        }
+      },
+      "area": {
+        "title": "Roghnaigh ceantar",
+        "description": "Tá praghsanna éagsúla ag an bplean seo i gceantair éagsúla.",
+        "data": {
+          "area": "Ceantar"
+        },
+        "data_description": {
+          "area": "Roghnaigh ceantar do sholáthair. De ghnáth bíonn sé in ainm do líonra dáiliúcháin nó ar do bhille."
+        }
+      },
+      "store": {
+        "title": "Roghnaigh tír",
+        "description": "Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte.",
+        "data": {
+          "country": "Tír"
+        },
+        "data_description": {
+          "country": "An tír a bhfuil tú ag iarraidh soláthraí di a roghnú."
+        }
+      },
+      "manual": {
+        "title": "Do ráta féin",
+        "description": "Praghsanna mar atá siad ar do bhille. Cuirtear ráthaí ama, mar ráta oíche, leis ina dhiaidh sin.",
+        "data": {
+          "name": "Ainm",
+          "country": "Tír",
+          "currency": "Cód airgeadra",
+          "base_rate_name": "Ainm an phríomhráta",
+          "base_rate": "Príomhráta",
+          "export_rate": "Ráta easpórtála",
+          "standing_charge": "Muirear seasta",
+          "levy": "Ioncam míosúil",
+          "discount_rate": "Lascaine ar fhuinneamh",
+          "vat_rate": "CBL",
+          "vat_included": "Tá CBL san áireamh sna praghsanna cheana",
+          "bill_start_day": "Lá den mhí a thosaíonn bille"
+        },
+        "data_description": {
+          "name": "Ainm don taraif, a thaispeántar mar theideal an lánpháirtithe.",
+          "country": "Tír an tsoláthair.",
+          "currency": "An cód airgeadra trí litir, mar EUR nó GBP.",
+          "base_rate_name": "An t-ainm a thaispeántar don ráta a bhaineann nuair nach mbaineann aon ráta ama.",
+          "base_rate": "Praghas aon kWh amháin ag an bpríomhráta, mar atá ar do bhille. Mar shampla 0.30.",
+          "export_rate": "An méid a íoctar leat as kWh amháin a easpórtáiltear. Fág ag 0 mura n-íoctar tada leat.",
+          "standing_charge": "An muirear seasta in aghaidh an lae, roimh CBL mura sonraíonn tú go bhfuil sé sna praghsanna.",
+          "levy": "Muirear seasta in aghaidh na míosa, mar ioncam seirbhíse poiblí. Fág ag 0 mura bhfuil ceann ann.",
+          "discount_rate": "Céatadán a bhaintear den mhuirear fuinnimh, mar lascaine as íoc go pras.",
+          "vat_rate": "An ráta CBL i gcéatadán. Fág ag 0 má tá sé sna praghsanna cheana.",
+          "vat_included": "Cuir air nuair is iad na rátaí thuas na praghsanna a íocann tú, CBL san áireamh.",
+          "bill_start_day": "Lá den mhí a thosaíonn tréimhse billeála do sholáthraí, 1 go 28."
+        }
+      },
+      "manual_more": {
+        "title": "Rátaí ama",
+        "description": "Cuir ráta leis a bhaineann ag amanna áirithe, mar ráta oíche. Nuair a fhorluíonn rátaí a chéile, baineann an ceann is saoire.",
+        "menu_options": {
+          "manual_period": "Cuir ráta ama leis",
+          "manual_done": "Críochnaigh"
+        }
+      },
+      "manual_period": {
+        "title": "Cuir ráta ama leis",
+        "data": {
+          "name": "Ainm",
+          "rate": "Ráta",
+          "start": "Ó",
+          "end": "Go dtí"
+        },
+        "data_description": {
+          "name": "Ainm don ráta ama seo, mar Oíche.",
+          "rate": "Praghas aon kWh amháin fad a bhaineann an ráta seo.",
+          "start": "An t-am a thosaíonn an ráta seo gach lá.",
+          "end": "An t-am a chríochnaíonn an ráta seo. Is féidir é a bheith níos luaithe ná an tosach, i gcás ráta a ritheann thar oíche."
+        }
+      }
+    },
+    "abort": {
+      "cannot_connect": "Níorbh fhéidir an stór taraifí a léamh. Seiceáil an nasc agus bain triail eile as.",
+      "no_tariffs": "Níl aon phlean ag an soláthraí seo a bhfuil praghsanna i bhfeidhm inniu aige.",
+      "single_instance_allowed": "Ní féidir ach taraif amháin a leanúint. Úsáid Athchumraigh chun plean a athrú.",
+      "already_configured": "Tá an plean seo socraithe cheana.",
+      "reconfigure_successful": "Athraíodh an plean. Coimeádann na braiteoirí a n-ainmneacha agus a stair."
+    },
+    "error": {
+      "invalid_tariff": "Ní féidir na rátaí seo a úsáid. Seiceáil an cód airgeadra agus na luachanna.",
+      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "valid_from": {
+        "name": "Praghsanna bailí ó"
+      },
+      "valid_to": {
+        "name": "Praghsanna bailí go dtí"
+      },
+      "prices_last_read": {
+        "name": "Praghsanna léite go deireanach"
+      },
+      "tariff_summary": {
+        "name": "Achoimre taraife"
+      },
+      "import_price": {
+        "name": "Praghas allmhairithe"
+      },
+      "export_price": {
+        "name": "Praghas easpórtála"
+      },
+      "import_band": {
+        "name": "Banda ráta allmhairithe"
+      },
+      "next_import_price": {
+        "name": "An chéad phraghas allmhairithe eile"
+      },
+      "previous_import_price": {
+        "name": "An praghas allmhairithe roimhe seo"
+      },
+      "import_price_rating": {
+        "name": "Rátáil an phraghais allmhairithe",
+        "state": {
+          "very_low": "An-íseal",
+          "low": "Íseal",
+          "normal": "Gnáth",
+          "high": "Ard",
+          "very_high": "An-ard"
+        }
+      },
+      "lowest_import_price_today": {
+        "name": "An praghas allmhairithe is ísle inniu"
+      },
+      "highest_import_price_today": {
+        "name": "An praghas allmhairithe is airde inniu"
+      },
+      "average_import_price_today": {
+        "name": "Meánphraghas allmhairithe inniu"
+      },
+      "lowest_export_price_today": {
+        "name": "An praghas easpórtála is ísle inniu"
+      },
+      "highest_export_price_today": {
+        "name": "An praghas easpórtála is airde inniu"
+      },
+      "average_export_price_today": {
+        "name": "Meánphraghas easpórtála inniu"
+      },
+      "next_price_change": {
+        "name": "An chéad athrú praghais eile"
+      },
+      "cheapest_window_start": {
+        "name": "Tús na fuinneoige is saoire"
+      },
+      "cheapest_window_end": {
+        "name": "Deireadh na fuinneoige is saoire"
+      },
+      "dearest_window_start": {
+        "name": "Tús na fuinneoige is daoire"
+      },
+      "dearest_window_end": {
+        "name": "Deireadh na fuinneoige is daoire"
+      },
+      "bill_so_far": {
+        "name": "Bille go dtí seo"
+      },
+      "period_import": {
+        "name": "Allmhairiú sa tréimhse billeála seo"
+      },
+      "bill_coverage": {
+        "name": "Clúdach sonraí an bhille"
+      },
+      "savings_this_period": {
+        "name": "Sábhálacháin sa tréimhse billeála seo"
+      },
+      "plan_rank": {
+        "name": "Rang an phlean"
+      },
+      "cheapest_plan_saving": {
+        "name": "Sábháil leis an bplean is saoire"
+      },
+      "price_forecast": {
+        "name": "Réamhaisnéis praghais"
+      },
+      "next_tariff_change": {
+        "name": "An chéad athrú taraife eile"
+      },
+      "next_low_price": {
+        "name": "An chéad phraghas íseal eile"
+      },
+      "next_high_price": {
+        "name": "An chéad phraghas ard eile"
+      },
+      "price_level": {
+        "name": "Leibhéal praghais",
+        "state": {
+          "low": "Íseal",
+          "mid": "Meánach",
+          "high": "Ard"
+        }
+      }
+    },
+    "binary_sensor": {
+      "tomorrow_prices_available": {
+        "name": "Praghsanna an lae amárach ar fáil"
+      },
+      "store_offline": {
+        "name": "Stór taraifí as líne"
+      },
+      "cheapest_window_active": {
+        "name": "Fuinneog is saoire gníomhach"
+      },
+      "dearest_window_active": {
+        "name": "Fuinneog is daoire gníomhach"
+      }
+    },
+    "number": {
+      "low_percentile": {
+        "name": "Peircintíl praghais íseal"
+      },
+      "high_percentile": {
+        "name": "Peircintíl praghais ard"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Roghanna",
+        "description": "Fad na bhfuinneog is saoire agus is daoire, na méadair fuinnimh as a n-oibrítear do bhille amach, agus do bhaitéir. Is braiteoir i kWh é méadar nach dtéann ach in airde, mar iomláin allmhairithe agus easpórtála do mhéadair chliste. Fág folamh iad chun praghsanna amháin a thaispeáint. Teastaíonn úsáid an tí ar fad do na sábháilníochtaí, agus teastaíonn muirear agus méid ó bhaitéir.",
+        "data": {
+          "window_minutes": "Fad na fuinneoige (nóiméad)",
+          "import_energy_entity": "Fuinneamh allmhairithe ón eangach",
+          "export_energy_entity": "Fuinneamh easpórtáilte chuig an eangach",
+          "house_energy_entity": "Fuinneamh a d'úsáid an teach ar fad",
+          "battery_discharge_energy_entity": "Fuinneamh a baineadh den bhaitéir",
+          "battery_soc_entity": "Muirear an bhaitéir (céatadán)",
+          "battery_capacity_kwh": "Méid an bhaitéir (kWh)",
+          "battery_wear_per_kwh": "Caitheamh an bhaitéir in aghaidh an kWh",
+          "bill_start_day": "Lá den mhí a thosaíonn bille",
+          "bill_months": "Míonna in aon bhille amháin",
+          "bill_start_month": "Mí ina dtosaíonn bille",
+          "refresh_now": "Léigh an stór taraifí arís anois",
+          "clear_cache": "Scrios na comhaid taraife shábháilte ar dtús"
+        },
+        "data_description": {
+          "refresh_now": "Léann sé innéacs an stóir agus do phlean arís nuair a shábháileann tú, in ionad fanacht go dtí anocht. Úsáid é tar éis don stór athrú a fhoilsiú.",
+          "clear_cache": "Scriosann sé na cóipeanna sábháilte den taraif agus dá praghsanna, agus ansin léann sé arís as an stór iad. Úsáid é má tá praghsanna mícheart. Caithfidh an stór a bheith inrochtana.",
+          "import_energy_entity": "Ag teastáil don bhille. Léitear gach nóiméad é.",
+          "export_energy_entity": "Roghnach. Creidiúnaíonn sé an méid a easpórtálann tú.",
+          "house_energy_entity": "Ag teastáil do na sábháilníochtaí. Méadar de gach fuinneamh a d'úsáid an teach, ón eangach, ón ngrian agus ón mbaitéir.",
+          "battery_discharge_energy_entity": "Roghnach. Baineann sé caitheamh an bhaitéir de na sábháilníochtaí.",
+          "battery_soc_entity": "Roghnach. Le méid an bhaitéir, luachálann sé an fuinneamh atá sa bhaitéir.",
+          "battery_capacity_kwh": "Roghnach. Méid úsáidte an bhaitéir.",
+          "battery_wear_per_kwh": "Roghnach. An costas caitheamh a bhaineann le gach kWh a bhaintear den bhaitéir, in airgeadra na taraife.",
+          "bill_start_day": "1 go 28. Fág folamh chun an taraif a leanúint.",
+          "bill_months": "1, 2, 3, 4, 6 nó 12. Fág folamh chun an taraif a leanúint.",
+          "bill_start_month": "Do billí níos faide ná mí amháin, ionas go mbeidh siad ailínithe le billí do sholáthraí. Mar shampla 2 le bille dhá mhí a thosaíonn i bhFeabhra."
+        }
+      }
+    },
+    "error": {
+      "clear_while_offline": "Ní féidir teacht ar an stór, mar sin ní bheadh aon phraghsanna fágtha dá scriosfaí na comhaid shábháilte. Bain triail eile as nuair a bheidh sé inrochtana."
+    }
+  },
+  "services": {
+    "find_window": {
+      "name": "Aimsigh fuinneog",
+      "description": "Aimsíonn sé an tréimhse is saoire nó is daoire d'fhad áirithe i bpraghsanna an dá lá seo chugainn, agus cé mhéad a chosnódh sé do ualach a bhfuil cumhacht áirithe aige.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Taraif",
+          "description": "An taraif le cuardach."
+        },
+        "duration": {
+          "name": "Fad",
+          "description": "Cá fhad a ritheann an t-ualach."
+        },
+        "flow": {
+          "name": "Treo",
+          "description": "Praghsálann allmhairiú an méid a íocann tú, easpórtáil an méid a íoctar leat."
+        },
+        "highest": {
+          "name": "Is daoire",
+          "description": "Aimsigh an fhuinneog is daoire in ionad na cinn is saoire."
+        },
+        "power_kw": {
+          "name": "Cumhacht",
+          "description": "An t-ualach i gcilea-vata. Baineann an costas le hualach den mhéid seo."
+        },
+        "earliest_start": {
+          "name": "An tús is luaithe",
+          "description": "Ní fhéadfaidh an fhuinneog tosú roimhe seo. Is é anois an réamhshocrú."
+        },
+        "latest_end": {
+          "name": "An deireadh is déanaí",
+          "description": "Caithfidh an fhuinneog críochnú faoin am seo."
+        }
+      }
+    },
+    "get_prices": {
+      "name": "Faigh praghsanna",
+      "description": "Tugann sé praghas allmhairithe agus easpórtála gach tréimhse ama i raon ar ais, thar gach athbhreithniú atá sa stór. I gcás taraife ar fhotha praghsanna stopann sé san áit a bhfoilsítear na praghsanna, agus deir sé amhlaidh.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Taraif",
+          "description": "An taraif le léamh."
+        },
+        "start": {
+          "name": "Tús",
+          "description": "An chéad nóiméad a theastaíonn. Is é anois an réamhshocrú."
+        },
+        "end": {
+          "name": "Deireadh",
+          "description": "Deireadh an raoin. Is é 24 uair an chloig tar éis an tosaigh an réamhshocrú."
+        }
+      }
+    },
+    "bill_summary": {
+      "name": "Achoimre an bhille",
+      "description": "Tugann sé an bille go dtí seo ar ais mar leathanach HTML, lena iomlán agus a thréimhse. Teastaíonn méadar allmhairithe fuinnimh sna roghanna. Úsáid é i ríomhphost, i bhfógra nó i gcárta.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Taraif",
+          "description": "An taraif a dtaispeánfar a bille."
+        }
+      }
+    }
+  },
+  "selector": {
+    "flow": {
+      "options": {
+        "import": "Allmhairiú",
+        "export": "Easpórtáil"
+      }
+    }
+  },
+  "exceptions": {
+    "unknown_entry": {
+      "message": "Níl aon iontráil Utility Tariffs {entry} ann."
+    },
+    "not_loaded": {
+      "message": "Níl an taraif sin luchtaithe."
+    },
+    "end_before_start": {
+      "message": "Caithfidh an deireadh a bheith tar éis an tosaigh."
+    },
+    "no_meter": {
+      "message": "Socraigh méadar allmhairithe fuinnimh sna roghanna ar dtús. Oibrítear an bille amach as."
+    },
+    "store_unreadable": {
+      "message": "Níorbh fhéidir an stór taraifí a léamh: {error}"
+    }
+  },
+  "issues": {
+    "plan_ending": {
+      "title": "Tá praghsanna do phlean ag teacht chun deiridh",
+      "description": "Liostaíonn an stór praghsanna {tariff} mar ag teacht chun deiridh ar {date}, agus níl aon phraghsanna níos déanaí aige dó. Seiceáil téarmaí reatha an phlean le do sholáthraí. Má tá an plean athraithe, úsáid Athchumraigh chun an ceann nua a leanúint."
+    },
+    "store_unreached": {
+      "title": "Níor baineadh an stór taraifí amach le {days} lá",
+      "description": "Tá {tariff} ag rith ar na praghsanna atá sábháilte ar an suiteáil seo. B'fhéidir go bhfuil siad as dáta. Seiceáil an nasc, nó léigh an stór arís ó roghanna an lánpháirtithe."
+    },
+    "cheaper_plan": {
+      "title": "Tá plean níos saoire ar fáil",
+      "description": "Praghsáilte thar do bhille iomlán is déanaí, chosnódh {plan} {saving} níos lú ná do phlean. Is comparáid ar úsáid roimhe seo é seo, ní réamhaisnéis. Seiceáil téarmaí reatha an phlean leis an soláthraí sula n-athraíonn tú, ansin úsáid Athchumraigh chun é a leanúint."
+    },
+    "prices_not_published": {
+      "title": "Níl praghsanna an lae amárach foilsithe fós",
+      "description": "Léann {tariff} praghsanna leathuaire, agus tá praghsanna an lae amárach in easnamh fós go déanach san oíche. Lean na praghsanna atá ann cheana ag obair. Is é an chéad léamh eile anocht ag leathuair tar éis gach uaire nó tar éis meán oíche. Má leanann sé seo, b'fhéidir go bhfuil an fotha praghsanna as feidhm."
+    }
+  }
+}

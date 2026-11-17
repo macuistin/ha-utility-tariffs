@@ -1,0 +1,400 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Choisir un tarif",
+        "description": "Choisissez une offre dans la base ouverte ou saisissez vos propres tarifs.",
+        "menu_options": {
+          "store": "Choisir une offre dans la base",
+          "manual": "Saisir mes propres tarifs"
+        }
+      },
+      "provider": {
+        "title": "Choisir un fournisseur",
+        "data": {
+          "provider": "Fournisseur"
+        },
+        "data_description": {
+          "provider": "Votre fournisseur d'électricité."
+        }
+      },
+      "tariff": {
+        "title": "Choisir une offre",
+        "description": "Offres dont les prix sont en vigueur aujourd'hui.",
+        "data": {
+          "tariff": "Offre"
+        },
+        "data_description": {
+          "tariff": "L'offre que vous avez souscrite. Seules les offres dont les prix sont en vigueur aujourd'hui sont listées."
+        }
+      },
+      "area": {
+        "title": "Choisir une zone",
+        "description": "Cette offre a des prix différents selon la zone.",
+        "data": {
+          "area": "Zone"
+        },
+        "data_description": {
+          "area": "Choisissez la zone de votre alimentation. Elle figure généralement dans le nom de votre réseau de distribution ou sur votre facture."
+        }
+      },
+      "store": {
+        "title": "Choisir un pays",
+        "description": "Seuls les pays dont la base ouverte contient les tarifs sont listés.",
+        "data": {
+          "country": "Pays"
+        },
+        "data_description": {
+          "country": "Le pays dont vous voulez choisir un fournisseur."
+        }
+      },
+      "manual": {
+        "title": "Vos propres tarifs",
+        "description": "Les prix tels qu'ils figurent sur votre facture. Les tarifs horaires, comme un tarif de nuit, sont ajoutés ensuite.",
+        "data": {
+          "name": "Nom",
+          "country": "Pays",
+          "currency": "Code de la devise",
+          "base_rate_name": "Nom du tarif principal",
+          "base_rate": "Tarif principal",
+          "export_rate": "Tarif de rachat",
+          "standing_charge": "Abonnement",
+          "levy": "Taxe mensuelle",
+          "discount_rate": "Remise sur l'énergie",
+          "vat_rate": "TVA",
+          "vat_included": "Prix TTC",
+          "bill_start_day": "Jour du mois où commence une facture"
+        },
+        "data_description": {
+          "name": "Un nom pour le tarif, affiché comme titre de l'intégration.",
+          "country": "Le pays de l'alimentation.",
+          "currency": "Le code de devise à trois lettres, comme EUR ou GBP.",
+          "base_rate_name": "Le nom affiché pour le tarif qui s'applique quand aucun tarif horaire ne s'applique.",
+          "base_rate": "Le prix d'un kWh au tarif principal, tel qu'il figure sur votre facture. Par exemple 0,30.",
+          "export_rate": "Ce que vous recevez pour un kWh exporté. Laissez 0 si vous ne recevez rien.",
+          "standing_charge": "Le montant fixe par jour, hors TVA sauf si vous indiquez que les prix la comprennent.",
+          "levy": "Un montant fixe par mois, comme une taxe de service public. Laissez 0 s'il n'y en a pas.",
+          "discount_rate": "Un pourcentage retiré du coût de l'énergie, comme une remise pour paiement rapide.",
+          "vat_rate": "Le taux de TVA en pourcentage. Laissez 0 si vos prix la comprennent déjà.",
+          "vat_included": "Activez-le quand les tarifs ci-dessus sont les prix que vous payez, TVA comprise.",
+          "bill_start_day": "Le jour du mois où commence la période de facturation de votre fournisseur, de 1 à 28."
+        }
+      },
+      "manual_more": {
+        "title": "Tarifs horaires",
+        "description": "Ajoutez un tarif qui s'applique à certaines heures, comme un tarif de nuit. Quand des tarifs se chevauchent, le moins cher s'applique.",
+        "menu_options": {
+          "manual_period": "Ajouter un tarif horaire",
+          "manual_done": "Terminer"
+        }
+      },
+      "manual_period": {
+        "title": "Ajouter un tarif horaire",
+        "data": {
+          "name": "Nom",
+          "rate": "Tarif",
+          "start": "De",
+          "end": "À"
+        },
+        "data_description": {
+          "name": "Un nom pour ce tarif horaire, comme Nuit.",
+          "rate": "Le prix d'un kWh tant que ce tarif s'applique.",
+          "start": "L'heure à laquelle ce tarif commence chaque jour.",
+          "end": "L'heure à laquelle ce tarif se termine. Elle peut précéder le début, pour un tarif qui court pendant la nuit."
+        }
+      }
+    },
+    "abort": {
+      "cannot_connect": "La base de tarifs n'a pas pu être lue. Vérifiez la connexion et réessayez.",
+      "no_tariffs": "Ce fournisseur n'a aucune offre dont les prix soient en vigueur aujourd'hui.",
+      "single_instance_allowed": "Un seul tarif peut être suivi. Utilisez Reconfigurer pour changer d'offre.",
+      "already_configured": "Cette offre est déjà configurée.",
+      "reconfigure_successful": "L'offre a été modifiée. Les capteurs gardent leurs noms et leur historique."
+    },
+    "error": {
+      "invalid_tariff": "Ces tarifs ne peuvent pas être utilisés. Vérifiez le code de devise et les valeurs.",
+      "empty_period": "Le tarif doit commencer et se terminer à des heures différentes."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "valid_from": {
+        "name": "Prix valables à partir du"
+      },
+      "valid_to": {
+        "name": "Prix valables jusqu'au"
+      },
+      "prices_last_read": {
+        "name": "Dernière lecture des prix"
+      },
+      "tariff_summary": {
+        "name": "Résumé du tarif"
+      },
+      "import_price": {
+        "name": "Prix d'achat"
+      },
+      "export_price": {
+        "name": "Prix de rachat"
+      },
+      "import_band": {
+        "name": "Tranche tarifaire d'achat"
+      },
+      "next_import_price": {
+        "name": "Prochain prix d'achat"
+      },
+      "previous_import_price": {
+        "name": "Prix d'achat précédent"
+      },
+      "import_price_rating": {
+        "name": "Évaluation du prix d'achat",
+        "state": {
+          "very_low": "Très bas",
+          "low": "Bas",
+          "normal": "Normal",
+          "high": "Élevé",
+          "very_high": "Très élevé"
+        }
+      },
+      "lowest_import_price_today": {
+        "name": "Prix d'achat le plus bas aujourd'hui"
+      },
+      "highest_import_price_today": {
+        "name": "Prix d'achat le plus élevé aujourd'hui"
+      },
+      "average_import_price_today": {
+        "name": "Prix d'achat moyen aujourd'hui"
+      },
+      "lowest_export_price_today": {
+        "name": "Prix de rachat le plus bas aujourd'hui"
+      },
+      "highest_export_price_today": {
+        "name": "Prix de rachat le plus élevé aujourd'hui"
+      },
+      "average_export_price_today": {
+        "name": "Prix de rachat moyen aujourd'hui"
+      },
+      "next_price_change": {
+        "name": "Prochain changement de prix"
+      },
+      "cheapest_window_start": {
+        "name": "Début de la période la moins chère"
+      },
+      "cheapest_window_end": {
+        "name": "Fin de la période la moins chère"
+      },
+      "dearest_window_start": {
+        "name": "Début de la période la plus chère"
+      },
+      "dearest_window_end": {
+        "name": "Fin de la période la plus chère"
+      },
+      "bill_so_far": {
+        "name": "Facture à ce jour"
+      },
+      "period_import": {
+        "name": "Achat sur cette période de facturation"
+      },
+      "bill_coverage": {
+        "name": "Couverture des données de la facture"
+      },
+      "savings_this_period": {
+        "name": "Économies sur cette période de facturation"
+      },
+      "plan_rank": {
+        "name": "Classement de l'offre"
+      },
+      "cheapest_plan_saving": {
+        "name": "Économie avec l'offre la moins chère"
+      },
+      "price_forecast": {
+        "name": "Prévision des prix"
+      },
+      "next_tariff_change": {
+        "name": "Prochain changement de tarif"
+      },
+      "next_low_price": {
+        "name": "Prochain prix bas"
+      },
+      "next_high_price": {
+        "name": "Prochain prix élevé"
+      },
+      "price_level": {
+        "name": "Niveau de prix",
+        "state": {
+          "low": "Bas",
+          "mid": "Moyen",
+          "high": "Élevé"
+        }
+      }
+    },
+    "binary_sensor": {
+      "tomorrow_prices_available": {
+        "name": "Prix de demain disponibles"
+      },
+      "store_offline": {
+        "name": "Base de tarifs hors ligne"
+      },
+      "cheapest_window_active": {
+        "name": "Période la moins chère active"
+      },
+      "dearest_window_active": {
+        "name": "Période la plus chère active"
+      }
+    },
+    "number": {
+      "low_percentile": {
+        "name": "Centile de prix bas"
+      },
+      "high_percentile": {
+        "name": "Centile de prix élevé"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "description": "La durée des périodes les moins chères et les plus chères, les compteurs d'énergie dont votre facture est calculée, et votre batterie. Un compteur est un capteur en kWh qui ne fait que croître, comme les totaux d'achat et de rachat de votre compteur intelligent. Laissez-les vides pour n'afficher que les prix. Les économies demandent la consommation de toute la maison, et une batterie demande son niveau de charge et sa capacité.",
+        "data": {
+          "window_minutes": "Durée de la période (minutes)",
+          "import_energy_entity": "Énergie achetée au réseau",
+          "export_energy_entity": "Énergie injectée dans le réseau",
+          "house_energy_entity": "Énergie consommée par toute la maison",
+          "battery_discharge_energy_entity": "Énergie sortie de la batterie",
+          "battery_soc_entity": "Charge de la batterie (pourcentage)",
+          "battery_capacity_kwh": "Capacité de la batterie (kWh)",
+          "battery_wear_per_kwh": "Usure de la batterie par kWh",
+          "bill_start_day": "Jour du mois où commence une facture",
+          "bill_months": "Mois par facture",
+          "bill_start_month": "Un mois où commence une facture",
+          "refresh_now": "Relire la base de tarifs maintenant",
+          "clear_cache": "Supprimer d'abord les fichiers de tarifs enregistrés"
+        },
+        "data_description": {
+          "refresh_now": "Relit l'index de la base et votre offre à l'enregistrement, au lieu d'attendre ce soir. À utiliser après qu'un changement a été publié dans la base.",
+          "clear_cache": "Supprime les copies enregistrées du tarif et de ses prix, puis les relit depuis la base. À utiliser si les prix semblent faux. La base doit être accessible.",
+          "import_energy_entity": "Nécessaire pour la facture. Lu chaque minute.",
+          "export_energy_entity": "Facultatif. Crédite ce que vous injectez.",
+          "house_energy_entity": "Nécessaire pour les économies. Un compteur de toute l'énergie consommée par la maison, du réseau, du solaire et de la batterie.",
+          "battery_discharge_energy_entity": "Facultatif. Déduit l'usure de la batterie des économies.",
+          "battery_soc_entity": "Facultatif. Avec la capacité de la batterie, valorise l'énergie qu'elle contient.",
+          "battery_capacity_kwh": "Facultatif. Capacité utilisable de la batterie.",
+          "battery_wear_per_kwh": "Facultatif. Ce que coûte en usure chaque kWh sorti de la batterie, dans la devise du tarif.",
+          "bill_start_day": "De 1 à 28. Laissez vide pour suivre le tarif.",
+          "bill_months": "1, 2, 3, 4, 6 ou 12. Laissez vide pour suivre le tarif.",
+          "bill_start_month": "Uniquement pour les factures de plus d'un mois, afin qu'elles coïncident avec celles de votre fournisseur. Par exemple 2 pour une facture de deux mois commençant en février."
+        }
+      }
+    },
+    "error": {
+      "clear_while_offline": "La base est inaccessible : supprimer les fichiers enregistrés ne laisserait aucun prix. Réessayez quand elle sera accessible."
+    }
+  },
+  "services": {
+    "find_window": {
+      "name": "Trouver une période",
+      "description": "Trouve la période la moins chère ou la plus chère d'une durée donnée dans les prix des deux prochains jours, et ce qu'elle coûterait pour une charge d'une puissance donnée.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Le tarif à explorer."
+        },
+        "duration": {
+          "name": "Durée",
+          "description": "La durée de fonctionnement de la charge."
+        },
+        "flow": {
+          "name": "Sens",
+          "description": "Achat : ce que vous payez. Rachat : ce que vous recevez."
+        },
+        "highest": {
+          "name": "Plus chère",
+          "description": "Trouver la période la plus chère au lieu de la moins chère."
+        },
+        "power_kw": {
+          "name": "Puissance",
+          "description": "La charge en kilowatts. Le coût est celui d'une charge de cette taille."
+        },
+        "earliest_start": {
+          "name": "Début au plus tôt",
+          "description": "La période ne peut pas commencer avant. Par défaut, maintenant."
+        },
+        "latest_end": {
+          "name": "Fin au plus tard",
+          "description": "La période doit se terminer avant cette heure."
+        }
+      }
+    },
+    "get_prices": {
+      "name": "Obtenir les prix",
+      "description": "Renvoie le prix d'achat et de rachat de chaque période dans une plage, sur toutes les révisions que contient la base. Pour un tarif sur un flux de prix, elle s'arrête là où les prix sont publiés, et le signale.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Le tarif à lire."
+        },
+        "start": {
+          "name": "Début",
+          "description": "Le premier instant voulu. Par défaut, maintenant."
+        },
+        "end": {
+          "name": "Fin",
+          "description": "La fin de la plage. Par défaut, 24 heures après le début."
+        }
+      }
+    },
+    "bill_summary": {
+      "name": "Résumé de la facture",
+      "description": "Renvoie la facture à ce jour sous forme de page HTML, avec son total et sa période. Elle nécessite un compteur d'énergie d'achat dans les options. À utiliser dans un e-mail, une notification ou une carte.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Le tarif dont afficher la facture."
+        }
+      }
+    }
+  },
+  "selector": {
+    "flow": {
+      "options": {
+        "import": "Achat",
+        "export": "Rachat"
+      }
+    }
+  },
+  "exceptions": {
+    "unknown_entry": {
+      "message": "Aucune entrée Utility Tariffs {entry}."
+    },
+    "not_loaded": {
+      "message": "Ce tarif n'est pas chargé."
+    },
+    "end_before_start": {
+      "message": "La fin doit être postérieure au début."
+    },
+    "no_meter": {
+      "message": "Définissez d'abord un compteur d'énergie d'achat dans les options. La facture en est calculée."
+    },
+    "store_unreadable": {
+      "message": "La base de tarifs n'a pas pu être lue : {error}"
+    }
+  },
+  "issues": {
+    "plan_ending": {
+      "title": "Les prix de votre offre prennent fin",
+      "description": "La base indique que les prix de {tariff} prennent fin le {date} et ne contient aucun prix ultérieur. Vérifiez les conditions actuelles de l'offre auprès de votre fournisseur. Si l'offre a changé, utilisez Reconfigurer pour suivre la nouvelle."
+    },
+    "store_unreached": {
+      "title": "La base de tarifs n'a pas été jointe depuis {days} jours",
+      "description": "{tariff} fonctionne avec les prix enregistrés sur cette installation. Ils peuvent être périmés. Vérifiez la connexion ou relisez la base depuis les options de l'intégration."
+    },
+    "cheaper_plan": {
+      "title": "Une offre moins chère est disponible",
+      "description": "Calculée sur votre dernière facture complète, l'offre {plan} aurait coûté {saving} de moins que la vôtre. C'est une comparaison de la consommation passée, pas une prévision. Vérifiez les conditions actuelles de l'offre auprès du fournisseur avant de changer, puis utilisez Reconfigurer pour la suivre."
+    },
+    "prices_not_published": {
+      "title": "Les prix de demain ne sont pas encore publiés",
+      "description": "{tariff} lit des prix à la demi-heure, et ceux de demain manquent encore tard dans la soirée. Les prix déjà détenus continuent de fonctionner. La prochaine lecture a lieu ce soir à la demie de chaque heure ou après minuit. Si cela persiste, le flux de prix est peut-être en panne."
+    }
+  }
+}
