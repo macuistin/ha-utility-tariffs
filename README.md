@@ -60,6 +60,11 @@ What you can see about freshness today:
 
 A price change is always a new numbered revision, so a tariff in use never changes under you.
 
+The store is synced on its own schedule, whatever version of this integration you run. An older
+release still reads current prices at its next nightly read, with nothing to update. Only a change
+in the format of a tariff, which is rare, can need a newer release. The integration then keeps the
+prices it already holds.
+
 ## Use cases
 
 - Start a load in the cheapest window: trigger on **Cheapest window active**, or call
