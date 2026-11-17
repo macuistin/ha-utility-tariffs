@@ -7,10 +7,11 @@ the held prices it may use, so that a window already under way still counts as t
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from datetime import datetime, timedelta
 
 from .coordinator import TariffData
-from .lib.tariff import Window, WindowSearch, find_window
+from .lib.tariff import PriceSlot, Window, WindowSearch, find_window
 from .lib.tariff.defaults import SLOT_SECONDS
 
 # A window that ends sooner than this is treated as over, so the answer does not jump to a later
@@ -33,7 +34,30 @@ def current_window(
         highest=highest,
         earliest_start=_on_grid(now - duration + MIN_REMAINING),
     )
-    return find_window(data.slots, search)
+    window = find_window(data.slots, search)
+    if window is None:
+        return None
+    return replace(window, end=_run_end(data.slots, window))
+
+
+def _run_end(slots: tuple[PriceSlot, ...], window: Window) -> datetime:
+    """The end of the unbroken run of the window's price that the window sits in.
+
+    The search finds a fixed length, so a window inside a longer band would end part way through
+    it. The end follows the band to where the price changes, so it matches the start.
+    """
+    end = window.end
+    price = None
+    for slot in slots:
+        if price is None:
+            if slot.start <= window.start < slot.end:
+                price = slot.import_price
+                end = max(end, slot.end)
+        elif slot.start <= end and slot.import_price == price:
+            end = max(end, slot.end)
+        elif slot.start > end:
+            break
+    return end
 
 
 def _on_grid(moment: datetime) -> datetime:
