@@ -1,247 +1,70 @@
 # Utility Tariffs
 
+<p align="center"><img src="custom_components/utility_tariffs/brand/logo.png" alt="Utility Tariffs" width="320"></p>
+
 A Home Assistant integration that knows your tariff. It prices every half hour from the open
 tariff store, and works out the cheapest and dearest windows, the bill so far and, with your own
 energy sensors, what solar and a battery save and which plan would have cost least.
 
-## Installation
+```mermaid
+flowchart LR
+    S[(Open tariff store)] -->|read nightly,<br/>kept on disk| I[Utility Tariffs]
+    M[Your energy meters<br/>optional] --> I
+    I --> P[Prices, bands and<br/>cheapest windows]
+    I --> B[Bill so far and savings]
+    I --> R[Cheaper plans]
+```
+
+## What you get
+
+| | |
+| --- | --- |
+| **Prices** | Import and export price now, rate band, next change, rating from very low to very high |
+| **Windows** | Cheapest and dearest stretch of a length you choose, and a `find_window` action for a load of a given power |
+| **Forecast** | Prices known for the next 48 hours, upcoming revisions, low and high price alerts |
+| **Bill** | The bill so far from your own meters, lined up with your supplier's bill dates, and an HTML bill summary |
+| **Savings** | What solar and a battery saved this bill period |
+| **Cheaper plans** | Your last bill re-priced under every other plan in your country and area |
+| **Works offline** | Tariffs and prices are held on disk, so sensors keep moving when the store cannot be reached |
+
+<p align="center">
+  <img src="docs/images/entities-placeholder.svg" alt="Placeholder for a screenshot of the price and window sensors" width="48%">
+  <img src="docs/images/bill-placeholder.svg" alt="Placeholder for a screenshot of the bill and savings" width="48%">
+</p>
+
+## Quick install
 
 1. In HACS, add `macuistin/ha-utility-tariffs` as a custom repository of type Integration, then
    download **Utility Tariffs**. Restart Home Assistant.
 2. Open Settings, Devices & services, Add integration, and choose **Utility Tariffs**.
-3. Choose **Pick a plan from the store**: country, supplier, plan and, where the plan has
-   different prices by area, your area. Or choose **Type in my own rates**.
+3. Pick your country, supplier, plan and area, or type in your own rates.
 
 Home Assistant needs internet access to read the tariff store. Only one tariff is followed.
 
-## Configuration
+## Examples
 
-Setup has no settings beyond the plan. The options (the three dots on the integration, then
-**Configure**) are:
-
-| Option | Meaning |
-| --- | --- |
-| Window length | Minutes in the cheapest and dearest windows, 30 to 720 in steps of 30 (default 120) |
-| Energy imported, exported, used by the home, taken out of the battery | Sensors in kWh that only ever rise. The import meter switches the bill on |
-| Battery charge, size and wear per kWh | Used with the home meter to value the energy the battery holds |
-| Day of the month a bill starts, months in one bill, a month a bill starts in | Line the bill up with your supplier's. Empty follows the tariff |
-
-Saving the options reloads the integration.
-
-## Data updates
-
-The tariff and its prices are read from the store at start-up and every night shortly after
-midnight, and held on disk so prices keep working with no network. Sensors move at every half hour
-without another read. A tariff on a half-hourly price feed is read every half hour from 16:00 until
-tomorrow's prices are held. Energy meters are read every minute, and only when you set them.
-
-### How the tariffs are kept current
-
-The integration never contacts a supplier. It reads only the open store at
-[macuistin/utility-tariffs](https://github.com/macuistin/utility-tariffs), which checks the
-published sources on a schedule:
-
-- **Plans and rates:** a weekly run reads every supplier or regulator source. The US sources run
-  monthly. A run opens one pull request when a price changed, and a person reviews it before it
-  reaches the store. A source that cannot be read opens an issue and does not stop the others.
-- **Half-hourly prices** (a dynamic tariff such as Agile): the feeds are read three times a day and
-  new complete days are added straight to the store.
-- **Your install:** reads the store every night shortly after midnight, and again every half hour
-  from 16:00 until tomorrow's prices are held. If the store cannot be read it keeps the saved
-  prices and the sensors carry on.
-
-What you can see about freshness today:
-
-- **Price forecast** shows how far ahead the prices are known.
-- **Next tariff change** shows the day the next revision the store holds takes effect.
-- A repair appears when tomorrow's prices are still missing late in the evening.
-- A repair appears when your plan's prices end within 14 days and the store holds nothing after
-  them, and when this install has not reached the store for 3 days. Both clear on their own.
-- The diagnostics download lists the revision, the first and last price held, and whether the
-  store was unreachable at the last read.
-
-A price change is always a new numbered revision, so a tariff in use never changes under you.
-
-The store is synced on its own schedule, whatever version of this integration you run. An older
-release still reads current prices at its next nightly read, with nothing to update. Only a change
-in the format of a tariff, which is rare, can need a newer release. The integration then keeps the
-prices it already holds.
-
-To read the store now instead of waiting for tonight, open the integration's options, tick **Read
-the tariff store again now** and save. Tick **Delete the saved tariff files first** to throw away
-the saved copies of the tariff and its prices and fetch them again. Use that if prices look wrong.
-It is refused while the store cannot be reached, because the saved files are then all the
-integration has to run on.
-
-## Use cases
-
-- Start a load in the cheapest window: trigger on **Cheapest window active**, or call
-  `utility_tariffs.find_window` for a load of a given power and length.
+- Start a load in the cheapest window: trigger on **Cheapest window active**.
 - Warn when the price is high: trigger on **Import price rating** becoming `high` or `very_high`.
-- Send the bill by email or notification with `utility_tariffs.bill_summary`.
-- Find out whether another plan would have cost less with **Cheapest plan saving**.
+- Send the bill by email or notification with the `utility_tariffs.bill_summary` action.
+- Use the import and export price sensors in the Energy dashboard.
 
-## Known limitations
+## Documentation
 
-- Electricity only. One tariff per Home Assistant.
-- Prices are only as current as the open store. A plan the store does not hold can be typed in as
-  your own rates, but public holidays are not applied to those.
-- The bill is an estimate from the meters you choose and can differ from your supplier's by small
-  amounts. Plan ranking is a comparison of past use, not a forecast, and ignores exit fees and
-  contract terms.
-- Nothing is guessed for prices that are not published yet.
-
-## Troubleshooting
-
-- **Setup says the store could not be read.** Check that Home Assistant can reach
-  `raw.githubusercontent.com` over https, then try again.
-- **Prices stopped updating.** The held prices keep working while the store is unreachable. For a
-  price-feed tariff, a repair issue appears if tomorrow's prices are still missing after 22:00.
-- **The bill is empty.** Set an import meter in the options. It must be a kWh sensor that only
-  rises.
-- **Reporting a bug.** Open the integration, choose the three dots, **Download diagnostics**, and
-  attach the file. Your area and the names of your energy sensors are removed from it.
-
-## Removing the integration
-
-Open Settings, Devices & services, Utility Tariffs, the three dots, then **Delete**. The saved
-energy history is deleted with it. The store cache under `.storage/utility_tariffs_store` and
-`.storage/utility_tariffs_prices` can then be deleted by hand if you want the space back. To remove
-the code, remove the repository in HACS and restart.
-
-## Bill so far
-
-In the integration's options, choose the sensors that count the energy you import and export, such
-as your smart meter's totals (kWh, Wh or MWh, only ever rising). Every minute the rise since the
-last reading is booked into a half-hourly history, which is saved and priced under the tariff for
-the current bill period. You get the bill so far, the energy imported this period and how much of
-the period the history covers. A meter that updates only every half hour or day books each step in
-the minute it appears, so the bill by rate band can differ slightly from your supplier's.
-
-## Savings
-
-Add a sensor for the energy the whole home uses and you also get "Savings this bill period": what
-the home would have paid buying all of its energy from the grid, less what it paid, with export
-credit counted. The standing charge cancels, because both bills carry it. For a battery, add its
-size and its charge sensor, and the value of the energy it holds more or less than when the bill
-period began is added or taken off. A sensor for the energy taken out of the battery, and a wear
-cost per kWh, take wear off. Without a record of what was bought for the battery, stored energy is
-valued at the cheapest rate band.
-
-## Energy dashboard
-
-The import price and export price sensors can be used as the "entity with the current price" for
-a grid connection in the Energy dashboard, and as the entity for export compensation.
-
-- Both report the price per kWh in the tariff's currency, such as `EUR/kWh`, and move at every
-  half hour.
-- The export price is `0` when the tariff pays nothing for export, so it is always a number.
-- The dashboard lists only price entities in your Home Assistant currency (Settings, System,
-  General). A tariff in another currency does not appear in the picker.
-
-## Bill summary
-
-The `utility_tariffs.bill_summary` action returns the bill so far as a self-contained HTML page in
-`html`, with `total`, `currency`, `period_start` and the days priced beside it. The page lists the
-energy imported in each band and every line of the bill (energy, saving, standing charge, levy,
-VAT and export credit), so the lines add up to the total. It follows your light or dark setting and
-fits a phone. It needs an import meter. Use the response in an email or a notification, or save it
-to a file:
-
-```yaml
-action: utility_tariffs.bill_summary
-data:
-  config_entry_id: <your entry>
-response_variable: bill
-```
-
-## Cheaper plans
-
-When an import meter is set, the integration prices your last whole bill under every other plan of
-your country and area in the store, every night shortly after midnight, and ranks them. **Plan
-rank** is where your plan stands (1 is the cheapest), with the cheapest few plans and their bills
-in its attributes. **Cheapest plan saving** is what the cheapest plan would have saved, and is 0
-when yours is cheapest. When the saving is at least 5% of your bill, a repair notice names the
-plan.
-
-This re-prices what you used. It is not a forecast, it never switches your plan, and it does not
-know exit fees, contract terms or whether a plan is open to you. A plan that lists no export price
-is priced with your plan's export rate. Plans that hold only other areas, or cannot be read, are
-left out and counted. To follow a plan, use Reconfigure.
-
-## Bill dates
-
-In the integration's options you can set the day of the month a bill starts (1 to 28) and how many
-months one bill covers (1, 2, 3, 4, 6 or 12). For a bill longer than a month, also give a month a
-bill starts in, so the periods line up with your supplier's: a two-month bill that starts on
-16 February has start day 16 and start month 2. Anything left empty follows the tariff, and a day
-count is not offered because suppliers bill by calendar month. The bill so far and the saving this
-bill period both use these dates.
-
-## Your own rates
-
-When your plan is not in the store, choose **Type in my own rates** at setup, or in Reconfigure.
-Enter the main unit rate, export rate, standing charge per day, monthly levy, discount on energy,
-VAT, whether your prices already include VAT, and the day of the month a bill starts (1 to 28). Then
-add any timed rates, such as a night rate, with their hours. Where timed rates overlap, the
-cheapest applies. Rates are entered as they appear on your bill, before VAT unless you say the
-prices include it. They are kept in your own Home Assistant and are never sent to the store.
-Public holidays are not applied. Changing the rates means reconfiguring again.
-
-## Changing plan
-
-Open the integration, choose the three dots, then **Reconfigure**, and pick another country,
-supplier, plan or area. The sensors keep their entity IDs, history and place in the Energy
-dashboard and your automations, and the saved energy history is priced again under the new plan.
-Only one tariff is followed. The device is always called Utility Tariff and the plan is its model,
-so sensors read `sensor.utility_tariff_import_price` whatever the plan. Entries made before this
-rule keep their existing entity IDs.
-
-## Entities and actions
-
-Each followed tariff is one device. Prices are in the tariff's currency per kWh.
-
-| Entity | Meaning |
+| Page | Covers |
 | --- | --- |
-| Import price, Export price | The price in force now, all taxes and discounts in |
-| Import rate band | The name of the band in force now |
-| Previous import price, Next import price, Next price change | The price before the current one, the one after it, and when it starts |
-| Import price rating | Where the current price sits in today's range: very low, low, normal, high or very high. A flat tariff is always normal |
-| Lowest, highest and average import price today | Over the local day. The average is weighted by time. The export versions are off until you enable them |
-| Cheapest window start and end, Dearest window start, Cheapest window active | The best stretch of the length set in the options, from now to the end of tomorrow. The window starts at its earliest best time and ends where that price stops changing, so a window inside a long band ends with the band |
-| Prices valid from, Prices valid to, Prices last read, Tariff summary, Tariff store offline, Tomorrow's prices available | Diagnostics. The dates are the store's for the plan in force (valid to is unknown while open ended). Prices last read is when this install last read the store. The summary is named after the plan and lists provider, revision, source link, completeness and band prices. Tomorrow's prices available is only for a tariff on a price feed |
-
-### Price forecast
-
-| Entity | Meaning |
-| --- | --- |
-| Price forecast | The time the prices are known until. Its `slots` attribute lists the next 48 hours (start, end, price, band and whether the price is `fixed` or `published`). `changes` lists revisions the store already holds, with each band's new price. `window_percentiles` and `history_percentiles` give the low, 50th and high percentile of the prices ahead and of this time of day over the last 28 days (shown after 7 days). `complete` says whether prices are known to the end of the range asked for |
-| Next tariff change | The day the next revision starts, with the band prices before and after |
-| Next low price, Next high price | When the price next falls to the low percentile of the prices known ahead, or rises to the high one, with when that stretch ends |
-| Price level (tariffs on a half-hourly price feed only) | Low, mid or high for the price now, compared with this time of day over the last 28 days, or with the prices ahead until a week of history is held. The `basis` attribute says which |
-| Low price percentile, High price percentile | Numbers that set what counts as low (1 to 49, default 10) and high (51 to 99, default 90). A change applies at once |
-
-A fixed tariff is priced two weeks ahead, over every revision the store already holds. A tariff
-on a price feed such as Agile Octopus is priced from the published half-hourly prices and stops
-where they stop: nothing is guessed for the part not yet published. Tomorrow's Agile prices appear
-in the afternoon, so the feed is read every half hour from 16:00 until they are held. If they are
-still missing after 22:00 a repair issue says so. The price history for the percentiles builds as
-days are published.
-
-The `get_prices` action returns every price that overlaps a range, from yesterday to the furthest
-price known, with the import and export price, band and source, and says whether the range is
-fully covered and where the prices are known until. The
-`find_window` action finds the cheapest or dearest stretch for a load of a given power. Both return
-their answer, so use them with `response_variable`.
+| [Installation](docs/installation.md) | Install, set up a plan, remove |
+| [Setup guide](docs/setup-guide.md) | Step by step setup and reconfigure, with pictures |
+| [Configuration](docs/configuration.md) | Options, bill dates, your own rates, changing plan |
+| [Features](docs/features.md) | Bill so far, savings, cheaper plans, Energy dashboard, bill summary |
+| [Entities and actions](docs/entities.md) | Every sensor, the price forecast and the actions |
+| [The tariff store](docs/tariff-store.md) | Where prices come from, how tariffs are kept current, the file format |
+| [Troubleshooting](docs/troubleshooting.md) | Common problems, known limitations, reporting a bug |
 
 ## How it is built
 
-- All tariff, price, window, ranking, savings and billing code is written and tested in
-  [utility-tariffs](https://github.com/macuistin/utility-tariffs) and installed from there as one
-  pinned package (`utility-tariffs-lib`, listed in `manifest.json`).
-- The integration is Home Assistant glue around it: the cache, timers, repairs, storage and
-  entities.
-- Electricity only to start.
+All tariff, price, window, ranking, savings and billing code lives in
+[utility-tariffs](https://github.com/macuistin/utility-tariffs) and is installed as one pinned
+package. This repository is the Home Assistant glue around it. Electricity only to start.
 
 ## Licence
 
