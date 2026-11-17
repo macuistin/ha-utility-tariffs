@@ -6,6 +6,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.config_entries import (
+    SOURCE_RECONFIGURE,
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
@@ -33,6 +34,7 @@ from .const import (
     CONF_BATTERY_SOC,
     CONF_BATTERY_WEAR,
     CONF_COUNTRY,
+    CONF_ENTITY_KEY,
     CONF_EXPORT_ENERGY,
     CONF_HOUSE_ENERGY,
     CONF_IMPORT_ENERGY,
@@ -79,6 +81,9 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._names: dict[str, str] = {}
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if self.source != SOURCE_RECONFIGURE:
+            if self._async_current_entries():
+                return self.async_abort(reason="single_instance_allowed")
         access = store_access(self.hass)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]
@@ -144,13 +149,30 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         suffix = "" if len(areas) == 1 else f" ({areas[user_input[CONF_AREA]]})"
         return await self._create(f"{self._names['provider']} {self._names['tariff']}{suffix}")
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Follow a different plan. The entities keep their ids, history and place in dashboards."""
+        return await self.async_step_user()
+
     async def _create(self, title: str) -> ConfigFlowResult:
         unique = "/".join(
             self._chosen[key] for key in (CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, CONF_AREA)
         )
         await self.async_set_unique_id(unique)
         self._abort_if_unique_id_configured()
-        return self.async_create_entry(title=title, data={**self._chosen, CONF_NAME: title})
+        if self.source == SOURCE_RECONFIGURE:
+            entry = self._get_reconfigure_entry()
+            key = entry.data.get(CONF_ENTITY_KEY) or entry.unique_id or entry.entry_id
+            return self.async_update_reload_and_abort(
+                entry,
+                unique_id=unique,
+                title=title,
+                data={**self._chosen, CONF_NAME: title, CONF_ENTITY_KEY: key},
+            )
+        return self.async_create_entry(
+            title=title, data={**self._chosen, CONF_NAME: title, CONF_ENTITY_KEY: unique}
+        )
 
 
 _METERS = (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY, CONF_HOUSE_ENERGY, CONF_BATTERY_DISCHARGE_ENERGY)

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 DOMAIN = "utility_tariffs"
 
+# The device is always called this, so entity ids read sensor.utility_tariff_<thing>.
+DEVICE_NAME = "Utility Tariff"
+
 # Where the open tariff store is read from: the raw files of its main branch, over https.
 DEFAULT_STORE_URL = (
     "https://raw.githubusercontent.com/macuistin/utility-tariffs/main/tariffs/electricity"
@@ -14,6 +17,7 @@ CONF_COUNTRY = "country"
 CONF_PROVIDER = "provider"
 CONF_TARIFF = "tariff"
 CONF_AREA = "area"
+CONF_ENTITY_KEY = "entity_key"  # fixed when the entry is made, so a new plan keeps its entities
 CONF_NAME = "name"  # the title shown for the tariff, kept so a renamed plan does not rename it
 
 CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows

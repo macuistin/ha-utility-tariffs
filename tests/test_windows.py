@@ -18,7 +18,7 @@ TIMES = "2026-11-14 22:00:00+00:00"
 
 
 def _binary(hass: HomeAssistant, which: str = "cheapest") -> str:
-    state = hass.states.get(f"binary_sensor.p_energy_plan_urban_{which}_window_active")
+    state = hass.states.get(f"binary_sensor.utility_tariff_{which}_window_active")
     assert state is not None
     return state.state
 

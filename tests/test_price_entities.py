@@ -54,9 +54,9 @@ async def test_the_export_day_figures_are_off_until_asked_for(
 
     registry = er.async_get(hass)
     for key in ("lowest", "highest", "average"):
-        entity = registry.async_get(f"sensor.p_energy_plan_urban_{key}_export_price_today")
+        entity = registry.async_get(f"sensor.utility_tariff_{key}_export_price_today")
         assert entity is not None and entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
-    assert registry.async_get("sensor.p_energy_plan_urban_lowest_import_price_today").disabled_by is None
+    assert registry.async_get("sensor.utility_tariff_lowest_import_price_today").disabled_by is None
 
 
 async def test_the_rating_places_the_price_in_the_day(
