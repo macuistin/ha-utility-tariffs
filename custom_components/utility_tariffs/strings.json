@@ -257,6 +257,16 @@
           "description": "The end of the range. Defaults to 24 hours after the start."
         }
       }
+    },
+    "bill_summary": {
+      "name": "Bill summary",
+      "description": "Returns the bill so far as an HTML page, with its total and period. It needs an energy import meter in the options. Use it in an email, a notification or a card.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tariff",
+          "description": "The tariff whose bill to show."
+        }
+      }
     }
   },
   "selector": {
@@ -276,6 +286,9 @@
     },
     "end_before_start": {
       "message": "The end must be after the start."
+    },
+    "no_meter": {
+      "message": "Set an energy import meter in the options first. The bill is worked out from it."
     }
   },
   "issues": {

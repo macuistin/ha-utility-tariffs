@@ -50,3 +50,11 @@ get_prices:
     end:
       selector:
         datetime:
+
+bill_summary:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: utility_tariffs

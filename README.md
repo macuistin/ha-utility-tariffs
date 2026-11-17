@@ -36,6 +36,22 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Bill summary
+
+The `utility_tariffs.bill_summary` action returns the bill so far as a self-contained HTML page in
+`html`, with `total`, `currency`, `period_start` and the days priced beside it. The page lists the
+energy imported in each band and every line of the bill (energy, saving, standing charge, levy,
+VAT and export credit), so the lines add up to the total. It follows your light or dark setting and
+fits a phone. It needs an import meter. Use the response in an email or a notification, or save it
+to a file:
+
+```yaml
+action: utility_tariffs.bill_summary
+data:
+  config_entry_id: <your entry>
+response_variable: bill
+```
+
 ## Cheaper plans
 
 When an import meter is set, the integration prices your last whole bill under every other plan of
