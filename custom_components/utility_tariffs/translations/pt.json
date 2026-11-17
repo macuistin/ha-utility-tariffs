@@ -1,0 +1,400 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Escolher um tarifário",
+        "description": "Escolha um plano do repositório aberto ou introduza os seus próprios preços.",
+        "menu_options": {
+          "store": "Escolher um plano do repositório",
+          "manual": "Introduzir os meus próprios preços"
+        }
+      },
+      "provider": {
+        "title": "Escolher um fornecedor",
+        "data": {
+          "provider": "Fornecedor"
+        },
+        "data_description": {
+          "provider": "O seu fornecedor de eletricidade."
+        }
+      },
+      "tariff": {
+        "title": "Escolher um plano",
+        "description": "Planos com preços em vigor hoje.",
+        "data": {
+          "tariff": "Plano"
+        },
+        "data_description": {
+          "tariff": "O plano que tem. Só são listados os planos com preços em vigor hoje."
+        }
+      },
+      "area": {
+        "title": "Escolher uma zona",
+        "description": "Este plano tem preços diferentes consoante a zona.",
+        "data": {
+          "area": "Zona"
+        },
+        "data_description": {
+          "area": "Escolha a zona do seu fornecimento. Costuma constar do nome da sua rede de distribuição ou da sua fatura."
+        }
+      },
+      "store": {
+        "title": "Escolher um país",
+        "description": "Só são listados os países cujos tarifários o repositório aberto contém.",
+        "data": {
+          "country": "País"
+        },
+        "data_description": {
+          "country": "O país de cujos fornecedores quer escolher."
+        }
+      },
+      "manual": {
+        "title": "Os seus próprios preços",
+        "description": "Os preços tal como constam da sua fatura. Os preços por horário, como um preço de noite, são adicionados a seguir.",
+        "data": {
+          "name": "Nome",
+          "country": "País",
+          "currency": "Código da moeda",
+          "base_rate_name": "Nome do preço principal",
+          "base_rate": "Preço principal",
+          "export_rate": "Preço de exportação",
+          "standing_charge": "Termo fixo",
+          "levy": "Taxa mensal",
+          "discount_rate": "Desconto na energia",
+          "vat_rate": "IVA",
+          "vat_included": "Preços com IVA incluído",
+          "bill_start_day": "Dia do mês em que começa uma fatura"
+        },
+        "data_description": {
+          "name": "Um nome para o tarifário, mostrado como título da integração.",
+          "country": "O país do fornecimento.",
+          "currency": "O código da moeda de três letras, como EUR ou GBP.",
+          "base_rate_name": "O nome mostrado para o preço que se aplica quando nenhum preço por horário se aplica.",
+          "base_rate": "O preço de um kWh ao preço principal, tal como consta da sua fatura. Por exemplo, 0,30.",
+          "export_rate": "O que recebe por cada kWh exportado. Deixe 0 se não receber nada.",
+          "standing_charge": "O encargo fixo por dia, sem IVA, a menos que indique que os preços o incluem.",
+          "levy": "Um encargo fixo por mês, como uma taxa de serviço público. Deixe 0 se não houver.",
+          "discount_rate": "Uma percentagem deduzida ao custo da energia, como um desconto por pagamento pontual.",
+          "vat_rate": "A taxa de IVA em percentagem. Deixe 0 se os seus preços já a incluírem.",
+          "vat_included": "Ative quando os preços acima são os que paga, com IVA incluído.",
+          "bill_start_day": "O dia do mês em que começa o período de faturação do seu fornecedor, de 1 a 28."
+        }
+      },
+      "manual_more": {
+        "title": "Preços por horário",
+        "description": "Adicione um preço que se aplica a certas horas, como um preço de noite. Quando os preços se sobrepõem, aplica-se o mais barato.",
+        "menu_options": {
+          "manual_period": "Adicionar um preço por horário",
+          "manual_done": "Concluir"
+        }
+      },
+      "manual_period": {
+        "title": "Adicionar um preço por horário",
+        "data": {
+          "name": "Nome",
+          "rate": "Preço",
+          "start": "Das",
+          "end": "Às"
+        },
+        "data_description": {
+          "name": "Um nome para este preço por horário, como Noite.",
+          "rate": "O preço de um kWh enquanto este preço se aplica.",
+          "start": "A hora a que este preço começa todos os dias.",
+          "end": "A hora a que este preço termina. Pode ser anterior ao início, para um preço que se prolonga pela noite."
+        }
+      }
+    },
+    "abort": {
+      "cannot_connect": "Não foi possível ler o repositório de tarifários. Verifique a ligação e tente de novo.",
+      "no_tariffs": "Este fornecedor não tem nenhum plano com preços em vigor hoje.",
+      "single_instance_allowed": "Só se pode seguir um tarifário. Use Reconfigurar para mudar de plano.",
+      "already_configured": "Este plano já está configurado.",
+      "reconfigure_successful": "O plano foi alterado. Os sensores mantêm os nomes e o histórico."
+    },
+    "error": {
+      "invalid_tariff": "Estes preços não podem ser usados. Verifique o código da moeda e os valores.",
+      "empty_period": "O preço tem de começar e terminar a horas diferentes."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "valid_from": {
+        "name": "Preços válidos desde"
+      },
+      "valid_to": {
+        "name": "Preços válidos até"
+      },
+      "prices_last_read": {
+        "name": "Preços lidos pela última vez"
+      },
+      "tariff_summary": {
+        "name": "Resumo do tarifário"
+      },
+      "import_price": {
+        "name": "Preço de importação"
+      },
+      "export_price": {
+        "name": "Preço de exportação"
+      },
+      "import_band": {
+        "name": "Escalão de importação"
+      },
+      "next_import_price": {
+        "name": "Próximo preço de importação"
+      },
+      "previous_import_price": {
+        "name": "Preço de importação anterior"
+      },
+      "import_price_rating": {
+        "name": "Classificação do preço de importação",
+        "state": {
+          "very_low": "Muito baixo",
+          "low": "Baixo",
+          "normal": "Normal",
+          "high": "Alto",
+          "very_high": "Muito alto"
+        }
+      },
+      "lowest_import_price_today": {
+        "name": "Preço de importação mais baixo hoje"
+      },
+      "highest_import_price_today": {
+        "name": "Preço de importação mais alto hoje"
+      },
+      "average_import_price_today": {
+        "name": "Preço de importação médio hoje"
+      },
+      "lowest_export_price_today": {
+        "name": "Preço de exportação mais baixo hoje"
+      },
+      "highest_export_price_today": {
+        "name": "Preço de exportação mais alto hoje"
+      },
+      "average_export_price_today": {
+        "name": "Preço de exportação médio hoje"
+      },
+      "next_price_change": {
+        "name": "Próxima alteração de preço"
+      },
+      "cheapest_window_start": {
+        "name": "Início da janela mais barata"
+      },
+      "cheapest_window_end": {
+        "name": "Fim da janela mais barata"
+      },
+      "dearest_window_start": {
+        "name": "Início da janela mais cara"
+      },
+      "dearest_window_end": {
+        "name": "Fim da janela mais cara"
+      },
+      "bill_so_far": {
+        "name": "Fatura até agora"
+      },
+      "period_import": {
+        "name": "Importação neste período de faturação"
+      },
+      "bill_coverage": {
+        "name": "Cobertura de dados da fatura"
+      },
+      "savings_this_period": {
+        "name": "Poupança neste período de faturação"
+      },
+      "plan_rank": {
+        "name": "Posição do plano"
+      },
+      "cheapest_plan_saving": {
+        "name": "Poupança com o plano mais barato"
+      },
+      "price_forecast": {
+        "name": "Previsão de preços"
+      },
+      "next_tariff_change": {
+        "name": "Próxima alteração de tarifário"
+      },
+      "next_low_price": {
+        "name": "Próximo preço baixo"
+      },
+      "next_high_price": {
+        "name": "Próximo preço alto"
+      },
+      "price_level": {
+        "name": "Nível de preço",
+        "state": {
+          "low": "Baixo",
+          "mid": "Médio",
+          "high": "Alto"
+        }
+      }
+    },
+    "binary_sensor": {
+      "tomorrow_prices_available": {
+        "name": "Preços de amanhã disponíveis"
+      },
+      "store_offline": {
+        "name": "Repositório de tarifários offline"
+      },
+      "cheapest_window_active": {
+        "name": "Janela mais barata ativa"
+      },
+      "dearest_window_active": {
+        "name": "Janela mais cara ativa"
+      }
+    },
+    "number": {
+      "low_percentile": {
+        "name": "Percentil de preço baixo"
+      },
+      "high_percentile": {
+        "name": "Percentil de preço alto"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opções",
+        "description": "A duração das janelas mais baratas e mais caras, os contadores de energia a partir dos quais a sua fatura é calculada e a sua bateria. Um contador é um sensor em kWh que só aumenta, como os totais de importação e exportação do seu contador inteligente. Deixe-os vazios para mostrar apenas preços. As poupanças precisam do consumo da casa toda e uma bateria precisa da sua carga e capacidade.",
+        "data": {
+          "window_minutes": "Duração da janela (minutos)",
+          "import_energy_entity": "Energia importada da rede",
+          "export_energy_entity": "Energia exportada para a rede",
+          "house_energy_entity": "Energia usada por toda a casa",
+          "battery_discharge_energy_entity": "Energia retirada da bateria",
+          "battery_soc_entity": "Carga da bateria (percentagem)",
+          "battery_capacity_kwh": "Capacidade da bateria (kWh)",
+          "battery_wear_per_kwh": "Desgaste da bateria por kWh",
+          "bill_start_day": "Dia do mês em que começa uma fatura",
+          "bill_months": "Meses numa fatura",
+          "bill_start_month": "Um mês em que começa uma fatura",
+          "refresh_now": "Ler o repositório de tarifários de novo agora",
+          "clear_cache": "Eliminar primeiro os ficheiros de tarifários guardados"
+        },
+        "data_description": {
+          "refresh_now": "Lê de novo o índice do repositório e o seu plano ao guardar, em vez de esperar pela noite. Use depois de o repositório publicar uma alteração.",
+          "clear_cache": "Elimina as cópias guardadas do tarifário e dos seus preços e volta a lê-las do repositório. Use se os preços parecerem errados. O repositório tem de estar acessível.",
+          "import_energy_entity": "Necessário para a fatura. Lido todos os minutos.",
+          "export_energy_entity": "Opcional. Credita o que exporta.",
+          "house_energy_entity": "Necessário para as poupanças. Um contador de toda a energia usada pela casa, da rede, solar e bateria.",
+          "battery_discharge_energy_entity": "Opcional. Deduz o desgaste da bateria às poupanças.",
+          "battery_soc_entity": "Opcional. Com a capacidade da bateria, valoriza a energia que a bateria contém.",
+          "battery_capacity_kwh": "Opcional. Capacidade utilizável da bateria.",
+          "battery_wear_per_kwh": "Opcional. O que custa em desgaste cada kWh retirado da bateria, na moeda do tarifário.",
+          "bill_start_day": "De 1 a 28. Deixe vazio para seguir o tarifário.",
+          "bill_months": "1, 2, 3, 4, 6 ou 12. Deixe vazio para seguir o tarifário.",
+          "bill_start_month": "Apenas para faturas com mais de um mês, para que coincidam com as do seu fornecedor. Por exemplo, 2 para uma fatura de dois meses que começa em fevereiro."
+        }
+      }
+    },
+    "error": {
+      "clear_while_offline": "Não é possível aceder ao repositório, pelo que eliminar os ficheiros guardados não deixaria preços. Tente de novo quando estiver acessível."
+    }
+  },
+  "services": {
+    "find_window": {
+      "name": "Encontrar janela",
+      "description": "Encontra o período mais barato ou mais caro de uma dada duração nos preços dos próximos dois dias e quanto custaria para uma carga de uma dada potência.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarifário",
+          "description": "O tarifário a pesquisar."
+        },
+        "duration": {
+          "name": "Duração",
+          "description": "Durante quanto tempo a carga funciona."
+        },
+        "flow": {
+          "name": "Sentido",
+          "description": "Importação preço o que paga, exportação o que recebe."
+        },
+        "highest": {
+          "name": "Mais cara",
+          "description": "Encontrar a janela mais cara em vez da mais barata."
+        },
+        "power_kw": {
+          "name": "Potência",
+          "description": "A carga em quilowatts. O custo é para uma carga deste tamanho."
+        },
+        "earliest_start": {
+          "name": "Início mais cedo",
+          "description": "A janela não pode começar antes disto. Por omissão, agora."
+        },
+        "latest_end": {
+          "name": "Fim mais tarde",
+          "description": "A janela tem de terminar até esta hora."
+        }
+      }
+    },
+    "get_prices": {
+      "name": "Obter preços",
+      "description": "Devolve o preço de importação e exportação de cada período num intervalo, em todas as revisões que o repositório contém. Para um tarifário num feed de preços, para onde os preços estão publicados e indica-o.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarifário",
+          "description": "O tarifário a ler."
+        },
+        "start": {
+          "name": "Início",
+          "description": "O primeiro momento pretendido. Por omissão, agora."
+        },
+        "end": {
+          "name": "Fim",
+          "description": "O fim do intervalo. Por omissão, 24 horas após o início."
+        }
+      }
+    },
+    "bill_summary": {
+      "name": "Resumo da fatura",
+      "description": "Devolve a fatura até agora como uma página HTML, com o total e o período. Precisa de um contador de importação de energia nas opções. Use num e-mail, numa notificação ou num cartão.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarifário",
+          "description": "O tarifário cuja fatura mostrar."
+        }
+      }
+    }
+  },
+  "selector": {
+    "flow": {
+      "options": {
+        "import": "Importação",
+        "export": "Exportação"
+      }
+    }
+  },
+  "exceptions": {
+    "unknown_entry": {
+      "message": "Nenhuma entrada Utility Tariffs {entry}."
+    },
+    "not_loaded": {
+      "message": "Esse tarifário não está carregado."
+    },
+    "end_before_start": {
+      "message": "O fim tem de ser posterior ao início."
+    },
+    "no_meter": {
+      "message": "Defina primeiro um contador de importação de energia nas opções. A fatura é calculada a partir dele."
+    },
+    "store_unreadable": {
+      "message": "Não foi possível ler o repositório de tarifários: {error}"
+    }
+  },
+  "issues": {
+    "plan_ending": {
+      "title": "Os preços do seu plano vão terminar",
+      "description": "O repositório indica que os preços de {tariff} terminam em {date} e não tem preços posteriores. Verifique as condições atuais do plano junto do seu fornecedor. Se o plano mudou, use Reconfigurar para seguir o novo."
+    },
+    "store_unreached": {
+      "title": "O repositório de tarifários não é contactado há {days} dias",
+      "description": "{tariff} está a usar os preços guardados nesta instalação. Podem estar desatualizados. Verifique a ligação ou volte a ler o repositório a partir das opções da integração."
+    },
+    "cheaper_plan": {
+      "title": "Está disponível um plano mais barato",
+      "description": "Calculado sobre a sua última fatura completa, o plano {plan} teria custado menos {saving} do que o seu. É uma comparação do consumo passado, não uma previsão. Verifique as condições atuais do plano junto do fornecedor antes de mudar e depois use Reconfigurar para o seguir."
+    },
+    "prices_not_published": {
+      "title": "Os preços de amanhã ainda não foram publicados",
+      "description": "{tariff} lê preços de meia em meia hora e os de amanhã ainda faltam ao fim da noite. Os preços já guardados continuam a funcionar. A próxima leitura é esta noite, aos 30 minutos de cada hora ou depois da meia-noite. Se isto continuar, o feed de preços pode estar em baixo."
+    }
+  }
+}

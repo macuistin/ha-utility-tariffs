@@ -5,6 +5,12 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- Translations of the setup, options, entity names, service actions and repairs into French, Danish,
+  Portuguese and Irish, for the countries the tariff store holds plans for. Other languages stay in
+  English. The Irish text has not had a native speaker's review yet.
+
 ## 1.1.0
 
 **Added**
