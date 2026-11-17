@@ -13,5 +13,5 @@
   "requirements": [
     "utility-tariffs-lib@https://github.com/macuistin/utility-tariffs/archive/refs/tags/lib-v0.1.0.zip"
   ],
-  "version": "0.1.0a1"
+  "version": "1.0.0"
 }
