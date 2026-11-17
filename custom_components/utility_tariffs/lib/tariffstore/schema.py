@@ -37,6 +37,7 @@ WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 AVAILABILITY = ("available", "partial", "unavailable")
 NODE_FIELDS = {
     "energy_by_band": {"kind", "round_bands", "round"},
+    "series_energy": {"kind", "series", "round"},
     "tiered_energy": {"kind", "blocks", "limits", "bands", "round"},
     "export_credit": {"kind", "round"},
     "per_day": {"kind", "amount", "round"},
@@ -193,6 +194,9 @@ def _kind_rules(node: Doc, path: str, errors: list[str]) -> None:
         _per_rule(node, path, errors)
     if kind == "tax" and node.get("mode") not in ("added", "included"):
         errors.append(f"{path}.mode: must be added or included")
+    if kind == "series_energy" and not (isinstance(node.get("series"), str)
+                                        and NAME.match(node["series"])):
+        errors.append(f"{path}.series: must be a lower case name")
     if kind in ("per_kwh", "minimum", "maximum") and "amount" not in node:
         errors.append(f"{path}.amount: missing")
     if node.get("on", "import") not in ("import", "export"):

@@ -188,6 +188,15 @@ class TariffFile(unittest.TestCase):
         self.assertIn("bill.total.amount: missing", adder())
         self.assertIn("bill.total.on: must be import or export", adder(amount="1", on="both"))
 
+    def test_a_series_energy_node(self) -> None:
+        def node(**fields) -> list[str]:
+            return errors_for(bill={"total": {"kind": "series_energy", **fields}})
+
+        self.assertEqual(node(series="agile"), [])
+        self.assertIn("bill.total.series: must be a lower case name", node())
+        self.assertIn("bill.total.series: must be a lower case name", node(series="Agile Prices"))
+        self.assertIn("bill.total.price: not allowed on series_energy", node(series="agile", price="1"))
+
     def test_a_bill_may_say_how_export_nets_against_import(self) -> None:
         total = {"kind": "per_day", "amount": "1"}
         self.assertEqual(errors_for(bill={"netting": "band", "total": total}), [])

@@ -51,6 +51,7 @@ from .definition import (
     PerKwh,
     PerPeriod,
     Provider,
+    SeriesEnergy,
     Sum,
     TariffDefinition,
     Tax,
@@ -597,6 +598,14 @@ def _per_day(fields: Fields, depth: int) -> Node:
     return PerDay(fields.money("amount"), _rounding(fields))
 
 
+def _series_energy(fields: Fields, depth: int) -> Node:
+    fields.only(required=("kind", "series"), optional=("round",))
+    name = fields.text("series")
+    if not _NODE_NAME.match(name):
+        raise DefinitionError(fields.at("series"), "must be a lower case name")
+    return SeriesEnergy(name, _rounding(fields))
+
+
 def _per_kwh(fields: Fields, depth: int) -> Node:
     fields.only(required=("kind", "amount"), optional=("on", "round"))
     on = fields.choice("on", _FLOWS) if fields.has("on") else "import"
@@ -680,6 +689,7 @@ def _sum(fields: Fields, depth: int) -> Node:
 
 _NODE_PARSERS: dict[str, Callable[[Fields, int], Node]] = {
     "energy_by_band": _energy_by_band,
+    "series_energy": _series_energy,
     "tiered_energy": _tiered_energy,
     "export_credit": _export_credit,
     "per_day": _per_day,
