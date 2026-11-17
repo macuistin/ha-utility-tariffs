@@ -63,9 +63,9 @@ jobs:
         run: python -m scripts.release_notes "${VERSION}" > "${RUNNER_TEMP}/notes.md"
       - name: Every check on this commit has passed
         run: |
-          # The beta job may fail without failing a commit, so it is not counted.
+          # The beta job may fail without failing a commit, and this job is running now, so neither is counted.
           gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs" --paginate \
-            --jq '.check_runs[] | select(.name | test("beta") | not) | [.name, .status, (.conclusion // "")] | @tsv' \
+            --jq '.check_runs[] | select(.name | test("beta|Tag and publish") | not) | [.name, .status, (.conclusion // "")] | @tsv' \
             > "${RUNNER_TEMP}/checks.tsv"
           cat "${RUNNER_TEMP}/checks.tsv"
           # The workflows must have run at all, and none may be unfinished or red.

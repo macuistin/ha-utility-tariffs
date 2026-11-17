@@ -13,6 +13,9 @@
         "title": "Choose a supplier",
         "data": {
           "provider": "Supplier"
+        },
+        "data_description": {
+          "provider": "Your electricity supplier."
         }
       },
       "tariff": {
@@ -20,6 +23,9 @@
         "description": "Plans with prices in force today.",
         "data": {
           "tariff": "Plan"
+        },
+        "data_description": {
+          "tariff": "The plan you are on. Only plans with prices in force today are listed."
         }
       },
       "area": {
@@ -27,6 +33,9 @@
         "description": "This plan has different prices in different areas.",
         "data": {
           "area": "Area"
+        },
+        "data_description": {
+          "area": "Pick the area of your supply. It is usually in the name of your distribution network or on your bill."
         }
       },
       "store": {
@@ -34,6 +43,9 @@
         "description": "Only countries whose tariffs the open store holds are listed.",
         "data": {
           "country": "Country"
+        },
+        "data_description": {
+          "country": "The country whose suppliers you want to choose from."
         }
       },
       "manual": {
@@ -52,6 +64,20 @@
           "vat_rate": "VAT",
           "vat_included": "Prices already include VAT",
           "bill_start_day": "Day of the month a bill starts"
+        },
+        "data_description": {
+          "name": "A name for the tariff, shown as the integration's title.",
+          "country": "The country of the supply.",
+          "currency": "The three-letter currency code, such as EUR or GBP.",
+          "base_rate_name": "The name shown for the rate that applies when no timed rate does.",
+          "base_rate": "The price of one kWh at the main rate, as it appears on your bill. For example 0.30.",
+          "export_rate": "What you are paid for one kWh exported. Leave at 0 if you are paid nothing.",
+          "standing_charge": "The fixed charge for each day, before VAT unless you say prices include it.",
+          "levy": "A fixed charge for each month, such as a public service levy. Leave at 0 if there is none.",
+          "discount_rate": "A percentage taken off the energy charge, such as a prompt payment discount.",
+          "vat_rate": "The VAT rate in percent. Leave at 0 if your prices already include it.",
+          "vat_included": "Turn on when the rates above are the prices you pay, with VAT in them.",
+          "bill_start_day": "The day of the month your supplier's bill period starts, 1 to 28."
         }
       },
       "manual_more": {
@@ -69,6 +95,12 @@
           "rate": "Rate",
           "start": "From",
           "end": "To"
+        },
+        "data_description": {
+          "name": "A name for this timed rate, such as Night.",
+          "rate": "The price of one kWh while this rate applies.",
+          "start": "The time this rate starts each day.",
+          "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight."
         }
       }
     },
@@ -317,6 +349,9 @@
     },
     "no_meter": {
       "message": "Set an energy import meter in the options first. The bill is worked out from it."
+    },
+    "store_unreadable": {
+      "message": "The tariff store could not be read: {error}"
     }
   },
   "issues": {
