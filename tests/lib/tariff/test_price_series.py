@@ -123,7 +123,7 @@ def test_the_node_can_keep_full_precision_and_is_checked_on_reading() -> None:
 def test_the_worked_example_in_the_format_doc() -> None:
     """docs/format.md, "A tariff on a price series": 5.60 of energy, 0.45 standing, 5% VAT."""
     from custom_components.utility_tariffs.lib.tariffstore.compile import compile_area
-    from tests.fixtures import META, country
+    from tests.lib.tariffstore.fixtures import META, country
 
     tariff = {
         "schema": 1, "name": "Agile example", "provider": "Example Power",
