@@ -15,10 +15,10 @@ and shares code with it.
 
 `macuistin/utility-tariffs` is the only source of tariff, price, window, ranking, savings and
 billing code. It is installed as the package `utility_tariffs_lib` (`.tariff`, `.tariffranking`,
-`.tariffstore`, `.timeutil`), pinned in `manifest.json` `requirements` to one archive of that
-repository. If the integration needs engine behaviour that is not there, open an issue and a pull
-request in `macuistin/utility-tariffs` first, then move the pin. No local patch, even a temporary
-one. To move the pin, change the URL in `manifest.json`, `requirements-test.txt` and
+`.tariffstore`, `.timeutil`), pinned in `manifest.json` `requirements` to one release of it on PyPI
+(`utility-tariffs-lib==X.Y.Z`). If the integration needs engine behaviour that is not there,
+open an issue and a pull request in `macuistin/utility-tariffs` first, then move the pin. No local patch, even a temporary
+one. To move the pin, change the version in `manifest.json`, `requirements-test.txt` and
 `tests/requirements-floor.txt` together (`tests/test_library_pin.py` checks they match). Home
 Assistant glue (cache files, timers, repairs, storage, entities) is written here.
 

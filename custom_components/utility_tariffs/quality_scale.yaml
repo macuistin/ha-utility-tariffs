@@ -2,11 +2,10 @@
 # A rule is `done`, `todo`, or `exempt` with a comment. tests/test_quality_scale.py checks this file
 # and that manifest.json claims no tier the file does not support.
 #
-# Open, and why the manifest claims no tier yet:
-# - dependency-transparency: the tariff library is installed from a GitHub archive, not PyPI.
+# Gold is claimed in manifest.json. Platinum is not, because two rules are open:
 # - async-dependency and inject-websession: the library's store client is blocking Python, run in
-#   an executor, and fed pages through Home Assistant's web session by a bridge.
-# Both need a change in macuistin/utility-tariffs, and publishing it to PyPI is the maintainer's call.
+#   an executor, and fed pages through Home Assistant's web session by a bridge. The fix is an
+#   async client in macuistin/utility-tariffs.
 rules:
   # Bronze
   action-setup: done
@@ -17,7 +16,9 @@ rules:
   common-modules: done
   config-flow-test-coverage: done
   config-flow: done
-  dependency-transparency: todo
+  dependency-transparency:
+    status: done
+    comment: utility-tariffs-lib is on PyPI, built and published from public CI with a trusted publisher.
   docs-actions: done
   docs-high-level-description: done
   docs-installation-instructions: done

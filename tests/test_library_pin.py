@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
+import re
 
 from tests.helpers import PKG, ROOT
 
-MARKER = "utility-tariffs-lib@"
+MARKER = "utility-tariffs-lib=="
 
 
 def _pins(text: str) -> set[str]:
@@ -16,7 +17,7 @@ def _pins(text: str) -> set[str]:
 def test_the_manifest_pins_one_archive_of_the_library() -> None:
     requirements = json.loads((PKG / "manifest.json").read_text(encoding="utf-8"))["requirements"]
     assert len(requirements) == 1
-    assert requirements[0].startswith(MARKER + "https://github.com/macuistin/utility-tariffs/archive/refs/tags/lib-v")
+    assert re.fullmatch(MARKER + r"\d+\.\d+\.\d+", requirements[0])
 
 
 def test_both_test_environments_install_the_manifest_pin() -> None:

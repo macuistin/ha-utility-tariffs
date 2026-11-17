@@ -74,6 +74,6 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-test.txt
       - name: Install dependencies
-        run: pip install --pre pytest-homeassistant-custom-component "utility-tariffs-lib@https://github.com/macuistin/utility-tariffs/archive/refs/tags/lib-v0.1.0.zip"
+        run: pip install --pre pytest-homeassistant-custom-component "utility-tariffs-lib==0.1.0"
       - name: Run tests
         run: python -m pytest tests -q
