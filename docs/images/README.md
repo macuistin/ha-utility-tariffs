@@ -1,8 +1,8 @@
 # Images
 
-`entities-placeholder.svg` and `bill-placeholder.svg` stand in for real dashboard screenshots.
-Replace each with a PNG of the same name (no personal names, sensor names or addresses in it) and
-update the two image links in the project README.
+The setup guide (`docs/setup-guide.md`) uses real screenshots of the Home Assistant interface,
+cropped to the dialog so no address bar, sidebar or household name shows.
 
-The guide in `docs/setup-guide.md` uses `setup-1-...` to `setup-4-...` and `reconfigure-1-...` to
-`reconfigure-3-...`. Each is an SVG placeholder. Replace it with a PNG and change the link.
+`entities-placeholder.svg` and `bill-placeholder.svg` still stand in for screenshots of the price,
+window, bill and savings sensors in the project README. Replace each with a PNG of the same name and
+update the two image links there. Keep personal names, entity ids and addresses out of the image.

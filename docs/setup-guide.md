@@ -1,7 +1,8 @@
 # Setup and reconfigure guide
 
-Step by step, with a diagram for each path. The pictures are placeholders until real screenshots
-are added (see [images](images/README.md)).
+Step by step, with a diagram for each path. The pictures are real screenshots of Home Assistant's dark theme. Home Assistant follows one tariff only, so the
+country, supplier and plan steps were taken from the Reconfigure flow, which asks the same questions
+as first setup. The first-setup dialogs are otherwise identical.
 
 ## First setup
 
@@ -23,20 +24,24 @@ flowchart TD
 
 1. Open Settings, Devices & services, then Add integration, and choose **Utility Tariffs**.
 
-   ![Add integration](images/setup-1-add-integration.svg)
+   ![Add integration](images/setup-1-add-integration.png)
 
 2. Choose **Pick a plan from the store**, or **Type in my own rates**.
 
-   ![Choose how to set the tariff](images/setup-2-choose-source.svg)
+   ![Choose how to set the tariff](images/setup-2-choose-source.png)
 
 3. For a store plan, pick the country, supplier, plan and, where prices differ by area, your area.
 
-   ![Country, supplier, plan and area](images/setup-3-plan.svg)
+   ![Choose a country](images/setup-3-country.png)
+
+   ![Choose a supplier](images/setup-3-supplier.png)
+
+   ![Choose a plan](images/setup-3-plan.png)
 
 4. Open the integration, choose the three dots, then **Configure**, to set the meters, window
    length and bill dates. Each is explained in [Configuration](configuration.md).
 
-   ![Options form](images/setup-4-options.svg)
+   ![Options form](images/setup-4-options.png)
 
 ## Reconfigure
 
@@ -55,16 +60,16 @@ flowchart TD
 
 1. Open the integration, choose the three dots, then **Reconfigure**.
 
-   ![Reconfigure menu](images/reconfigure-1-menu.svg)
+   ![Reconfigure menu](images/reconfigure-1-menu.png)
 
 2. Pick another country, supplier, plan or area.
 
-   ![Pick another plan](images/reconfigure-2-plan.svg)
+   ![Pick another plan](images/reconfigure-2-plan.png)
 
 3. To change your own rates, enter the new rates in the form. Changing the rates means
    reconfiguring again.
 
-   ![Own rates form](images/reconfigure-3-own-rates.svg)
+   ![Own rates form](images/reconfigure-3-own-rates.png)
 
 ## Configure or reconfigure?
 
