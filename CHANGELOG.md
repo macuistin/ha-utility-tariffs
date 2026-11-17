@@ -5,6 +5,8 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.1.0
+
 **Added**
 
 - Diagnostic entities that show which prices apply and how fresh the data is: Prices valid from,
@@ -16,6 +18,11 @@ Each release has a section here. The release workflow publishes the section for 
 - Repairs when your plan's prices are ending within 14 days with nothing after them, and when the
   store has not been reached for 3 days. Prices last read now keeps the time of the last real
   read while the store is unreachable, instead of moving on.
+
+**Changed**
+
+- The README and documentation are reworked: clearer installation, configuration, entity and
+  troubleshooting steps, written for any supplier.
 
 ## 1.0.1
 
