@@ -1,8 +1,8 @@
 # Setup and reconfigure guide
 
-Step by step, with a diagram for each path. The pictures are real screenshots of Home Assistant's dark theme. Home Assistant follows one tariff only, so the
-country, supplier and plan steps were taken from the Reconfigure flow, which asks the same questions
-as first setup. The first-setup dialogs are otherwise identical.
+Step by step, with a diagram for each path. The pictures are screenshots of Home Assistant's dark
+theme. The integration follows one tariff only, so the country, supplier and plan pictures come from
+the Reconfigure flow, which asks the same questions as first setup.
 
 ## First setup
 
