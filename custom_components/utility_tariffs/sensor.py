@@ -28,6 +28,7 @@ from .forecast_sensor import (
     PriceForecastSensor,
     PriceLevelSensor,
 )
+from .info_sensor import info_sensors
 from .plan_sensor import CheapestPlanSavingSensor, PlanRankSensor
 from .savings_sensor import SavingsSensor
 from .windows import current_window
@@ -204,6 +205,7 @@ async def async_setup_entry(
 ) -> None:
     coordinator = entry.runtime_data
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
+    async_add_entities(info_sensors(coordinator))
     async_add_entities([
         PriceForecastSensor(coordinator),
         NextTariffChangeSensor(coordinator),

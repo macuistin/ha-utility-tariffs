@@ -10,6 +10,7 @@ from homeassistant.util import dt as dt_util
 from .const import CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry
 from .entity import TariffEntity
+from .info_sensor import info_binary_sensors
 from .windows import current_window
 
 if TYPE_CHECKING:
@@ -31,6 +32,7 @@ async def async_setup_entry(
             DearestWindowActive(data, "dearest_window_active"),
         ]
     )
+    async_add_entities(info_binary_sensors(data))
 
 
 class _WindowActive(TariffEntity, BinarySensorEntity):

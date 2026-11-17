@@ -3,6 +3,15 @@
 Each release has a section here. The release workflow publishes the section for the version in
 `manifest.json` as the release notes, so write it before you run the workflow.
 
+## Unreleased
+
+**Added**
+
+- Diagnostic entities that show which prices apply and how fresh the data is: Prices valid from,
+  Prices valid to, Prices last read, a Tariff summary with the plan's details in its attributes,
+  Tariff store offline, and Tomorrow's prices available for a tariff on a price feed. A tariff of
+  your own rates has no store dates, so it has no valid from or to.
+
 ## 1.0.0
 
 First release.

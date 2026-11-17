@@ -118,6 +118,18 @@
   },
   "entity": {
     "sensor": {
+      "valid_from": {
+        "name": "Prices valid from"
+      },
+      "valid_to": {
+        "name": "Prices valid to"
+      },
+      "prices_last_read": {
+        "name": "Prices last read"
+      },
+      "tariff_summary": {
+        "name": "Tariff summary"
+      },
       "import_price": {
         "name": "Import price"
       },
@@ -216,6 +228,12 @@
       }
     },
     "binary_sensor": {
+      "tomorrow_prices_available": {
+        "name": "Tomorrow's prices available"
+      },
+      "store_offline": {
+        "name": "Tariff store offline"
+      },
       "cheapest_window_active": {
         "name": "Cheapest window active"
       },

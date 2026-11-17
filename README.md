@@ -201,6 +201,7 @@ Each followed tariff is one device. Prices are in the tariff's currency per kWh.
 | Import price rating | Where the current price sits in today's range: very low, low, normal, high or very high. A flat tariff is always normal |
 | Lowest, highest and average import price today | Over the local day. The average is weighted by time. The export versions are off until you enable them |
 | Cheapest window start and end, Dearest window start, Cheapest window active | The best stretch of the length set in the options, from now to the end of tomorrow. The window starts at its earliest best time and ends where that price stops changing, so a window inside a long band ends with the band |
+| Prices valid from, Prices valid to, Prices last read, Tariff summary, Tariff store offline, Tomorrow's prices available | Diagnostics. The dates are the store's for the plan in force (valid to is unknown while open ended). Prices last read is when this install last read the store. The summary is named after the plan and lists provider, revision, source link, completeness and band prices. Tomorrow's prices available is only for a tariff on a price feed |
 
 ### Price forecast
 

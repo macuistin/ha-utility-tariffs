@@ -262,3 +262,16 @@ async def test_the_windows_are_still_searched_over_today_and_tomorrow_only(
         blocking=True, return_response=True,
     )
     assert reply["found"] is True and reply["start"] < "2026-11-16"
+
+
+@pytest.mark.parametrize("published", [False, True])
+async def test_tomorrow_available_follows_what_the_feed_has_published(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed, published: bool
+) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 15) if published else date(2026, 11, 14))
+    freezer.move_to(EVENING)
+    await _setup(hass, FEED)
+
+    state = hass.states.get("binary_sensor.utility_tariff_tomorrow_s_prices_available")
+    assert state is not None
+    assert state.state == ("on" if published else "off")

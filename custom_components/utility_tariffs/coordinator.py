@@ -84,6 +84,7 @@ class TariffData:
     revisions: tuple[Revision, ...] = ()  # the definition in force and any that start later
     feeds: tuple[str, ...] = ()  # the price feeds the tariff reads, empty for fixed prices
     horizon_end: datetime | None = None  # how far ahead the prices were asked for
+    read_at: datetime | None = None  # when the store was last read, UTC. Unchanged on a failed read
 
     @property
     def on_a_feed(self) -> bool:
@@ -190,6 +191,10 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             )
         )
 
+    def tomorrow_known(self, now: datetime) -> bool:
+        """Whether the held prices reach the end of tomorrow, local time."""
+        return self.data is not None and not self._tomorrow_missing(now)
+
     def _tomorrow_missing(self, now: datetime) -> bool:
         """Whether the held prices stop before the end of tomorrow, local time."""
         if self.data is None:
@@ -250,7 +255,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             )
         return TariffData(
             definition, slots, holidays_known, is_holiday, tuple(revisions),
-            tuple(feed_of(name) for name in names), end,
+            tuple(feed_of(name) for name in names), end, dt_util.utcnow(),
         )
 
     @staticmethod
