@@ -55,6 +55,8 @@ What you can see about freshness today:
 - **Price forecast** shows how far ahead the prices are known.
 - **Next tariff change** shows the day the next revision the store holds takes effect.
 - A repair appears when tomorrow's prices are still missing late in the evening.
+- A repair appears when your plan's prices end within 14 days and the store holds nothing after
+  them, and when this install has not reached the store for 3 days. Both clear on their own.
 - The diagnostics download lists the revision, the first and last price held, and whether the
   store was unreachable at the last read.
 

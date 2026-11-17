@@ -49,6 +49,7 @@ from .const import (
     CONF_TARIFF,
     DOMAIN,
 )
+from .freshness import days_unreached, plan_ending
 from .manual import definition_from
 from .store import price_access, store_access
 
@@ -69,6 +70,8 @@ REVISION_DAYS = 90  # a revision the store holds is listed this far ahead
 PRICES_DUE_HOUR = 16  # tomorrow's Agile prices appear in the afternoon
 PRICES_LATE_HOUR = 22  # and a repair is raised when they are still missing at night
 ISSUE_PRICES_LATE = "prices_not_published"
+ISSUE_PLAN_ENDING = "plan_ending"
+ISSUE_STORE_UNREACHED = "store_unreached"
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
 type TariffConfigEntry = ConfigEntry[TariffCoordinator]
 
@@ -219,16 +222,48 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
     async def _async_update_data(self) -> TariffData:
         today = dt_util.now().date()
         try:
-            return await self._read(today)
+            data = await self._read(today)
         except STORE_ERRORS as err:
             if self.data is not None:
                 _LOGGER.warning("The tariff store could not be read, keeping saved prices: %s", err)
+                self._check_freshness(self.data)
                 return self.data
             raise UpdateFailed(
                 translation_domain=DOMAIN,
                 translation_key="store_unreadable",
                 translation_placeholders={"error": str(err)},
             ) from err
+        self._check_freshness(data)
+        return data
+
+    def _check_freshness(self, data: TariffData) -> None:
+        """Raise a repair when the plan is about to end or the store has not been reached for days.
+        Each clears itself once the cause has gone."""
+        if CONF_MANUAL in self.config_entry.data:
+            return
+        now = dt_util.now()
+        title = self.config_entry.title
+        ending = plan_ending(data, now.date())
+        self._set_issue(
+            ISSUE_PLAN_ENDING,
+            None if ending is None else {"tariff": title, "date": ending.isoformat()},
+        )
+        unreached = days_unreached(data, now)
+        self._set_issue(
+            ISSUE_STORE_UNREACHED,
+            None if unreached is None else {"tariff": title, "days": str(unreached)},
+        )
+
+    def _set_issue(self, key: str, placeholders: dict[str, str] | None) -> None:
+        """Raise the repair with its text, or clear it when there are no placeholders."""
+        issue = f"{key}_{self.config_entry.entry_id}"
+        if placeholders is None:
+            ir.async_delete_issue(self.hass, DOMAIN, issue)
+            return
+        ir.async_create_issue(
+            self.hass, DOMAIN, issue, is_fixable=False, severity=ir.IssueSeverity.WARNING,
+            translation_key=key, translation_placeholders=placeholders,
+        )
 
     async def _read(self, today: date) -> TariffData:
         entry = self.config_entry.data
@@ -264,8 +299,15 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             )
         return TariffData(
             definition, slots, holidays_known, is_holiday, tuple(revisions),
-            tuple(feed_of(name) for name in names), end, dt_util.utcnow(),
+            tuple(feed_of(name) for name in names), end, self._read_time(),
         )
+
+    def _read_time(self) -> datetime | None:
+        """Now, unless the store was unreachable and the answer came from saved files: then the
+        time of the last real read stays, so the age of the prices is not hidden."""
+        if self._access.offline:
+            return None if self.data is None else self.data.read_at
+        return dt_util.utcnow()
 
     @staticmethod
     def _range(

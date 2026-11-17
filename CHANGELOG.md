@@ -13,6 +13,9 @@ Each release has a section here. The release workflow publishes the section for 
   your own rates has no store dates, so it has no valid from or to.
 - Options to read the tariff store again now, and to delete the saved tariff files and fetch them
   again. Deleting is refused while the store cannot be reached.
+- Repairs when your plan's prices are ending within 14 days with nothing after them, and when the
+  store has not been reached for 3 days. Prices last read now keeps the time of the last real
+  read while the store is unreachable, instead of moving on.
 
 ## 1.0.0
 

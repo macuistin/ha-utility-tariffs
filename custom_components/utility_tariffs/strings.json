@@ -380,6 +380,14 @@
     }
   },
   "issues": {
+    "plan_ending": {
+      "title": "Your plan's prices are ending",
+      "description": "The store lists the prices of {tariff} as ending on {date}, and holds no later prices for it. Check the plan's current terms with your supplier. If the plan has changed, use Reconfigure to follow the new one."
+    },
+    "store_unreached": {
+      "title": "The tariff store has not been reached for {days} days",
+      "description": "{tariff} is running on the prices saved on this install. They may be out of date. Check the connection, or read the store again from the integration's options."
+    },
     "cheaper_plan": {
       "title": "A cheaper plan is available",
       "description": "Priced over your last whole bill, {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
