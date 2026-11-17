@@ -15,6 +15,8 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariff import price_rating
+from utility_tariffs_lib.tariff.price_stats import RATINGS
 
 from .bill_sensor import BILL_SENSORS, BillSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
@@ -26,8 +28,6 @@ from .forecast_sensor import (
     PriceForecastSensor,
     PriceLevelSensor,
 )
-from .lib.tariff import price_rating
-from .lib.tariff.price_stats import RATINGS
 from .plan_sensor import CheapestPlanSavingSensor, PlanRankSensor
 from .savings_sensor import SavingsSensor
 from .windows import current_window

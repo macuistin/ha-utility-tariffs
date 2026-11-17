@@ -2,7 +2,7 @@
 
 This reads the held `TariffData` and the two percentiles the user chose. It never touches Home
 Assistant, so the entities only format what it returns. All the price maths is in the copied
-`lib/tariff`.
+`utility_tariffs_lib.tariff`.
 """
 
 from __future__ import annotations
@@ -12,8 +12,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from .coordinator import TariffData
-from .lib.tariff import (
+from utility_tariffs_lib.tariff import (
     HistoryPercentiles,
     PriceSlot,
     TariffDefinition,
@@ -23,6 +22,8 @@ from .lib.tariff import (
     price_level,
     price_percentiles,
 )
+
+from .coordinator import TariffData
 
 FORECAST_HOURS = 48  # how much of the forecast is written into the sensor's attributes
 

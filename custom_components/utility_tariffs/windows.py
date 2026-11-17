@@ -1,6 +1,6 @@
 """Choosing the search for the cheapest and dearest windows from the held prices.
 
-The search itself is `find_window` in the copied tariff library. This only decides which part of
+The search itself is `find_window` in the tariff library. This only decides which part of
 the held prices it may use, so that a window already under way still counts as the current one.
 """
 
@@ -10,9 +10,10 @@ import math
 from dataclasses import replace
 from datetime import datetime, timedelta
 
+from utility_tariffs_lib.tariff import PriceSlot, Window, WindowSearch, find_window
+from utility_tariffs_lib.tariff.defaults import SLOT_SECONDS
+
 from .coordinator import TariffData
-from .lib.tariff import PriceSlot, Window, WindowSearch, find_window
-from .lib.tariff.defaults import SLOT_SECONDS
 
 # A window that ends sooner than this is treated as over, so the answer does not jump to a later
 # window in the last minutes of the cheapest one.

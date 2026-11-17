@@ -6,10 +6,10 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariff import DefinitionSavings
 
 from .coordinator import TariffCoordinator
 from .entity import TariffEntity
-from .lib.tariff import DefinitionSavings
 from .savings import saving_so_far
 
 

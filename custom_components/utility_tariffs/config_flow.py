@@ -27,6 +27,7 @@ from homeassistant.helpers.selector import (
     TimeSelector,
 )
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariffstore import StoreError
 
 from .const import (
     BILL_MONTHS,
@@ -55,7 +56,6 @@ from .const import (
     MIN_WINDOW_MINUTES,
     WINDOW_STEP_MINUTES,
 )
-from .lib.tariffstore import StoreError
 from .manual import problem_with
 from .store import store_access
 

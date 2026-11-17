@@ -18,10 +18,10 @@ from homeassistant.core import callback
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariffranking import Candidate, Usage, ranges, search
 
 from .bill_period import period_dates, period_rules
 from .const import CONF_AREA, CONF_MANUAL, CONF_PROVIDER, CONF_TARIFF, DOMAIN
-from .lib.tariffranking import Candidate, Usage, ranges, search
 from .plan_search import (
     CURRENT,
     READ_ERRORS,

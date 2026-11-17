@@ -11,11 +11,11 @@ from homeassistant.core import ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariff import WindowSearch, find_window
 
 from .bill import bill_so_far
 from .bill_summary import render_bill_html
 from .const import CONF_NAME, DOMAIN
-from .lib.tariff import WindowSearch, find_window
 from .windows import end_of_tomorrow
 
 if TYPE_CHECKING:

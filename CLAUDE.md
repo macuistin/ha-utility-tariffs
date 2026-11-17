@@ -14,10 +14,12 @@ and shares code with it.
 ## All tariff maths lives elsewhere
 
 `macuistin/utility-tariffs` is the only source of tariff, price, window, ranking, savings and
-billing code. `custom_components/utility_tariffs/lib/` holds copies, written by
-`scripts/copy_tariffstore.py` with an `UPSTREAM.json` each. Never edit a copy or a copied test.
-If the integration needs engine behaviour that is not there, open an issue and a pull request in
-`macuistin/utility-tariffs` first, then copy. No local patch, even a temporary one. Home
+billing code. It is installed as the package `utility_tariffs_lib` (`.tariff`, `.tariffranking`,
+`.tariffstore`, `.timeutil`), pinned in `manifest.json` `requirements` to one archive of that
+repository. If the integration needs engine behaviour that is not there, open an issue and a pull
+request in `macuistin/utility-tariffs` first, then move the pin. No local patch, even a temporary
+one. To move the pin, change the URL in `manifest.json`, `requirements-test.txt` and
+`tests/requirements-floor.txt` together (`tests/test_library_pin.py` checks they match). Home
 Assistant glue (cache files, timers, repairs, storage, entities) is written here.
 
 ## Layout
@@ -25,12 +27,10 @@ Assistant glue (cache files, timers, repairs, storage, entities) is written here
 | Path | Role |
 | --- | --- |
 | `custom_components/utility_tariffs/` | The integration: `config_flow.py` (country, supplier, plan, area), `coordinator.py` (the tariff and two days of prices, read nightly), `sensor.py`, `entity.py` |
-| `custom_components/utility_tariffs/lib/` | Copied packages. `lib/README.md` has the rules and the allowed imports |
 | `custom_components/utility_tariffs/helper/` | Home Assistant glue meant to be shared with the GivEnergy integration: no domain or constants of its own, no tariff maths. Cache access first, then updater and slot storage |
-| `scripts/copy_tariffstore.py` | Copies the packages and their tests from a checkout of the store |
-| `custom_components/utility_tariffs/{meter,accountant,energy_store,bill,bill_sensor}.py` | The bill from the user's own meters: `meter.py` reads a rising kWh sensor into rises, `accountant.py` books them every minute into the slot history, `energy_store.py` saves it per entry, `bill.py` prices the period with `price_period`, `bill_sensor.py` shows it. Only when an import meter is set in the options. `savings.py` and `savings_sensor.py` add the saving from the copied `definition_savings`, when a house meter is set too |
-| `tests/` | Unit tests. `tests/lib/` holds the copied tests |
-| `.github/workflows/` | `tests.yml`, `hassfest.yml`, `hacs.yml`, `tariffstore-copy.yml` (weekly copy pull request) |
+| `custom_components/utility_tariffs/{meter,accountant,energy_store,bill,bill_sensor}.py` | The bill from the user's own meters: `meter.py` reads a rising kWh sensor into rises, `accountant.py` books them every minute into the slot history, `energy_store.py` saves it per entry, `bill.py` prices the period with `price_period`, `bill_sensor.py` shows it. Only when an import meter is set in the options. `savings.py` and `savings_sensor.py` add the saving from `utility_tariffs_lib.tariff`'s `definition_savings`, when a house meter is set too |
+| `tests/` | Unit tests. `tests/support/` builds a small store on disk. The library's own tests run in its repository |
+| `.github/workflows/` | `tests.yml`, `hassfest.yml`, `hacs.yml` |
 
 ## Commands
 
@@ -40,12 +40,10 @@ The code uses Python 3.14 syntax. Make the virtualenv with `uv venv --python 3.1
 minimum Home Assistant in `hacs.json`. `strings.json` and `translations/en.json` stay identical.
 
 ```bash
-ruff check custom_components tests scripts
+ruff check custom_components tests
 mypy --follow-imports=silent custom_components/utility_tariffs
 bandit -q -r custom_components/utility_tariffs -c .bandit.yaml
 python -m pytest tests -q
-python scripts/copy_tariffstore.py ../utility-tariffs      # refresh the copies
-python scripts/copy_tariffstore.py --check ../utility-tariffs   # exit 1 if a copy is behind
 ```
 
 Run the first four before pushing. Say plainly which checks you ran.

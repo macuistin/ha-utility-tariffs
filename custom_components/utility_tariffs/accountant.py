@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING
 from homeassistant.core import callback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariff import SlotEnergy
 
 from .const import CONF_BATTERY_SOC, METER_TARGETS
 from .energy_store import EnergyStore
-from .lib.tariff import SlotEnergy
 from .meter import RiseTracker, kwh_of
 
 if TYPE_CHECKING:

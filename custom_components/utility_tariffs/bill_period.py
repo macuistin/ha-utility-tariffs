@@ -6,8 +6,15 @@ from collections.abc import Callable, Mapping
 from datetime import date
 from typing import Any
 
+from utility_tariffs_lib.tariff import (
+    PeriodRules,
+    TariffDefinition,
+    months_of,
+    start_day_of,
+    start_month_of,
+)
+
 from .const import CONF_BILL_MONTHS, CONF_BILL_START_DAY, CONF_BILL_START_MONTH
-from .lib.tariff import PeriodRules, TariffDefinition, months_of, start_day_of, start_month_of
 
 
 def period_rules(options: Mapping[str, Any], is_holiday: Callable[[date], bool]) -> PeriodRules:

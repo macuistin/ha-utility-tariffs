@@ -11,7 +11,7 @@ from dataclasses import replace
 from datetime import date, time
 from typing import Any
 
-from .lib.tariff import (
+from utility_tariffs_lib.tariff import (
     DefinitionError,
     Locale,
     RatePeriod,
