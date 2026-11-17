@@ -39,6 +39,7 @@ from .const import (
     CONF_BILL_MONTHS,
     CONF_BILL_START_DAY,
     CONF_BILL_START_MONTH,
+    CONF_CLEAR_CACHE,
     CONF_COUNTRY,
     CONF_ENTITY_KEY,
     CONF_EXPORT_ENERGY,
@@ -47,6 +48,7 @@ from .const import (
     CONF_MANUAL,
     CONF_NAME,
     CONF_PROVIDER,
+    CONF_REFRESH_NOW,
     CONF_TARIFF,
     CONF_WINDOW_MINUTES,
     DEFAULT_WINDOW_MINUTES,
@@ -298,8 +300,24 @@ class TariffOptionsFlow(OptionsFlowWithReload):
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
-            return self.async_create_entry(data=_saved(user_input))
-        options = self.config_entry.options
+            problem = await self._store_action(user_input)
+            if problem is None:
+                return self.async_create_entry(data=_saved(user_input))
+            return self._form(self.config_entry.options, {"base": problem})
+        return self._form(self.config_entry.options, {})
+
+    async def _store_action(self, user_input: dict[str, Any]) -> str | None:
+        """Refresh or clear what was read from the store, if asked. Returns the error, if any."""
+        clear = bool(user_input.get(CONF_CLEAR_CACHE))
+        if not (clear or user_input.get(CONF_REFRESH_NOW)):
+            return None
+        coordinator = self.config_entry.runtime_data
+        if clear and coordinator.access.offline:
+            return "clear_while_offline"  # the files are all there is to run on
+        await coordinator.async_refresh_store(clear=clear)
+        return None
+
+    def _form(self, options: Any, errors: dict[str, str]) -> ConfigFlowResult:
         current = options.get(CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES)
         fields: dict[Any, Any] = {
             vol.Required(CONF_WINDOW_MINUTES, default=current): NumberSelector(
@@ -329,7 +347,12 @@ class TariffOptionsFlow(OptionsFlowWithReload):
             fields[vol.Optional(key, description={"suggested_value": options.get(key)})] = (
                 NumberSelector(config)
             )
-        return self.async_show_form(step_id="init", data_schema=_schema(fields))
+        if CONF_MANUAL not in self.config_entry.data:
+            fields[vol.Optional(CONF_REFRESH_NOW, default=False)] = bool
+            fields[vol.Optional(CONF_CLEAR_CACHE, default=False)] = bool
+        return self.async_show_form(
+            step_id="init", data_schema=_schema(fields), errors=errors
+        )
 
 
 def _bill_fields(options: Any) -> dict[Any, Any]:

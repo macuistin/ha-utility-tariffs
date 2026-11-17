@@ -156,6 +156,15 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
     def access(self) -> TariffStoreAccess:
         return self._access
 
+    async def async_refresh_store(self, *, clear: bool = False) -> None:
+        """Read the store again now. With *clear*, the saved files are deleted first."""
+        if clear:
+            await self._access.async_clear_cache()
+            await self._prices.async_clear_cache()
+        else:
+            await self._access.async_refresh()
+        await self.async_refresh()
+
     async def _async_setup(self) -> None:
         """Read again every night, and wake the sensors at every half hour."""
 

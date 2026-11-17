@@ -65,6 +65,12 @@ release still reads current prices at its next nightly read, with nothing to upd
 in the format of a tariff, which is rare, can need a newer release. The integration then keeps the
 prices it already holds.
 
+To read the store now instead of waiting for tonight, open the integration's options, tick **Read
+the tariff store again now** and save. Tick **Delete the saved tariff files first** to throw away
+the saved copies of the tariff and its prices and fetch them again. Use that if prices look wrong.
+It is refused while the store cannot be reached, because the saved files are then all the
+integration has to run on.
+
 ## Use cases
 
 - Start a load in the cheapest window: trigger on **Cheapest window active**, or call

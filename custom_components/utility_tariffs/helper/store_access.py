@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shutil
 import weakref
 from collections.abc import Awaitable, Callable
 from datetime import date
@@ -62,6 +63,12 @@ def _reader(
     return session_reader(session, base_url, timeout=REQUEST_TIMEOUT_S, errors=(ClientError,))
 
 
+def _empty_folder(folder: Path | None) -> None:
+    """Delete what the cache holds. The cache makes its folder again on the next write."""
+    if folder is not None and folder.exists():
+        shutil.rmtree(folder)
+
+
 _LOCKS: weakref.WeakKeyDictionary[Any, asyncio.Lock] = weakref.WeakKeyDictionary()
 
 
@@ -74,18 +81,19 @@ def _lock_of(hass: Any) -> asyncio.Lock:
 class TariffStoreAccess:
     """The store as the screens use it: awaitable calls that never block the event loop."""
 
-    def __init__(self, hass: HomeAssistant, store: AsyncStore) -> None:
+    def __init__(
+        self, hass: HomeAssistant, store: AsyncStore, folder: Path | None = None
+    ) -> None:
         self._hass = hass
         self._store = store
+        self._folder = folder
 
     @classmethod
     def for_home_assistant(cls, hass: HomeAssistant, base_url: str, cache_folder: str) -> Self:
         """The store at *base_url*, cached in a folder of that name under `.storage`."""
-        store = AsyncStore(
-            _reader(hass, base_url),
-            AsyncFolderCache(Path(hass.config.path(".storage", cache_folder))),
-        )
-        return cls(hass, store)
+        folder = Path(hass.config.path(".storage", cache_folder))
+        store = AsyncStore(_reader(hass, base_url), AsyncFolderCache(folder))
+        return cls(hass, store, folder)
 
     @property
     def offline(self) -> bool:
@@ -99,6 +107,12 @@ class TariffStoreAccess:
     async def async_refresh(self) -> None:
         """Read the countries index again on the next call, whatever its age."""
         self._store.refresh()
+
+    async def async_clear_cache(self) -> None:
+        """Delete every saved file, and read the store afresh on the next call."""
+        async with _lock_of(self._hass):
+            await self._hass.async_add_executor_job(_empty_folder, self._folder)
+            self._store.refresh()
 
     async def async_countries(self) -> dict[str, dict[str, Any]]:
         return await self._run(self._store.countries)
@@ -149,17 +163,23 @@ class TariffStoreAccess:
 class PriceStoreAccess:
     """The dynamic prices as the coordinator uses them, read one call at a time."""
 
-    def __init__(self, hass: HomeAssistant, store: AsyncPriceStore) -> None:
+    def __init__(
+        self, hass: HomeAssistant, store: AsyncPriceStore, folder: Path | None = None
+    ) -> None:
         self._hass = hass
         self._store = store
+        self._folder = folder
 
     @classmethod
     def for_home_assistant(cls, hass: HomeAssistant, base_url: str, cache_folder: str) -> Self:
-        store = AsyncPriceStore(
-            _reader(hass, base_url),
-            AsyncFolderCache(Path(hass.config.path(".storage", cache_folder))),
-        )
-        return cls(hass, store)
+        folder = Path(hass.config.path(".storage", cache_folder))
+        store = AsyncPriceStore(_reader(hass, base_url), AsyncFolderCache(folder))
+        return cls(hass, store, folder)
+
+    async def async_clear_cache(self) -> None:
+        """Delete every saved price day. They are fetched again on the next read."""
+        async with _lock_of(self._hass):
+            await self._hass.async_add_executor_job(_empty_folder, self._folder)
 
     async def async_days(  # noqa: PLR0913
         self, country: str, feed: str, area: str, first: date, last: date

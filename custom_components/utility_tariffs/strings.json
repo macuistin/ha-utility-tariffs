@@ -266,9 +266,13 @@
           "battery_wear_per_kwh": "Battery wear per kWh",
           "bill_start_day": "Day of the month a bill starts",
           "bill_months": "Months in one bill",
-          "bill_start_month": "A month a bill starts in"
+          "bill_start_month": "A month a bill starts in",
+          "refresh_now": "Read the tariff store again now",
+          "clear_cache": "Delete the saved tariff files first"
         },
         "data_description": {
+          "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
+          "clear_cache": "Deletes the saved copies of the tariff and its prices, then reads them again from the store. Use it if prices look wrong. It needs the store to be reachable.",
           "import_energy_entity": "Needed for the bill. Read every minute.",
           "export_energy_entity": "Optional. Credits what you export.",
           "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
@@ -281,6 +285,9 @@
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
       }
+    },
+    "error": {
+      "clear_while_offline": "The store cannot be reached, so deleting the saved files would leave no prices. Try again when it is reachable."
     }
   },
   "services": {

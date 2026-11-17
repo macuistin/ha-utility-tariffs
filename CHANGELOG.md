@@ -11,6 +11,8 @@ Each release has a section here. The release workflow publishes the section for 
   Prices valid to, Prices last read, a Tariff summary with the plan's details in its attributes,
   Tariff store offline, and Tomorrow's prices available for a tariff on a price feed. A tariff of
   your own rates has no store dates, so it has no valid from or to.
+- Options to read the tariff store again now, and to delete the saved tariff files and fetch them
+  again. Deleting is refused while the store cannot be reached.
 
 ## 1.0.0
 
