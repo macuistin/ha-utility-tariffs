@@ -105,7 +105,7 @@ Each followed tariff is one device. Prices are in the tariff's currency per kWh.
 | Previous import price, Next import price, Next price change | The price before the current one, the one after it, and when it starts |
 | Import price rating | Where the current price sits in today's range: very low, low, normal, high or very high. A flat tariff is always normal |
 | Lowest, highest and average import price today | Over the local day. The average is weighted by time. The export versions are off until you enable them |
-| Cheapest window start and end, Dearest window start, Cheapest window active | The best stretch of the length set in the options, from now to the end of tomorrow |
+| Cheapest window start and end, Dearest window start, Cheapest window active | The best stretch of the length set in the options, from now to the end of tomorrow. The window starts at its earliest best time and ends where that price stops changing, so a window inside a long band ends with the band |
 
 The `get_prices` action returns every price from yesterday to the end of tomorrow that overlaps a
 range, with the import and export price and band, and says whether the range is fully covered. The

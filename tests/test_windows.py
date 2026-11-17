@@ -30,7 +30,7 @@ async def test_the_cheapest_window_is_the_first_stretch_at_the_night_price(
     await _setup(hass)
 
     assert _state(hass, "cheapest_window_start") == "2026-11-14T23:00:00+00:00"
-    assert _state(hass, "cheapest_window_end") == "2026-11-15T01:00:00+00:00"
+    assert _state(hass, "cheapest_window_end") == "2026-11-15T08:00:00+00:00"
     assert _binary(hass) == "off"
 
 
@@ -51,9 +51,9 @@ async def test_a_dearest_window_under_way_has_a_past_start_a_future_end_and_is_a
     await _setup(hass)
 
     # The start is behind us because the window began at 10:30, so the end and the active sensor
-    # say it is current, not a later one.
+    # say it is current, not a later one. The end is where the day price stops, not start + two hours.
     assert _state(hass, "dearest_window_start") == "2026-11-14T10:30:00+00:00"
-    assert _state(hass, "dearest_window_end") == "2026-11-14T12:30:00+00:00"
+    assert _state(hass, "dearest_window_end") == "2026-11-14T23:00:00+00:00"
     assert _binary(hass, "dearest") == "on"
     assert _binary(hass, "cheapest") == "off"
 
@@ -87,7 +87,7 @@ async def test_a_longer_window_from_the_options_is_used(
     await hass.async_block_till_done()
 
     assert result["data"] == {"window_minutes": 360}
-    assert _state(hass, "cheapest_window_end") == "2026-11-15T05:00:00+00:00"
+    assert _state(hass, "cheapest_window_end") == "2026-11-15T08:00:00+00:00"
 
 
 async def test_the_action_finds_the_cheapest_window_and_its_cost(
@@ -206,3 +206,16 @@ async def test_a_time_with_its_own_offset_is_used_as_given(
     )
 
     assert reply["start"] == "2026-11-14T15:00:00+00:00"
+
+
+async def test_the_window_end_follows_the_band_not_the_search_length(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass)
+
+    # A two hour search inside a 15 hour day band: the end is the end of the band.
+    start = _state(hass, "dearest_window_start")
+    end = _state(hass, "dearest_window_end")
+    assert end == "2026-11-14T23:00:00+00:00"
+    assert end > start
