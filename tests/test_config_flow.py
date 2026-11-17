@@ -282,3 +282,5 @@ async def test_the_bill_dates_are_saved_as_options(
     assert flow["data"]["bill_start_day"] == 16
     assert flow["data"]["bill_months"] == 2
     assert flow["data"]["bill_start_month"] == 2
+    await hass.async_block_till_done()
+    await hass.config_entries.async_unload(entry.entry_id)
