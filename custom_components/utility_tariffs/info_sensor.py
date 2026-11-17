@@ -7,8 +7,10 @@ from collections.abc import Mapping
 from datetime import date, datetime
 from typing import Any
 
-from homeassistant.components.binary_sensor import BinarySensorEntity
-from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
+from homeassistant.components.binary_sensor import (  # type: ignore[attr-defined]
+    BinarySensorDeviceClass,  # the `const` module it lives in is missing from older Home Assistant
+    BinarySensorEntity,
+)
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.const import EntityCategory
 from homeassistant.util import dt as dt_util
