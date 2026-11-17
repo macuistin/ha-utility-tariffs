@@ -14,6 +14,7 @@ from .engine import (
     CheckFailed,
     Line,
     MissingPeak,
+    MissingSeries,
     PricedBill,
     price_bill,
     verify_checks,
@@ -41,6 +42,7 @@ from .period_bill import (
 )
 from .periods import RatePeriod
 from .price_curve import MarginalPrices, PriceSlot, marginal_prices, price_curve
+from .price_series import MissingPrice, PriceSeries, series_cost, series_from_days
 from .price_stats import PriceStats, price_rating, price_stats
 from .reprice import BillPeriod, Repriced, Rounding, import_by_band, reprice
 from .savings import Battery, Savings, savings
@@ -81,6 +83,11 @@ __all__ = [
     "CheckFailed",
     "Line",
     "MissingPeak",
+    "MissingPrice",
+    "MissingSeries",
+    "PriceSeries",
+    "series_cost",
+    "series_from_days",
     "PricedBill",
     "peak_kw_by_window",
     "price_bill",

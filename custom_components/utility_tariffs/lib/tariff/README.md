@@ -19,6 +19,7 @@ read option keys.
 - `definition_savings`, `DefinitionSavings`, `SavingsOptions`: the same saving for a tariff held as a `TariffDefinition`, over the bill period so far (see below)
 - `StoredEnergy`, `stored_energy_change`, `value_per_stored_kwh`: the value of stored energy
 - `price_stats`, `price_rating`, `PriceStats`: the lowest, highest and time-weighted average price over a range, and a five-step rating of a price within that range
+- `PriceSeries`, `series_from_days`, `series_cost`, `MissingPrice`, `MissingSeries`: a price for each interval of consecutive days (the store's price day files) and the cost of slot kWh against it, handed to the bill through a `series_energy` node
 - `marginal_prices`, `price_curve`, `MarginalPrices`, `PriceSlot`: what one more kWh costs in each band, and the all-in import and export price over a time range (see below)
 
 ## Half-hourly slots

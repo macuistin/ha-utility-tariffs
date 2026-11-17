@@ -28,6 +28,7 @@ from .definition import (
     PerDay,
     PerKwh,
     PerPeriod,
+    SeriesEnergy,
     Sum,
     TariffDefinition,
     Tax,
@@ -46,6 +47,10 @@ class MissingPeak(ValueError):
     """A bill has a demand charge and no peak kW was given for its window."""
 
 
+class MissingSeries(ValueError):
+    """A bill has a series energy node and no cost was given for its series."""
+
+
 @dataclass(frozen=True)
 class BillInputs:
     """What a bill is priced from."""
@@ -60,6 +65,9 @@ class BillInputs:
     # The highest half-hour kW in each demand window of the bill. A window the tree uses and this
     # leaves out is refused, never priced as zero.
     peak_kw: Mapping[str, Decimal] = field(default_factory=dict)
+    # The cost of the import kWh under each price series the tree names, from `series_cost`. A
+    # series the tree uses and this leaves out is refused, never priced as zero.
+    import_cost_by_series: Mapping[str, Decimal] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -159,10 +167,8 @@ class _Pricer:
 
     def _leaf(self, node: Node) -> Line | None:
         """The line for a node that holds no other node, or None for one that does."""
-        if isinstance(node, EnergyByBand):
-            return self._energy(node)
-        if isinstance(node, TieredEnergy):
-            return self._tiered(node)
+        if isinstance(node, EnergyByBand | SeriesEnergy | TieredEnergy):
+            return self._import_energy(node)
         if isinstance(node, ExportCredit):
             return self._export(node)
         if isinstance(node, PerDay):
@@ -175,6 +181,11 @@ class _Pricer:
             return self._per_period(node)
         return None
 
+    def _import_energy(self, node: EnergyByBand | SeriesEnergy | TieredEnergy) -> Line:
+        if isinstance(node, SeriesEnergy):
+            return self._series(node)
+        return self._tiered(node) if isinstance(node, TieredEnergy) else self._energy(node)
+
     def _energy(self, node: EnergyByBand) -> Line:
         costs = {}
         for band, kwh in self._inputs.import_kwh_by_band.items():
@@ -183,6 +194,12 @@ class _Pricer:
         children = {band: Line("band", cost) for band, cost in costs.items()}
         amount = self._round(sum(costs.values(), Decimal(0)), node.rounding)
         return Line("energy_by_band", amount, children=children)
+
+    def _series(self, node: SeriesEnergy) -> Line:
+        if node.series not in self._inputs.import_cost_by_series:
+            raise MissingSeries(f"no cost was given for the price series {node.series!r}")
+        cost = self._inputs.import_cost_by_series[node.series]
+        return Line("series_energy", self._round(cost, node.rounding))
 
     def _tiered(self, node: TieredEnergy) -> Line:
         in_scope = (

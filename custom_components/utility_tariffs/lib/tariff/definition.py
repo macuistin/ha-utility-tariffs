@@ -131,6 +131,17 @@ class EnergyByBand:
 
 
 @dataclass(frozen=True)
+class SeriesEnergy:
+    """Import kWh priced against a named price series, a price for each interval of the day.
+
+    The engine reads only totals, so the cost is worked out first from the slots and the series
+    (`price_series.series_cost`) and handed over under *series*."""
+
+    series: str  # the name the bill inputs give the cost under
+    rounding: NodeRounding
+
+
+@dataclass(frozen=True)
 class Block:
     """One block of a tiered price: the kWh from *start* up to *end* cost *price* each."""
 
@@ -254,8 +265,8 @@ class Sum:
 
 
 Node = (
-    EnergyByBand | TieredEnergy | ExportCredit | PerDay | PerPeriod | PerKwh | Demand | Bound
-    | Adjust | Tax | Sum
+    EnergyByBand | SeriesEnergy | TieredEnergy | ExportCredit | PerDay | PerPeriod | PerKwh
+    | Demand | Bound | Adjust | Tax | Sum
 )
 
 
