@@ -2,10 +2,11 @@
   "config": {
     "step": {
       "user": {
-        "title": "Choose a country",
-        "description": "Only countries whose tariffs the open store holds are listed.",
-        "data": {
-          "country": "Country"
+        "title": "Choose a tariff",
+        "description": "Pick a plan from the open store, or type in your own rates.",
+        "menu_options": {
+          "store": "Pick a plan from the store",
+          "manual": "Type in my own rates"
         }
       },
       "provider": {
@@ -27,6 +28,48 @@
         "data": {
           "area": "Area"
         }
+      },
+      "store": {
+        "title": "Choose a country",
+        "description": "Only countries whose tariffs the open store holds are listed.",
+        "data": {
+          "country": "Country"
+        }
+      },
+      "manual": {
+        "title": "Your own rates",
+        "description": "Prices as they appear on your bill. Timed rates, such as a night rate, are added next.",
+        "data": {
+          "name": "Name",
+          "country": "Country",
+          "currency": "Currency code",
+          "base_rate_name": "Name of the main rate",
+          "base_rate": "Main rate",
+          "export_rate": "Export rate",
+          "standing_charge": "Standing charge",
+          "levy": "Monthly levy",
+          "discount_rate": "Discount on energy",
+          "vat_rate": "VAT",
+          "vat_included": "Prices already include VAT",
+          "bill_start_day": "Day of the month a bill starts"
+        }
+      },
+      "manual_more": {
+        "title": "Timed rates",
+        "description": "Add a rate that applies at certain hours, such as a night rate. Where rates overlap, the cheapest applies.",
+        "menu_options": {
+          "manual_period": "Add a timed rate",
+          "manual_done": "Finish"
+        }
+      },
+      "manual_period": {
+        "title": "Add a timed rate",
+        "data": {
+          "name": "Name",
+          "rate": "Rate",
+          "start": "From",
+          "end": "To"
+        }
       }
     },
     "abort": {
@@ -35,6 +78,10 @@
       "single_instance_allowed": "Only one tariff can be followed. Use Reconfigure to change plan.",
       "already_configured": "This plan is already set up.",
       "reconfigure_successful": "The plan was changed. The sensors keep their names and history."
+    },
+    "error": {
+      "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
+      "empty_period": "The rate must start and end at different times."
     }
   },
   "entity": {

@@ -18,7 +18,15 @@ from homeassistant.helpers.event import async_track_time_change, async_track_utc
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .const import CONF_AREA, CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, DOMAIN
+from .const import (
+    CONF_AREA,
+    CONF_COUNTRY,
+    CONF_MANUAL,
+    CONF_NAME,
+    CONF_PROVIDER,
+    CONF_TARIFF,
+    DOMAIN,
+)
 from .lib.tariff import (
     PriceSlot,
     PriceStats,
@@ -28,6 +36,7 @@ from .lib.tariff import (
     price_stats,
 )
 from .lib.tariffstore import StoreError
+from .manual import definition_from
 from .store import store_access
 
 if TYPE_CHECKING:
@@ -140,17 +149,22 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
 
     async def _read(self, today: date) -> TariffData:
         entry = self.config_entry.data
-        definition = await self._access.async_definition(
-            entry[CONF_COUNTRY], entry[CONF_PROVIDER], entry[CONF_TARIFF], today,
-            area=entry[CONF_AREA],
-        )
         holidays_known = True
-        try:
-            is_holiday = await self._access.async_is_holiday(
-                entry[CONF_COUNTRY], definition.region
+        is_holiday: Callable[[date], bool]
+        if CONF_MANUAL in entry:  # the household's own rates: no store, and no public holidays
+            definition = definition_from(entry[CONF_MANUAL], entry[CONF_NAME])
+            is_holiday = no_holidays
+        else:
+            definition = await self._access.async_definition(
+                entry[CONF_COUNTRY], entry[CONF_PROVIDER], entry[CONF_TARIFF], today,
+                area=entry[CONF_AREA],
             )
-        except StoreError:
-            is_holiday, holidays_known = no_holidays, False
+            try:
+                is_holiday = await self._access.async_is_holiday(
+                    entry[CONF_COUNTRY], definition.region
+                )
+            except StoreError:
+                is_holiday, holidays_known = no_holidays, False
         midnight = datetime.min.time()
         start = datetime.combine(today - timedelta(days=PAST_DAYS), midnight, definition.timezone)
         end = datetime.combine(

@@ -15,14 +15,20 @@ from custom_components.utility_tariffs.const import DOMAIN
 
 
 async def _start(hass: HomeAssistant):
-    return await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    """Open the flow and take the store route, past the first menu."""
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    if result["type"] is FlowResultType.MENU:
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"next_step_id": "store"}
+        )
+    return result
 
 
 async def test_a_plan_with_areas_is_chosen_in_four_steps(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
     result = await _start(hass)
-    assert result["step_id"] == "user"
+    assert result["step_id"] == "store"
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     assert result["step_id"] == "provider"
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"provider": "p"})
@@ -179,6 +185,9 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
     assert before
 
     result = await _reconfigure(hass, entry)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"next_step_id": "store"}
+    )
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"provider": "p"})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "flat"})
@@ -222,6 +231,9 @@ async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
     assert all(uid.startswith("IE/p/plan/urban_") for uid in before)
 
     result = await _reconfigure(hass, old)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"next_step_id": "store"}
+    )
     for key, value in (("country", "IE"), ("provider", "p"), ("tariff", "flat")):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
     await hass.async_block_till_done()
@@ -241,6 +253,9 @@ async def test_changing_to_a_plan_already_followed_is_refused(
     other = MockConfigEntry(domain=DOMAIN, unique_id="IE/p/plan/urban", data={"entity_key": "x"})
     other.add_to_hass(hass)
     result = await _reconfigure(hass, other)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"next_step_id": "store"}
+    )
     for key, value in (("country", "IE"), ("provider", "p"), ("tariff", "flat")):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
 
