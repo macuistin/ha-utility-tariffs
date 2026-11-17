@@ -41,8 +41,9 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 Open the integration, choose the three dots, then **Reconfigure**, and pick another country,
 supplier, plan or area. The sensors keep their entity IDs, history and place in the Energy
 dashboard and your automations, and the saved energy history is priced again under the new plan.
-The device and sensor names follow the new plan, but only the entity IDs matter to automations.
-Choosing a plan another entry already follows is refused.
+Only one tariff is followed. The device is always called Utility Tariff and the plan is its model,
+so sensors read `sensor.utility_tariff_import_price` whatever the plan. Entries made before this
+rule keep their existing entity IDs.
 
 ## Entities and actions
 

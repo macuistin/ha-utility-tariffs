@@ -57,17 +57,14 @@ async def test_a_plan_with_one_price_skips_the_area_step(
     assert result["data"]["area"] == "all"
 
 
-async def test_the_same_plan_cannot_be_added_twice(
+async def test_only_one_tariff_can_be_followed(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
     MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
     result = await _start(hass)
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"provider": "p"})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "flat"})
 
     assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "already_configured"
+    assert result["reason"] == "single_instance_allowed"
 
 
 async def test_only_countries_the_store_holds_are_offered(
@@ -239,13 +236,12 @@ async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
 async def test_changing_to_a_plan_already_followed_is_refused(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
-    first = await _to(hass, ("country", "IE"), ("provider", "p"), ("tariff", "flat"))
-    second = await _to(
-        hass, ("country", "IE"), ("provider", "p"), ("tariff", "plan"), ("area", "urban")
-    )
-    result = await _reconfigure(hass, second["result"])
+    # Entries made before the single-tariff rule can still exist side by side.
+    MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
+    other = MockConfigEntry(domain=DOMAIN, unique_id="IE/p/plan/urban", data={"entity_key": "x"})
+    other.add_to_hass(hass)
+    result = await _reconfigure(hass, other)
     for key, value in (("country", "IE"), ("provider", "p"), ("tariff", "flat")):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
 
-    assert first["type"] is FlowResultType.CREATE_ENTRY
     assert result["reason"] == "already_configured"

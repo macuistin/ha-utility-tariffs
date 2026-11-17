@@ -4,6 +4,9 @@ from __future__ import annotations
 
 DOMAIN = "utility_tariffs"
 
+# The device is always called this, so entity ids read sensor.utility_tariff_<thing>.
+DEVICE_NAME = "Utility Tariff"
+
 # Where the open tariff store is read from: the raw files of its main branch, over https.
 DEFAULT_STORE_URL = (
     "https://raw.githubusercontent.com/macuistin/utility-tariffs/main/tariffs/electricity"

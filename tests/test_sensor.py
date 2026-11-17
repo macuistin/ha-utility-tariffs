@@ -44,7 +44,7 @@ async def _setup(
 
 
 def _state(hass: HomeAssistant, key: str) -> str:
-    entity_id = f"sensor.p_energy_plan_urban_{key}"
+    entity_id = f"sensor.utility_tariff_{key}"
     state = hass.states.get(entity_id)
     assert state is not None, entity_id
     return state.state
@@ -58,7 +58,7 @@ async def test_the_prices_and_band_in_force_now(
 
     assert _state(hass, "import_price") == "0.3"
     assert _state(hass, "import_rate_band") == "Day"
-    assert hass.states.get("sensor.p_energy_plan_urban_import_price").attributes[
+    assert hass.states.get("sensor.utility_tariff_import_price").attributes[
         "unit_of_measurement"
     ] == "EUR/kWh"
 
@@ -88,7 +88,7 @@ async def test_the_sensors_follow_the_clock_at_the_half_hour(
     assert _state(hass, "import_price") == "0.15"
 
 
-async def test_the_device_is_named_for_the_plan(
+async def test_the_device_has_a_fixed_name_and_the_plan_as_its_model(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:
     from homeassistant.helpers import device_registry as dr
@@ -97,11 +97,12 @@ async def test_the_device_is_named_for_the_plan(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    entity = er.async_get(hass).async_get("sensor.p_energy_plan_urban_import_price")
+    entity = er.async_get(hass).async_get("sensor.utility_tariff_import_price")
     assert entity is not None and entity.device_id is not None
     device = dr.async_get(hass).async_get(entity.device_id)
     assert device is not None
-    assert device.name == "P Energy Plan (Urban)"
+    assert device.name == "Utility Tariff"
+    assert device.model == "Plan (Urban)"
     assert device.manufacturer == "P Energy"
     assert entry.state is ConfigEntryState.LOADED
 
@@ -131,7 +132,7 @@ async def test_every_sensor_has_a_unique_id_from_the_plan(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    entity = er.async_get(hass).async_get(f"sensor.p_energy_plan_urban_{key}")
+    entity = er.async_get(hass).async_get(f"sensor.utility_tariff_{key}")
     assert entity is not None
     assert entity.unique_id == f"IE/p/plan/urban_{key}"
 

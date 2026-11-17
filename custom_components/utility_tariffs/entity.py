@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_ENTITY_KEY, CONF_NAME, DOMAIN
+from .const import CONF_ENTITY_KEY, DEVICE_NAME, DOMAIN
 from .coordinator import TariffCoordinator
 
 
@@ -23,7 +23,7 @@ class TariffEntity(CoordinatorEntity[TariffCoordinator]):
         self._attr_unique_id = f"{stable}_{key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, stable)},
-            name=entry.data[CONF_NAME],
+            name=DEVICE_NAME,
             manufacturer=coordinator.data.definition.provider.name,
             model=coordinator.data.definition.name,
             entry_type=DeviceEntryType.SERVICE,

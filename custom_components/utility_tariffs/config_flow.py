@@ -81,6 +81,9 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._names: dict[str, str] = {}
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if self.source != SOURCE_RECONFIGURE:
+            if self._async_current_entries():
+                return self.async_abort(reason="single_instance_allowed")
         access = store_access(self.hass)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]

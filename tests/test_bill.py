@@ -46,7 +46,7 @@ async def test_no_bill_sensors_without_a_meter(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    assert hass.states.get("sensor.p_energy_plan_urban_bill_so_far") is None
+    assert hass.states.get("sensor.utility_tariff_bill_so_far") is None
 
 
 async def test_the_import_the_meter_counts_is_priced_into_the_bill(
@@ -92,7 +92,7 @@ async def test_the_unit_and_period_are_on_the_bill(
 ) -> None:
     await _setup_with_meters(hass, freezer)
 
-    state = hass.states.get("sensor.p_energy_plan_urban_bill_so_far")
+    state = hass.states.get("sensor.utility_tariff_bill_so_far")
 
     assert state is not None
     assert state.attributes["unit_of_measurement"] == "EUR"
