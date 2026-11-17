@@ -28,8 +28,7 @@ flowchart LR
 | **Works offline** | Tariffs and prices are held on disk, so sensors keep moving when the store cannot be reached |
 
 <p align="center">
-  <img src="docs/images/entities.png" alt="The price, rate band and window sensors on the device page" width="48%">
-  <img src="docs/images/bill-placeholder.svg" alt="Placeholder for a screenshot of the bill and savings" width="48%">
+  <img src="docs/images/entities.png" alt="The price, rate band and window sensors on the device page" width="360">
 </p>
 
 ## Quick install
