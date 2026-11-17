@@ -155,6 +155,12 @@
       },
       "savings_this_period": {
         "name": "Savings this bill period"
+      },
+      "plan_rank": {
+        "name": "Plan rank"
+      },
+      "cheapest_plan_saving": {
+        "name": "Cheapest plan saving"
       }
     },
     "binary_sensor": {
@@ -179,7 +185,10 @@
           "battery_discharge_energy_entity": "Energy taken out of the battery",
           "battery_soc_entity": "Battery charge (percent)",
           "battery_capacity_kwh": "Battery size (kWh)",
-          "battery_wear_per_kwh": "Battery wear per kWh"
+          "battery_wear_per_kwh": "Battery wear per kWh",
+          "bill_start_day": "Day of the month a bill starts",
+          "bill_months": "Months in one bill",
+          "bill_start_month": "A month a bill starts in"
         },
         "data_description": {
           "import_energy_entity": "Needed for the bill. Read every minute.",
@@ -188,7 +197,10 @@
           "battery_discharge_energy_entity": "Optional. Takes battery wear off the savings.",
           "battery_soc_entity": "Optional. With the battery size, values the energy the battery holds.",
           "battery_capacity_kwh": "Optional. Usable size of the battery.",
-          "battery_wear_per_kwh": "Optional. What each kWh taken out of the battery costs in wear, in the tariff's currency."
+          "battery_wear_per_kwh": "Optional. What each kWh taken out of the battery costs in wear, in the tariff's currency.",
+          "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
+          "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
       }
     }
@@ -245,6 +257,16 @@
           "description": "The end of the range. Defaults to 24 hours after the start."
         }
       }
+    },
+    "bill_summary": {
+      "name": "Bill summary",
+      "description": "Returns the bill so far as an HTML page, with its total and period. It needs an energy import meter in the options. Use it in an email, a notification or a card.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tariff",
+          "description": "The tariff whose bill to show."
+        }
+      }
     }
   },
   "selector": {
@@ -264,6 +286,15 @@
     },
     "end_before_start": {
       "message": "The end must be after the start."
+    },
+    "no_meter": {
+      "message": "Set an energy import meter in the options first. The bill is worked out from it."
+    }
+  },
+  "issues": {
+    "cheaper_plan": {
+      "title": "A cheaper plan is available",
+      "description": "Priced over your last whole bill, {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
     }
   }
 }

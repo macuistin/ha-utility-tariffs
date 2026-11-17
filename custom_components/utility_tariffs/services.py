@@ -12,7 +12,9 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN
+from .bill import bill_so_far
+from .bill_summary import render_bill_html
+from .const import CONF_NAME, DOMAIN
 from .lib.tariff import WindowSearch, find_window
 
 if TYPE_CHECKING:
@@ -22,6 +24,7 @@ if TYPE_CHECKING:
 
 SERVICE_FIND_WINDOW = "find_window"
 SERVICE_GET_PRICES = "get_prices"
+SERVICE_BILL_SUMMARY = "bill_summary"
 ATTR_ENTRY = "config_entry_id"
 FLOWS = ("import", "export")
 
@@ -44,6 +47,9 @@ GET_PRICES_SCHEMA: Any = vol.Schema(
         vol.Optional("end"): cv.datetime,
     }
 )
+
+
+BILL_SUMMARY_SCHEMA: Any = vol.Schema({vol.Required(ATTR_ENTRY): cv.string})
 
 
 def _entry(hass: HomeAssistant, entry_id: str) -> TariffConfigEntry:
@@ -121,6 +127,26 @@ async def _get_prices(call: ServiceCall) -> ServiceResponse:
     }
 
 
+async def _bill_summary(call: ServiceCall) -> ServiceResponse:
+    """The bill so far as an HTML page, with its total and period."""
+    entry = _entry(call.hass, call.data[ATTR_ENTRY])
+    coordinator = entry.runtime_data
+    accountant = coordinator.accountant
+    if accountant is None:
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_meter")
+    data = coordinator.data
+    bill = bill_so_far(accountant.store.history, data, entry.options, dt_util.now())
+    return {
+        "html": render_bill_html(bill, data.definition, entry.data[CONF_NAME]),
+        "total": float(bill.priced.total),
+        "currency": data.definition.currency,
+        "period_start": bill.first_day.isoformat(),
+        "next_period_start": bill.next_first_day.isoformat(),
+        "days_priced": bill.days,
+        "days_in_period": bill.period_days,
+    }
+
+
 def async_register_services(hass: HomeAssistant) -> None:
     hass.services.async_register(
         DOMAIN,
@@ -134,5 +160,12 @@ def async_register_services(hass: HomeAssistant) -> None:
         SERVICE_GET_PRICES,
         _get_prices,
         schema=GET_PRICES_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_BILL_SUMMARY,
+        _bill_summary,
+        schema=BILL_SUMMARY_SCHEMA,
         supports_response=SupportsResponse.ONLY,
     )

@@ -29,11 +29,15 @@ from homeassistant.helpers.selector import (
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    BILL_MONTHS,
     CONF_AREA,
     CONF_BATTERY_CAPACITY,
     CONF_BATTERY_DISCHARGE_ENERGY,
     CONF_BATTERY_SOC,
     CONF_BATTERY_WEAR,
+    CONF_BILL_MONTHS,
+    CONF_BILL_START_DAY,
+    CONF_BILL_START_MONTH,
     CONF_COUNTRY,
     CONF_ENTITY_KEY,
     CONF_EXPORT_ENERGY,
@@ -46,6 +50,7 @@ from .const import (
     CONF_WINDOW_MINUTES,
     DEFAULT_WINDOW_MINUTES,
     DOMAIN,
+    MAX_BILL_START_DAY,
     MAX_WINDOW_MINUTES,
     MIN_WINDOW_MINUTES,
     WINDOW_STEP_MINUTES,
@@ -316,6 +321,7 @@ class TariffOptionsFlow(OptionsFlowWithReload):
                 CONF_BATTERY_SOC, description={"suggested_value": options.get(CONF_BATTERY_SOC)}
             )
         ] = charge
+        fields.update(_bill_fields(options))
         for key, unit in _NUMBERS.items():
             config = NumberSelectorConfig(min=0, step="any", mode=NumberSelectorMode.BOX)
             if unit:
@@ -326,9 +332,36 @@ class TariffOptionsFlow(OptionsFlowWithReload):
         return self.async_show_form(step_id="init", data_schema=_schema(fields))
 
 
+def _bill_fields(options: Any) -> dict[Any, Any]:
+    """Where a bill starts and how long it runs. Left empty, the tariff's own dates apply."""
+    day = NumberSelectorConfig(
+        min=1, max=MAX_BILL_START_DAY, step=1, mode=NumberSelectorMode.BOX
+    )
+    month = NumberSelectorConfig(min=1, max=12, step=1, mode=NumberSelectorMode.BOX)
+    lengths = [SelectOptionDict(value=str(n), label=str(n)) for n in BILL_MONTHS]
+    suggested = options.get(CONF_BILL_MONTHS)
+    return {
+        vol.Optional(
+            CONF_BILL_START_DAY, description={"suggested_value": options.get(CONF_BILL_START_DAY)}
+        ): NumberSelector(day),
+        vol.Optional(
+            CONF_BILL_MONTHS,
+            description={"suggested_value": None if suggested is None else str(suggested)},
+        ): SelectSelector(SelectSelectorConfig(options=lengths)),
+        vol.Optional(
+            CONF_BILL_START_MONTH,
+            description={"suggested_value": options.get(CONF_BILL_START_MONTH)},
+        ): NumberSelector(month),
+    }
+
+
 def _saved(user_input: dict[str, Any]) -> dict[str, Any]:
     """The options to keep: the window, and every meter and battery setting that was filled in."""
     data: dict[str, Any] = {CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])}
     data.update({k: user_input[k] for k in (*_METERS, CONF_BATTERY_SOC) if user_input.get(k)})
+    data.update(
+        {k: int(user_input[k]) for k in (CONF_BILL_START_DAY, CONF_BILL_MONTHS, CONF_BILL_START_MONTH)
+         if user_input.get(k)}
+    )
     data.update({k: float(user_input[k]) for k in _NUMBERS if user_input.get(k) is not None})
     return data

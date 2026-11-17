@@ -36,6 +36,45 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Bill summary
+
+The `utility_tariffs.bill_summary` action returns the bill so far as a self-contained HTML page in
+`html`, with `total`, `currency`, `period_start` and the days priced beside it. The page lists the
+energy imported in each band and every line of the bill (energy, saving, standing charge, levy,
+VAT and export credit), so the lines add up to the total. It follows your light or dark setting and
+fits a phone. It needs an import meter. Use the response in an email or a notification, or save it
+to a file:
+
+```yaml
+action: utility_tariffs.bill_summary
+data:
+  config_entry_id: <your entry>
+response_variable: bill
+```
+
+## Cheaper plans
+
+When an import meter is set, the integration prices your last whole bill under every other plan of
+your country and area in the store, every night shortly after midnight, and ranks them. **Plan
+rank** is where your plan stands (1 is the cheapest), with the cheapest few plans and their bills
+in its attributes. **Cheapest plan saving** is what the cheapest plan would have saved, and is 0
+when yours is cheapest. When the saving is at least 5% of your bill, a repair notice names the
+plan.
+
+This re-prices what you used. It is not a forecast, it never switches your plan, and it does not
+know exit fees, contract terms or whether a plan is open to you. A plan that lists no export price
+is priced with your plan's export rate. Plans that hold only other areas, or cannot be read, are
+left out and counted. To follow a plan, use Reconfigure.
+
+## Bill dates
+
+In the integration's options you can set the day of the month a bill starts (1 to 28) and how many
+months one bill covers (1, 2, 3, 4, 6 or 12). For a bill longer than a month, also give a month a
+bill starts in, so the periods line up with your supplier's: a two-month bill that starts on
+16 February has start day 16 and start month 2. Anything left empty follows the tariff, and a day
+count is not offered because suppliers bill by calendar month. The bill so far and the saving this
+bill period both use these dates.
+
 ## Your own rates
 
 When your plan is not in the store, choose **Type in my own rates** at setup, or in Reconfigure.

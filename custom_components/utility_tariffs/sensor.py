@@ -22,6 +22,7 @@ from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
 from .lib.tariff import price_rating
 from .lib.tariff.price_stats import RATINGS
+from .plan_sensor import CheapestPlanSavingSensor, PlanRankSensor
 from .savings_sensor import SavingsSensor
 from .windows import current_window
 
@@ -198,6 +199,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
     if coordinator.accountant is not None:
+        async_add_entities([PlanRankSensor(coordinator), CheapestPlanSavingSensor(coordinator)])
         async_add_entities(BillSensor(coordinator, description) for description in BILL_SENSORS)
         if entry.options.get(CONF_HOUSE_ENERGY):
             async_add_entities([SavingsSensor(coordinator)])
