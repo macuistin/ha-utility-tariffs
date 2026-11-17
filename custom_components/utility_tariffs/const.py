@@ -31,6 +31,10 @@ CONF_BILL_START_MONTH = "bill_start_month"  # a month a bill starts in, so two-m
 BILL_MONTHS = (1, 2, 3, 4, 6, 12)  # the lengths that divide a year
 MAX_BILL_START_DAY = 28
 
+# Actions in the options form, never saved: read the store again now, or delete the saved files.
+CONF_REFRESH_NOW = "refresh_now"
+CONF_CLEAR_CACHE = "clear_cache"
+
 CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows
 DEFAULT_WINDOW_MINUTES = 120
 MIN_WINDOW_MINUTES = 30

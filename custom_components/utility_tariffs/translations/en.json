@@ -118,6 +118,18 @@
   },
   "entity": {
     "sensor": {
+      "valid_from": {
+        "name": "Prices valid from"
+      },
+      "valid_to": {
+        "name": "Prices valid to"
+      },
+      "prices_last_read": {
+        "name": "Prices last read"
+      },
+      "tariff_summary": {
+        "name": "Tariff summary"
+      },
       "import_price": {
         "name": "Import price"
       },
@@ -216,6 +228,12 @@
       }
     },
     "binary_sensor": {
+      "tomorrow_prices_available": {
+        "name": "Tomorrow's prices available"
+      },
+      "store_offline": {
+        "name": "Tariff store offline"
+      },
       "cheapest_window_active": {
         "name": "Cheapest window active"
       },
@@ -248,9 +266,13 @@
           "battery_wear_per_kwh": "Battery wear per kWh",
           "bill_start_day": "Day of the month a bill starts",
           "bill_months": "Months in one bill",
-          "bill_start_month": "A month a bill starts in"
+          "bill_start_month": "A month a bill starts in",
+          "refresh_now": "Read the tariff store again now",
+          "clear_cache": "Delete the saved tariff files first"
         },
         "data_description": {
+          "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
+          "clear_cache": "Deletes the saved copies of the tariff and its prices, then reads them again from the store. Use it if prices look wrong. It needs the store to be reachable.",
           "import_energy_entity": "Needed for the bill. Read every minute.",
           "export_energy_entity": "Optional. Credits what you export.",
           "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
@@ -263,6 +285,9 @@
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
       }
+    },
+    "error": {
+      "clear_while_offline": "The store cannot be reached, so deleting the saved files would leave no prices. Try again when it is reachable."
     }
   },
   "services": {
@@ -355,6 +380,14 @@
     }
   },
   "issues": {
+    "plan_ending": {
+      "title": "Your plan's prices are ending",
+      "description": "The store lists the prices of {tariff} as ending on {date}, and holds no later prices for it. Check the plan's current terms with your supplier. If the plan has changed, use Reconfigure to follow the new one."
+    },
+    "store_unreached": {
+      "title": "The tariff store has not been reached for {days} days",
+      "description": "{tariff} is running on the prices saved on this install. They may be out of date. Check the connection, or read the store again from the integration's options."
+    },
     "cheaper_plan": {
       "title": "A cheaper plan is available",
       "description": "Priced over your last whole bill, {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
