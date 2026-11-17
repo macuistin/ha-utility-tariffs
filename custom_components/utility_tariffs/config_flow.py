@@ -24,6 +24,7 @@ from homeassistant.helpers.selector import (
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
+    TimeSelector,
 )
 from homeassistant.util import dt as dt_util
 
@@ -38,6 +39,7 @@ from .const import (
     CONF_EXPORT_ENERGY,
     CONF_HOUSE_ENERGY,
     CONF_IMPORT_ENERGY,
+    CONF_MANUAL,
     CONF_NAME,
     CONF_PROVIDER,
     CONF_TARIFF,
@@ -49,6 +51,7 @@ from .const import (
     WINDOW_STEP_MINUTES,
 )
 from .lib.tariffstore import StoreError
+from .manual import problem_with
 from .store import store_access
 
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
@@ -79,11 +82,15 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         self._chosen: dict[str, str] = {}
         self._names: dict[str, str] = {}
+        self._manual: dict[str, Any] = {}
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        if self.source != SOURCE_RECONFIGURE:
-            if self._async_current_entries():
-                return self.async_abort(reason="single_instance_allowed")
+        """Pick a plan from the store, or type in the household's own rates."""
+        if self.source != SOURCE_RECONFIGURE and self._async_current_entries():
+            return self.async_abort(reason="single_instance_allowed")
+        return self.async_show_menu(step_id="user", menu_options=["store", "manual"])
+
+    async def async_step_store(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         access = store_access(self.hass)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]
@@ -95,7 +102,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         schema = _schema(
             {vol.Required(CONF_COUNTRY): CountrySelector(CountrySelectorConfig(countries=held))}
         )
-        return self.async_show_form(step_id="user", data_schema=schema)
+        return self.async_show_form(step_id="store", data_schema=schema)
 
     async def async_step_provider(
         self, user_input: dict[str, Any] | None = None
@@ -149,6 +156,53 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         suffix = "" if len(areas) == 1 else f" ({areas[user_input[CONF_AREA]]})"
         return await self._create(f"{self._names['provider']} {self._names['tariff']}{suffix}")
 
+
+    async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """The base rates of a tariff that is not in the store."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            rates = {**user_input, "timezone": self.hass.config.time_zone, "periods": []}
+            reason = problem_with(rates, user_input[CONF_NAME])
+            if reason is None:
+                self._manual = rates
+                return await self.async_step_manual_more()
+            errors["base"] = "invalid_tariff"
+        return self.async_show_form(
+            step_id="manual",
+            data_schema=_manual_schema(self.hass, user_input),
+            errors=errors,
+        )
+
+    async def async_step_manual_more(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Add a timed rate such as a night rate, or finish."""
+        return self.async_show_menu(step_id="manual_more", menu_options=["manual_period", "manual_done"])
+
+    async def async_step_manual_period(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            period = {k: user_input[k] for k in ("name", "rate", "start", "end")}
+            trial = {**self._manual, "periods": [*self._manual["periods"], period]}
+            if user_input["start"] == user_input["end"]:
+                errors["base"] = "empty_period"
+            elif problem_with(trial, self._manual[CONF_NAME]) is not None:
+                errors["base"] = "invalid_tariff"
+            else:
+                self._manual = trial
+                return await self.async_step_manual_more()
+        return self.async_show_form(
+            step_id="manual_period", data_schema=_period_schema(user_input), errors=errors
+        )
+
+    async def async_step_manual_done(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        title = self._manual[CONF_NAME]
+        return await self._save("manual", title, {CONF_MANUAL: self._manual})
+
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -159,6 +213,10 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         unique = "/".join(
             self._chosen[key] for key in (CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, CONF_AREA)
         )
+        return await self._save(unique, title, dict(self._chosen))
+
+    async def _save(self, unique: str, title: str, plan: dict[str, Any]) -> ConfigFlowResult:
+        """Make the entry, or on reconfigure move it to this plan and keep its entities."""
         await self.async_set_unique_id(unique)
         self._abort_if_unique_id_configured()
         if self.source == SOURCE_RECONFIGURE:
@@ -168,11 +226,62 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
                 entry,
                 unique_id=unique,
                 title=title,
-                data={**self._chosen, CONF_NAME: title, CONF_ENTITY_KEY: key},
+                data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: key},
             )
         return self.async_create_entry(
-            title=title, data={**self._chosen, CONF_NAME: title, CONF_ENTITY_KEY: unique}
+            title=title, data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: unique}
         )
+
+
+def _manual_schema(hass: Any, previous: dict[str, Any] | None) -> Any:
+    """The base rates. Currency and country start from the home's settings."""
+    given = previous or {}
+
+    def field(key: str, default: Any) -> Any:
+        return vol.Required(key, default=given.get(key, default))
+
+    def amount(unit: str | None = None, maximum: float | None = None) -> Any:
+        config = NumberSelectorConfig(min=0, step="any", mode=NumberSelectorMode.BOX)
+        if unit:
+            config["unit_of_measurement"] = unit
+        if maximum is not None:
+            config["max"] = maximum
+        return NumberSelector(config)
+
+    return _schema(
+        {
+            field(CONF_NAME, "My tariff"): str,
+            field("country", hass.config.country or "GB"): CountrySelector(),
+            field("currency", hass.config.currency): str,
+            field("base_rate_name", "Day"): str,
+            field("base_rate", 0.0): amount("per kWh"),
+            field("export_rate", 0.0): amount("per kWh"),
+            field("standing_charge", 0.0): amount("per day"),
+            field("levy", 0.0): amount("per month"),
+            field("discount_rate", 0.0): amount("%", 100),
+            field("vat_rate", 0.0): amount("%", 100),
+            field("vat_included", False): bool,
+            field("bill_start_day", 1): NumberSelector(
+                NumberSelectorConfig(min=1, max=28, step=1, mode=NumberSelectorMode.BOX)
+            ),
+        }
+    )
+
+
+def _period_schema(previous: dict[str, Any] | None) -> Any:
+    given = previous or {}
+    return _schema(
+        {
+            vol.Required("name", default=given.get("name", "Night")): str,
+            vol.Required("rate", default=given.get("rate", 0.0)): NumberSelector(
+                NumberSelectorConfig(
+                    min=0, step="any", mode=NumberSelectorMode.BOX, unit_of_measurement="per kWh"
+                )
+            ),
+            vol.Required("start", default=given.get("start", "23:00:00")): TimeSelector(),
+            vol.Required("end", default=given.get("end", "08:00:00")): TimeSelector(),
+        }
+    )
 
 
 _METERS = (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY, CONF_HOUSE_ENERGY, CONF_BATTERY_DISCHARGE_ENERGY)

@@ -36,6 +36,16 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## Your own rates
+
+When your plan is not in the store, choose **Type in my own rates** at setup, or in Reconfigure.
+Enter the main unit rate, export rate, standing charge per day, monthly levy, discount on energy,
+VAT, whether your prices already include VAT, and the day of the month a bill starts (1 to 28). Then
+add any timed rates, such as a night rate, with their hours. Where timed rates overlap, the
+cheapest applies. Rates are entered as they appear on your bill, before VAT unless you say the
+prices include it. They are kept in your own Home Assistant and are never sent to the store.
+Public holidays are not applied. Changing the rates means reconfiguring again.
+
 ## Changing plan
 
 Open the integration, choose the three dots, then **Reconfigure**, and pick another country,
