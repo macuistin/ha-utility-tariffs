@@ -16,6 +16,7 @@ from .bill import bill_so_far
 from .bill_summary import render_bill_html
 from .const import CONF_NAME, DOMAIN
 from .lib.tariff import WindowSearch, find_window
+from .windows import end_of_tomorrow
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -81,7 +82,7 @@ async def _find_window(call: ServiceCall) -> ServiceResponse:
         highest=call.data["highest"],
         power_kw=Decimal(str(call.data["power_kw"])),
         earliest_start=_aware(call.data.get("earliest_start")) or dt_util.now(),
-        latest_end=_aware(call.data.get("latest_end")),
+        latest_end=_aware(call.data.get("latest_end")) or end_of_tomorrow(data, dt_util.now()),
     )
     window = await call.hass.async_add_executor_job(find_window, data.slots, search)
     if window is None:

@@ -17,6 +17,14 @@ from .lib.tariff.defaults import SLOT_SECONDS
 # A window that ends sooner than this is treated as over, so the answer does not jump to a later
 # window in the last minutes of the cheapest one.
 MIN_REMAINING = timedelta(minutes=5)
+SEARCH_DAYS = 2  # today and tomorrow: the prices are held further ahead, but a window is for soon
+
+
+def end_of_tomorrow(data: TariffData, now: datetime) -> datetime:
+    """The local midnight that ends tomorrow, which is as far as a window is searched by default."""
+    zone = data.definition.timezone
+    day = now.astimezone(zone).date() + timedelta(days=SEARCH_DAYS)
+    return datetime.combine(day, datetime.min.time(), zone)
 
 
 def current_window(
@@ -33,6 +41,7 @@ def current_window(
         duration=duration,
         highest=highest,
         earliest_start=_on_grid(now - duration + MIN_REMAINING),
+        latest_end=end_of_tomorrow(data, now),
     )
     window = find_window(data.slots, search)
     if window is None:

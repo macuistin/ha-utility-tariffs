@@ -245,3 +245,19 @@ async def test_get_prices_names_the_source_of_each_price_and_how_far_they_are_kn
     assert reply["known_until"] == "2026-11-15T00:00:00+00:00"
     assert {row["source"] for row in reply["prices"]} == {"published"}
     assert json.dumps(reply)  # plain values only
+
+
+async def test_the_windows_are_still_searched_over_today_and_tomorrow_only(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    """The dearer revision from the 20th is held, but a window is for the next day or so."""
+    freezer.move_to(NOON)
+    entry = await _setup(hass, FLAT)
+
+    assert _state(hass, "dearest_window_start") < "2026-11-16"
+    reply = await hass.services.async_call(
+        DOMAIN, "find_window",
+        {"config_entry_id": entry.entry_id, "duration": "01:00:00", "highest": True},
+        blocking=True, return_response=True,
+    )
+    assert reply["found"] is True and reply["start"] < "2026-11-16"
