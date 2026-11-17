@@ -1,0 +1,85 @@
+{
+  "entity": {
+    "sensor": {
+      "import_price": {
+        "default": "mdi:transmission-tower-import"
+      },
+      "export_price": {
+        "default": "mdi:transmission-tower-export"
+      },
+      "import_band": {
+        "default": "mdi:clock-time-four-outline"
+      },
+      "next_import_price": {
+        "default": "mdi:arrow-right-bold-circle-outline"
+      },
+      "previous_import_price": {
+        "default": "mdi:arrow-left-bold-circle-outline"
+      },
+      "lowest_import_price_today": {
+        "default": "mdi:arrow-collapse-down"
+      },
+      "highest_import_price_today": {
+        "default": "mdi:arrow-collapse-up"
+      },
+      "average_import_price_today": {
+        "default": "mdi:approximately-equal"
+      },
+      "lowest_export_price_today": {
+        "default": "mdi:arrow-collapse-down"
+      },
+      "highest_export_price_today": {
+        "default": "mdi:arrow-collapse-up"
+      },
+      "average_export_price_today": {
+        "default": "mdi:approximately-equal"
+      },
+      "bill_coverage": {
+        "default": "mdi:calendar-check"
+      },
+      "plan_rank": {
+        "default": "mdi:podium"
+      },
+      "import_price_rating": {
+        "default": "mdi:gauge",
+        "state": {
+          "very_low": "mdi:gauge-empty",
+          "low": "mdi:gauge-low",
+          "normal": "mdi:gauge",
+          "high": "mdi:gauge-full",
+          "very_high": "mdi:gauge-full"
+        }
+      },
+      "price_level": {
+        "default": "mdi:gauge",
+        "state": {
+          "low": "mdi:gauge-low",
+          "mid": "mdi:gauge",
+          "high": "mdi:gauge-full"
+        }
+      }
+    },
+    "binary_sensor": {
+      "cheapest_window_active": {
+        "default": "mdi:clock-outline",
+        "state": {
+          "on": "mdi:clock-check"
+        }
+      },
+      "dearest_window_active": {
+        "default": "mdi:clock-outline",
+        "state": {
+          "on": "mdi:clock-check"
+        }
+      }
+    },
+    "number": {
+      "low_percentile": {
+        "default": "mdi:percent"
+      },
+      "high_percentile": {
+        "default": "mdi:percent"
+      }
+    }
+  }
+}

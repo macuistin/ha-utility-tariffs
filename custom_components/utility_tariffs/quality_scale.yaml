@@ -1,0 +1,84 @@
+# Home Assistant integration quality scale. https://developers.home-assistant.io/docs/core/integration-quality-scale/
+# A rule is `done`, `todo`, or `exempt` with a comment. tests/test_quality_scale.py checks this file
+# and that manifest.json claims no tier the file does not support.
+#
+# Open, and why the manifest claims no tier yet:
+# - dependency-transparency: the tariff library is installed from a GitHub archive, not PyPI.
+# - async-dependency and inject-websession: the library's store client is blocking Python, run in
+#   an executor, and fed pages through Home Assistant's web session by a bridge.
+# Both need a change in macuistin/utility-tariffs, and publishing it to PyPI is the maintainer's call.
+rules:
+  # Bronze
+  action-setup: done
+  appropriate-polling:
+    status: done
+    comment: No fixed interval. The store is read at start-up, nightly, and from 16:00 for feeds.
+  brands: done
+  common-modules: done
+  config-flow-test-coverage: done
+  config-flow: done
+  dependency-transparency: todo
+  docs-actions: done
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup:
+    status: exempt
+    comment: Entities read the coordinator and subscribe to nothing of their own.
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: The store is public and needs no sign-in.
+  test-coverage: done
+  # Gold
+  devices: done
+  diagnostics: done
+  discovery-update-info:
+    status: exempt
+    comment: The store is a fixed public address. Nothing is discovered.
+  discovery:
+    status: exempt
+    comment: There is no device on the network to find.
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices:
+    status: exempt
+    comment: There are no devices. It follows a tariff.
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: One tariff makes one device, and it never changes.
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: done
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow: done
+  repair-issues: done
+  stale-devices:
+    status: exempt
+    comment: One tariff makes one device, and it never changes.
+  # Platinum
+  async-dependency: todo
+  inject-websession: todo
+  strict-typing:
+    status: done
+    comment: mypy strict runs in CI, and the library ships py.typed.

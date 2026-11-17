@@ -210,7 +210,11 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             if self.data is not None:
                 _LOGGER.warning("The tariff store could not be read, keeping saved prices: %s", err)
                 return self.data
-            raise UpdateFailed(f"The tariff store could not be read: {err}") from err
+            raise UpdateFailed(
+                translation_domain=DOMAIN,
+                translation_key="store_unreadable",
+                translation_placeholders={"error": str(err)},
+            ) from err
 
     async def _read(self, today: date) -> TariffData:
         entry = self.config_entry.data

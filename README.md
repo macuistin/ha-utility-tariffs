@@ -4,7 +4,72 @@ A Home Assistant integration that knows your tariff. It prices every half hour f
 tariff store, and works out the cheapest and dearest windows, the bill so far and, with your own
 energy sensors, what solar and a battery save and which plan would have cost least.
 
-Status: early development. Nothing is installable yet.
+## Installation
+
+1. In HACS, add `macuistin/ha-utility-tariffs` as a custom repository of type Integration, then
+   download **Utility Tariffs**. Restart Home Assistant.
+2. Open Settings, Devices & services, Add integration, and choose **Utility Tariffs**.
+3. Choose **Pick a plan from the store**: country, supplier, plan and, where the plan has
+   different prices by area, your area. Or choose **Type in my own rates**.
+
+Home Assistant needs internet access to read the tariff store. Only one tariff is followed.
+
+## Configuration
+
+Setup has no settings beyond the plan. The options (the three dots on the integration, then
+**Configure**) are:
+
+| Option | Meaning |
+| --- | --- |
+| Window length | Minutes in the cheapest and dearest windows, 30 to 720 in steps of 30 (default 120) |
+| Energy imported, exported, used by the home, taken out of the battery | Sensors in kWh that only ever rise. The import meter switches the bill on |
+| Battery charge, size and wear per kWh | Used with the home meter to value the energy the battery holds |
+| Day of the month a bill starts, months in one bill, a month a bill starts in | Line the bill up with your supplier's. Empty follows the tariff |
+
+Saving the options reloads the integration.
+
+## Data updates
+
+The tariff and its prices are read from the store at start-up and every night shortly after
+midnight, and held on disk so prices keep working with no network. Sensors move at every half hour
+without another read. A tariff on a half-hourly price feed is read every half hour from 16:00 until
+tomorrow's prices are held. Energy meters are read every minute, and only when you set them.
+
+## Use cases
+
+- Start a load in the cheapest window: trigger on **Cheapest window active**, or call
+  `utility_tariffs.find_window` for a load of a given power and length.
+- Warn when the price is high: trigger on **Import price rating** becoming `high` or `very_high`.
+- Send the bill by email or notification with `utility_tariffs.bill_summary`.
+- Find out whether another plan would have cost less with **Cheapest plan saving**.
+
+## Known limitations
+
+- Electricity only. One tariff per Home Assistant.
+- Prices are only as current as the open store. A plan the store does not hold can be typed in as
+  your own rates, but public holidays are not applied to those.
+- The bill is an estimate from the meters you choose and can differ from your supplier's by small
+  amounts. Plan ranking is a comparison of past use, not a forecast, and ignores exit fees and
+  contract terms.
+- Nothing is guessed for prices that are not published yet.
+
+## Troubleshooting
+
+- **Setup says the store could not be read.** Check that Home Assistant can reach
+  `raw.githubusercontent.com` over https, then try again.
+- **Prices stopped updating.** The held prices keep working while the store is unreachable. For a
+  price-feed tariff, a repair issue appears if tomorrow's prices are still missing after 22:00.
+- **The bill is empty.** Set an import meter in the options. It must be a kWh sensor that only
+  rises.
+- **Reporting a bug.** Open the integration, choose the three dots, **Download diagnostics**, and
+  attach the file. Your area and the names of your energy sensors are removed from it.
+
+## Removing the integration
+
+Open Settings, Devices & services, Utility Tariffs, the three dots, then **Delete**. The saved
+energy history is deleted with it. The store cache under `.storage/utility_tariffs_store` and
+`.storage/utility_tariffs_prices` can then be deleted by hand if you want the space back. To remove
+the code, remove the repository in HACS and restart.
 
 ## Bill so far
 
