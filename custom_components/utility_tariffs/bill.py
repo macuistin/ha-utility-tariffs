@@ -6,9 +6,10 @@ from collections.abc import Mapping
 from datetime import datetime
 from typing import Any
 
+from utility_tariffs_lib.tariff import PeriodBill, SlotHistory, price_period
+
 from .bill_period import period_rules
 from .coordinator import TariffData
-from .lib.tariff import PeriodBill, SlotHistory, price_period
 
 
 def bill_so_far(

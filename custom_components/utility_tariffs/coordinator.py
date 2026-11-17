@@ -24,17 +24,7 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.event import async_track_time_change, async_track_utc_time_change
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
-
-from .const import (
-    CONF_AREA,
-    CONF_COUNTRY,
-    CONF_MANUAL,
-    CONF_NAME,
-    CONF_PROVIDER,
-    CONF_TARIFF,
-    DOMAIN,
-)
-from .lib.tariff import (
+from utility_tariffs_lib.tariff import (
     PriceSeries,
     PriceSlot,
     PriceStats,
@@ -48,7 +38,17 @@ from .lib.tariff import (
     series_names,
     series_runs,
 )
-from .lib.tariffstore import StoreError
+from utility_tariffs_lib.tariffstore import StoreError
+
+from .const import (
+    CONF_AREA,
+    CONF_COUNTRY,
+    CONF_MANUAL,
+    CONF_NAME,
+    CONF_PROVIDER,
+    CONF_TARIFF,
+    DOMAIN,
+)
 from .manual import definition_from
 from .store import price_access, store_access
 

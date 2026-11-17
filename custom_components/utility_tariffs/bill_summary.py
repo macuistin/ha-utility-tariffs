@@ -6,8 +6,8 @@ from datetime import date
 from decimal import Decimal
 from html import escape
 
-from .lib.tariff import PeriodBill, TariffDefinition
-from .lib.tariff.engine import Line
+from utility_tariffs_lib.tariff import PeriodBill, TariffDefinition
+from utility_tariffs_lib.tariff.engine import Line
 
 _STYLE = """
 :root{color-scheme:light dark;--fg:#1c1c1e;--bg:#fff;--line:#d8d8dc;--muted:#6b6b72}

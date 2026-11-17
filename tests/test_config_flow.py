@@ -110,8 +110,9 @@ async def _to(hass: HomeAssistant, *steps: tuple[str, str]):
 async def test_a_store_that_fails_after_the_country_aborts_at_the_supplier(
     hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    from utility_tariffs_lib.tariffstore import StoreError
+
     from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
-    from custom_components.utility_tariffs.lib.tariffstore import StoreError
 
     async def fail(self, *args, **kwargs):
         raise StoreError("down")
@@ -126,8 +127,9 @@ async def test_a_store_that_fails_after_the_country_aborts_at_the_supplier(
 async def test_a_store_that_fails_when_listing_plans_aborts(
     hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    from utility_tariffs_lib.tariffstore import StoreError
+
     from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
-    from custom_components.utility_tariffs.lib.tariffstore import StoreError
 
     async def fail(self, *args, **kwargs):
         raise StoreError("down")
@@ -155,8 +157,9 @@ async def test_a_supplier_with_no_plan_in_force_aborts(
 async def test_a_plan_whose_file_cannot_be_read_aborts_at_the_area(
     hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    from utility_tariffs_lib.tariffstore import StoreError
+
     from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
-    from custom_components.utility_tariffs.lib.tariffstore import StoreError
 
     async def fail(self, *args, **kwargs):
         raise StoreError("down")

@@ -9,19 +9,19 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-
-from custom_components.utility_tariffs.helper.store_access import (
-    TariffStoreAccess,
-    session_reader,
-)
-from custom_components.utility_tariffs.lib.tariffstore import (
+from utility_tariffs_lib.tariffstore import (
     FolderCache,
     Store,
     StoreError,
     folder_reader,
 )
-from tests.lib.tariffstore.building import build_store
-from tests.lib.tariffstore.fixtures import write_store
+
+from custom_components.utility_tariffs.helper.store_access import (
+    TariffStoreAccess,
+    session_reader,
+)
+from tests.support.building import build_store
+from tests.support.fixtures import write_store
 
 DAY = date(2026, 11, 12)
 

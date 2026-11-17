@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
+from utility_tariffs_lib.tariff import SlotHistory
 
 from custom_components.utility_tariffs.const import (
     CONF_BATTERY_CAPACITY,
@@ -18,7 +19,6 @@ from custom_components.utility_tariffs.const import (
     CONF_HOUSE_ENERGY,
     CONF_IMPORT_ENERGY,
 )
-from custom_components.utility_tariffs.lib.tariff import SlotHistory
 from custom_components.utility_tariffs.savings import battery_of, opening_charge
 from tests.test_bill import METER, _minute, _set
 from tests.test_sensor import NOON, _setup, _state

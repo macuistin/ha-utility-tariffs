@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 from homeassistant.core import HomeAssistant
+from utility_tariffs_lib.tariffstore import FolderCache, Store, folder_reader
 
 from custom_components.utility_tariffs import config_flow, coordinator
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
-from custom_components.utility_tariffs.lib.tariffstore import FolderCache, Store, folder_reader
-from tests.lib.tariffstore.building import build_store
-from tests.lib.tariffstore.fixtures import flat, tariff, write_store
+from tests.support.building import build_store
+from tests.support.fixtures import flat, tariff, write_store
 
 
 @pytest.fixture(autouse=True)

@@ -11,10 +11,10 @@ import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
+from utility_tariffs_lib.tariff import SlotEnergy
+from utility_tariffs_lib.tariffstore import StoreError
 
 from custom_components.utility_tariffs.const import CONF_IMPORT_ENERGY, DOMAIN
-from custom_components.utility_tariffs.lib.tariff import SlotEnergy
-from custom_components.utility_tariffs.lib.tariffstore import StoreError
 from tests.test_sensor import NOON, _setup, _state
 
 METER = "sensor.meter_in"

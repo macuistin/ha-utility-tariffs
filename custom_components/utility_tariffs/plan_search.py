@@ -1,7 +1,8 @@
 """Find every plan of the store that fits the current tariff, and sum up how they rank.
 
-`lib/tariffranking` prices plans over measured usage. This module lists which plans to price and
-turns the result into what a sensor shows. It re-prices past usage and never changes the tariff.
+`utility_tariffs_lib.tariffranking` prices plans over measured usage. This module lists which
+plans to price and turns the result into what a sensor shows. It re-prices past usage and
+never changes the tariff.
 """
 
 from __future__ import annotations
@@ -11,8 +12,8 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Protocol
 
-from .lib.tariff import DefinitionError, TariffDefinition
-from .lib.tariffranking import (
+from utility_tariffs_lib.tariff import DefinitionError, TariffDefinition
+from utility_tariffs_lib.tariffranking import (
     TOP,
     Candidate,
     Ranked,
@@ -21,7 +22,7 @@ from .lib.tariffranking import (
     Window,
     rank_sentence,
 )
-from .lib.tariffstore import StoreError
+from utility_tariffs_lib.tariffstore import StoreError
 
 _LOG = logging.getLogger(__name__)
 ALL_AREAS = "all"

@@ -1,7 +1,8 @@
 """
 store_access.py - reads the open tariff store for the screens and the update timer.
 
-The store client (`lib/tariffstore`) is plain blocking Python. This wraps it for Home Assistant:
+The store client (`utility_tariffs_lib.tariffstore`) is plain blocking Python.
+This wraps it for Home Assistant:
 
 - Every call runs in an executor job, never on the event loop.
 - Files are fetched through Home Assistant's shared web session, so the host's proxy and
@@ -25,8 +26,8 @@ from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, TypeVar
 
-from ..lib.tariff import TariffDefinition, parse_definition
-from ..lib.tariffstore import FolderCache, PriceStore, Store, StoreError
+from utility_tariffs_lib.tariff import TariffDefinition, parse_definition
+from utility_tariffs_lib.tariffstore import FolderCache, PriceStore, Store, StoreError
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant

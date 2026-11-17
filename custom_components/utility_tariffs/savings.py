@@ -6,10 +6,7 @@ from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from .bill_period import period_dates, period_rules
-from .const import CONF_BATTERY_CAPACITY, CONF_BATTERY_WEAR
-from .coordinator import TariffData
-from .lib.tariff import (
+from utility_tariffs_lib.tariff import (
     Battery,
     DefinitionSavings,
     SavingsOptions,
@@ -18,6 +15,10 @@ from .lib.tariff import (
     bill_period_bounds,
     definition_savings,
 )
+
+from .bill_period import period_dates, period_rules
+from .const import CONF_BATTERY_CAPACITY, CONF_BATTERY_WEAR
+from .coordinator import TariffData
 
 LOOKBACK_DAYS = 7  # how far back to look for the charge the battery had when the period began
 

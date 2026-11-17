@@ -143,8 +143,9 @@ async def test_a_store_that_fails_later_keeps_the_prices_already_held(
     use_store: Callable[..., Path],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from utility_tariffs_lib.tariffstore import StoreError
+
     from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
-    from custom_components.utility_tariffs.lib.tariffstore import StoreError
 
     freezer.move_to(NOON)
     entry = await _setup(hass)

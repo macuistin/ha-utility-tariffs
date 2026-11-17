@@ -10,7 +10,7 @@
 
 <!-- What you ran and on which Python, what the new tests cover, and what was not verified. -->
 
-- [ ] `ruff check custom_components tests scripts` is clean
+- [ ] `ruff check custom_components tests` is clean
 - [ ] `python -m pytest tests -q` passes
 
 ## Impact
@@ -20,5 +20,5 @@
 ## Checklist
 
 - [ ] The title follows Conventional Commits
-- [ ] No copied file under `lib/` or `tests/lib/` is edited by hand
+- [ ] The tariff library pin moves in `manifest.json`, `requirements-test.txt` and `tests/requirements-floor.txt` together
 - [ ] Docs are updated

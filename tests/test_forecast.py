@@ -13,19 +13,19 @@ from homeassistant.components.number import SERVICE_SET_VALUE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
-
-from custom_components.utility_tariffs import coordinator
-from custom_components.utility_tariffs.const import DOMAIN
-from custom_components.utility_tariffs.helper.store_access import PriceStoreAccess
-from custom_components.utility_tariffs.lib.tariffstore import (
+from utility_tariffs_lib.tariffstore import (
     MemoryCache,
     PriceStore,
     Store,
     folder_reader,
     prices,
 )
-from tests.lib.tariffstore.building import build_store
-from tests.lib.tariffstore.fixtures import flat, write_store
+
+from custom_components.utility_tariffs import coordinator
+from custom_components.utility_tariffs.const import DOMAIN
+from custom_components.utility_tariffs.helper.store_access import PriceStoreAccess
+from tests.support.building import build_store
+from tests.support.fixtures import flat, write_store
 from tests.test_sensor import DATA, NOON, _setup, _state
 
 AGILE_BILL = {"total": {

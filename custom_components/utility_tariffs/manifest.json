@@ -10,6 +10,8 @@
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/macuistin/ha-utility-tariffs/issues",
-  "requirements": [],
+  "requirements": [
+    "utility-tariffs-lib @ https://github.com/macuistin/utility-tariffs/archive/1e5c531548d3dacece13ff91f1cc0001a0b80fed.zip"
+  ],
   "version": "0.1.0a1"
 }

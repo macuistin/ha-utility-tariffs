@@ -13,11 +13,11 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import PERCENTAGE, UnitOfEnergy
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariff import PeriodBill
 
 from .bill import bill_so_far
 from .coordinator import TariffCoordinator
 from .entity import TariffEntity
-from .lib.tariff import PeriodBill
 
 
 @dataclass(frozen=True, kw_only=True)

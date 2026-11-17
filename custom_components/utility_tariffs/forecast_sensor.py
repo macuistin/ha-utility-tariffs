@@ -8,6 +8,7 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.util import dt as dt_util
+from utility_tariffs_lib.tariff import Revision
 
 from .const import (
     CONF_HIGH_PERCENTILE,
@@ -29,7 +30,6 @@ from .forecast import (
     slot_rows,
     window_points,
 )
-from .lib.tariff import Revision
 
 LEVELS = ["low", "mid", "high"]
 

@@ -133,8 +133,8 @@ their answer, so use them with `response_variable`.
 ## How it is built
 
 - All tariff, price, window, ranking, savings and billing code is written and tested in
-  [utility-tariffs](https://github.com/macuistin/utility-tariffs) and copied here unchanged
-  (`custom_components/utility_tariffs/lib/`, each folder with an `UPSTREAM.json`).
+  [utility-tariffs](https://github.com/macuistin/utility-tariffs) and installed from there as one
+  pinned package (`utility-tariffs-lib`, listed in `manifest.json`).
 - The integration is Home Assistant glue around it: the cache, timers, repairs, storage and
   entities.
 - Electricity only to start.
