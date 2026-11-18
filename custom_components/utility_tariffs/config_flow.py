@@ -28,6 +28,7 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
     TimeSelector,
 )
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariffstore import StoreError
 
@@ -64,6 +65,7 @@ from .helper.store_access import TariffStoreAccess
 from .manual import problem_with
 from .store import store_access
 
+OWN_RATES = "own_rates"  # the key of the first choice label in the translations
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
 SINGLE_AREA = "all"
 
@@ -87,9 +89,29 @@ class _Plan:
     tariff_name: str
 
 
-def _progress(step: int, total: int) -> dict[str, str]:
-    """Where the person is in the flow, for the page text."""
-    return {"step": str(step), "total": str(total)}
+def _choices(plans: dict[str, _Plan], own_rates: str) -> dict[str, _Plan | None]:
+    """Readable name to plan, own rates first. A name two plans share gets the plan id added."""
+    ordered = sorted(plans.values(), key=lambda p: (p.provider_name, p.tariff_name))
+    names = [f"{p.provider_name} \u2013 {p.tariff_name}" for p in ordered]
+    choices: dict[str, _Plan | None] = {own_rates: None}
+    for name, plan in zip(names, ordered, strict=True):
+        choices[f"{name} ({plan.tariff})" if names.count(name) > 1 else name] = plan
+    return choices
+
+
+def _plan_schema(names: list[str], previous: dict[str, Any] | None) -> Any:
+    """A searchable list. `custom_value` is what gives the frontend its search box."""
+    selector = SelectSelector(
+        SelectSelectorConfig(options=names, mode=SelectSelectorMode.DROPDOWN, custom_value=True)
+    )
+    default = (previous or {}).get(CONF_TARIFF)
+    key = vol.Required(CONF_TARIFF, description={"suggested_value": default})
+    return _schema({key: selector})
+
+
+def _progress(step: int) -> dict[str, str]:
+    """Which step this page is. The total is not known: the area page only follows some plans."""
+    return {"step": str(step)}
 
 
 class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -108,13 +130,9 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._manual: dict[str, Any] = {}
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Pick a plan from the store, or type in the household's own rates."""
+        """Step 1: the country. Own rates are the first choice on the next page."""
         if self.source != SOURCE_RECONFIGURE and self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
-        return self.async_show_menu(step_id="user", menu_options=["store", "manual"])
-
-    async def async_step_store(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Step 1: the country. The supplier and plan share the next page."""
         access = store_access(self.hass)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]
@@ -123,18 +141,37 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._chosen[CONF_COUNTRY] = user_input[CONF_COUNTRY]
             return await self.async_step_plan()
-        schema = _schema(
-            {vol.Required(CONF_COUNTRY): CountrySelector(CountrySelectorConfig(countries=held))}
-        )
         return self.async_show_form(
-            step_id="store",
-            data_schema=schema,
-            description_placeholders=_progress(1, 2),
+            step_id="user",
+            data_schema=self._country_schema(held),
+            description_placeholders=_progress(1),
             last_step=False,
         )
 
+    def _country_schema(self, held: list[str]) -> Any:
+        """The country list, starting at the followed plan's country or else the home's."""
+        current = self._reconfigure_country() or self.hass.config.country
+        suggested = current if current in held else None
+        return _schema(
+            {
+                vol.Required(CONF_COUNTRY, description={"suggested_value": suggested}): (
+                    CountrySelector(CountrySelectorConfig(countries=held))
+                )
+            }
+        )
+
+    def _reconfigure_country(self) -> str | None:
+        if self.source != SOURCE_RECONFIGURE:
+            return None
+        country = self._get_reconfigure_entry().data.get(CONF_COUNTRY)
+        return country if isinstance(country, str) else None
+
     async def async_step_plan(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Step 2: one list of every plan in force today, each named by supplier and plan."""
+        """Step 2: a searchable list of every plan in force today, own rates first.
+
+        The list allows a typed value so that the frontend shows a search box. The value of a
+        choice is its readable name, and anything that is not one of the names is refused.
+        """
         access = store_access(self.hass)
         try:
             plans = await self._plans(access)
@@ -143,29 +180,34 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cannot_connect")
         if not plans:
             return self.async_abort(reason="no_tariffs")
+        choices = _choices(plans, await self._own_rates_label())
+        errors: dict[str, str] = {}
         if user_input is not None:
-            plan = plans[user_input[CONF_TARIFF]]
-            self._chosen[CONF_PROVIDER], self._chosen[CONF_TARIFF] = plan.provider, plan.tariff
-            self._names["provider"], self._names["tariff"] = plan.provider_name, plan.tariff_name
-            return await self.async_step_area()
-        options = [
-            SelectOptionDict(value=key, label=f"{plan.provider_name} \u2013 {plan.tariff_name}")
-            for key, plan in sorted(
-                plans.items(), key=lambda item: (item[1].provider_name, item[1].tariff_name)
-            )
-        ]
-        schema = _schema(
-            {
-                vol.Required(CONF_TARIFF): SelectSelector(
-                    SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN)
-                )
-            }
-        )
+            if user_input[CONF_TARIFF] in choices:
+                return await self._take(choices[user_input[CONF_TARIFF]])
+            errors["base"] = "unknown_plan"
         return self.async_show_form(
             step_id="plan",
-            data_schema=schema,
-            description_placeholders={**_progress(2, 2), "country_note": note},
+            data_schema=_plan_schema(list(choices), user_input),
+            description_placeholders={**_progress(2), "country_note": note},
+            errors=errors,
         )
+
+    async def _take(self, plan: _Plan | None) -> ConfigFlowResult:
+        """Go on with the chosen plan, or to the own-rates form when none was chosen."""
+        if plan is None:
+            return await self.async_step_manual()
+        self._chosen[CONF_PROVIDER], self._chosen[CONF_TARIFF] = plan.provider, plan.tariff
+        self._names["provider"], self._names["tariff"] = plan.provider_name, plan.tariff_name
+        return await self.async_step_area()
+
+    async def _own_rates_label(self) -> str:
+        """The first choice on the plan page, in the language of the home."""
+        key = f"component.{DOMAIN}.selector.plan_choice.options.{OWN_RATES}"
+        texts = await async_get_translations(
+            self.hass, self.hass.config.language, "selector", [DOMAIN]
+        )
+        return texts.get(key, "Type in my own rates")
 
     async def _plans(self, access: TariffStoreAccess) -> dict[str, _Plan]:
         """Plans with prices in force today, by `provider/tariff`."""
@@ -201,7 +243,10 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_show_form(
                 step_id="area",
                 data_schema=_choice(CONF_AREA, areas),
-                description_placeholders=_progress(3, 3),
+                description_placeholders={
+                    **_progress(3),
+                    "plan": f"{self._names['provider']} {self._names['tariff']}",
+                },
             )
         self._chosen[CONF_AREA] = user_input[CONF_AREA]
         suffix = "" if len(areas) == 1 else f" ({areas[user_input[CONF_AREA]]})"

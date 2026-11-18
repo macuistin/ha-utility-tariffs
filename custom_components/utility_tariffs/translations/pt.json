@@ -2,41 +2,33 @@
   "config": {
     "step": {
       "user": {
-        "title": "Escolher um tarifário",
-        "description": "Escolha um plano do repositório aberto ou introduza os seus próprios preços.",
-        "menu_options": {
-          "store": "Escolher um plano do repositório",
-          "manual": "Introduzir os meus próprios preços"
-        }
-      },
-      "plan": {
-        "title": "Escolher um fornecedor e um plano",
-        "description": "Passo {step} de {total}. Planos com preços em vigor hoje. {country_note}",
-        "data": {
-          "tariff": "Fornecedor e plano"
-        },
-        "data_description": {
-          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje."
-        }
-      },
-      "area": {
-        "title": "Escolher uma zona",
-        "description": "Passo {step} de {total}. Este plano tem preços diferentes consoante a zona.",
-        "data": {
-          "area": "Zona"
-        },
-        "data_description": {
-          "area": "Escolha a zona do seu fornecimento. Costuma constar do nome da sua rede de distribuição ou da sua fatura."
-        }
-      },
-      "store": {
         "title": "Escolher um país",
-        "description": "Passo {step} de {total}. Só são listados os países cujos tarifários o repositório aberto contém.",
+        "description": "Passo {step}. Só são listados os países cujos tarifários o repositório aberto contém.",
         "data": {
           "country": "País"
         },
         "data_description": {
           "country": "O país de cujos fornecedores quer escolher."
+        }
+      },
+      "plan": {
+        "title": "Escolher um fornecedor e um plano",
+        "description": "Passo {step}. Planos com preços em vigor hoje. Só segue um terceiro passo se os preços do plano diferirem consoante a zona. {country_note}",
+        "data": {
+          "tariff": "Fornecedor e plano"
+        },
+        "data_description": {
+          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje. Escolha o seu fornecedor e o seu plano, ou escolha Introduzir os meus preços no topo da lista. Escreva para pesquisar na lista."
+        }
+      },
+      "area": {
+        "title": "Escolher uma zona",
+        "description": "Passo {step}. {plan} tem preços diferentes consoante a zona.",
+        "data": {
+          "area": "Zona"
+        },
+        "data_description": {
+          "area": "Escolha a zona do seu fornecimento. Costuma constar do nome da sua rede de distribuição ou da sua fatura."
         }
       },
       "manual": {
@@ -104,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "Estes preços não podem ser usados. Verifique o código da moeda e os valores.",
-      "empty_period": "O preço tem de começar e terminar a horas diferentes."
+      "empty_period": "O preço tem de começar e terminar a horas diferentes.",
+      "unknown_plan": "Escolha um plano da lista."
     }
   },
   "entity": {
@@ -350,6 +343,11 @@
       "options": {
         "import": "Importação",
         "export": "Exportação"
+      }
+    },
+    "plan_choice": {
+      "options": {
+        "own_rates": "Introduzir os meus preços"
       }
     }
   },

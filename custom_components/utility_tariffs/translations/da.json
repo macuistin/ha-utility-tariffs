@@ -2,41 +2,33 @@
   "config": {
     "step": {
       "user": {
-        "title": "Vælg en tarif",
-        "description": "Vælg en plan fra det åbne lager, eller indtast dine egne priser.",
-        "menu_options": {
-          "store": "Vælg en plan fra lageret",
-          "manual": "Indtast mine egne priser"
-        }
-      },
-      "plan": {
-        "title": "Vælg en leverandør og en plan",
-        "description": "Trin {step} af {total}. Planer med priser, der gælder i dag. {country_note}",
-        "data": {
-          "tariff": "Leverandør og plan"
-        },
-        "data_description": {
-          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises."
-        }
-      },
-      "area": {
-        "title": "Vælg et område",
-        "description": "Trin {step} af {total}. Denne plan har forskellige priser i forskellige områder.",
-        "data": {
-          "area": "Område"
-        },
-        "data_description": {
-          "area": "Vælg dit forsyningsområde. Det står som regel i navnet på dit netselskab eller på din regning."
-        }
-      },
-      "store": {
         "title": "Vælg et land",
-        "description": "Trin {step} af {total}. Kun lande, hvis tariffer det åbne lager rummer, vises.",
+        "description": "Trin {step}. Kun lande, hvis tariffer det åbne lager rummer, vises.",
         "data": {
           "country": "Land"
         },
         "data_description": {
           "country": "Det land, hvis leverandører du vil vælge imellem."
+        }
+      },
+      "plan": {
+        "title": "Vælg en leverandør og en plan",
+        "description": "Trin {step}. Planer med priser, der gælder i dag. Et tredje trin følger kun, hvis planens priser er forskellige fra område til område. {country_note}",
+        "data": {
+          "tariff": "Leverandør og plan"
+        },
+        "data_description": {
+          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises. Vælg din leverandør og din plan, eller vælg Indtast mine egne priser øverst på listen. Skriv for at søge i listen."
+        }
+      },
+      "area": {
+        "title": "Vælg et område",
+        "description": "Trin {step}. {plan} har forskellige priser i forskellige områder.",
+        "data": {
+          "area": "Område"
+        },
+        "data_description": {
+          "area": "Vælg dit forsyningsområde. Det står som regel i navnet på dit netselskab eller på din regning."
         }
       },
       "manual": {
@@ -104,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "Disse priser kan ikke bruges. Tjek valutakoden og værdierne.",
-      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter."
+      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter.",
+      "unknown_plan": "Vælg en plan fra listen."
     }
   },
   "entity": {
@@ -350,6 +343,11 @@
       "options": {
         "import": "Import",
         "export": "Eksport"
+      }
+    },
+    "plan_choice": {
+      "options": {
+        "own_rates": "Indtast mine egne priser"
       }
     }
   },

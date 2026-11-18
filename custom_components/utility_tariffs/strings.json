@@ -2,41 +2,33 @@
   "config": {
     "step": {
       "user": {
-        "title": "Choose a tariff",
-        "description": "Pick a plan from the open store, or type in your own rates.",
-        "menu_options": {
-          "store": "Pick a plan from the store",
-          "manual": "Type in my own rates"
-        }
-      },
-      "plan": {
-        "title": "Choose a supplier and plan",
-        "description": "Step {step} of {total}. Plans with prices in force today. {country_note}",
-        "data": {
-          "tariff": "Supplier and plan"
-        },
-        "data_description": {
-          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed."
-        }
-      },
-      "area": {
-        "title": "Choose an area",
-        "description": "Step {step} of {total}. This plan has different prices in different areas.",
-        "data": {
-          "area": "Area"
-        },
-        "data_description": {
-          "area": "Pick the area of your supply. It is usually in the name of your distribution network or on your bill."
-        }
-      },
-      "store": {
         "title": "Choose a country",
-        "description": "Step {step} of {total}. Only countries whose tariffs the open store holds are listed.",
+        "description": "Step {step}. Only countries whose tariffs the open store holds are listed.",
         "data": {
           "country": "Country"
         },
         "data_description": {
           "country": "The country whose suppliers you want to choose from."
+        }
+      },
+      "plan": {
+        "title": "Choose a supplier and plan",
+        "description": "Step {step}. Plans with prices in force today. A third step follows only if the plan's prices differ by area. {country_note}",
+        "data": {
+          "tariff": "Supplier and plan"
+        },
+        "data_description": {
+          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed. Choose your supplier and plan, or choose Type in my own rates at the top of the list. Type to search the list."
+        }
+      },
+      "area": {
+        "title": "Choose an area",
+        "description": "Step {step}. {plan} has different prices in different areas.",
+        "data": {
+          "area": "Area"
+        },
+        "data_description": {
+          "area": "Pick the area of your supply. It is usually in the name of your distribution network or on your bill."
         }
       },
       "manual": {
@@ -104,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
-      "empty_period": "The rate must start and end at different times."
+      "empty_period": "The rate must start and end at different times.",
+      "unknown_plan": "Choose a plan from the list."
     }
   },
   "entity": {
@@ -350,6 +343,11 @@
       "options": {
         "import": "Import",
         "export": "Export"
+      }
+    },
+    "plan_choice": {
+      "options": {
+        "own_rates": "Type in my own rates"
       }
     }
   },
