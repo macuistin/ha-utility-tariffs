@@ -18,7 +18,7 @@
           "tariff": "Fornecedor e plano"
         },
         "data_description": {
-          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje. Escolha o seu fornecedor e o seu plano, ou escolha Introduzir os meus preços no topo da lista."
+          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje. Escolha o seu fornecedor e o seu plano, ou escolha Introduzir os meus preços no topo da lista. Escreva para pesquisar na lista."
         }
       },
       "area": {
@@ -96,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "Estes preços não podem ser usados. Verifique o código da moeda e os valores.",
-      "empty_period": "O preço tem de começar e terminar a horas diferentes."
+      "empty_period": "O preço tem de começar e terminar a horas diferentes.",
+      "unknown_plan": "Escolha um plano da lista."
     }
   },
   "entity": {

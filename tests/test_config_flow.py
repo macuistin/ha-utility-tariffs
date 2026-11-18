@@ -30,7 +30,7 @@ async def test_a_plan_with_areas_is_chosen_in_three_pages(
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     assert result["step_id"] == "plan"
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"tariff": "p/plan"}
+        result["flow_id"], {"tariff": "P Energy \u2013 Plan"}
     )
     assert result["step_id"] == "area"
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"area": "urban"})
@@ -59,7 +59,7 @@ async def test_the_pages_say_where_the_person_is_and_what_comes_next(
     assert result["description_placeholders"]["step"] == "2"
     assert result["description_placeholders"]["country_note"] == ""
     options = result["data_schema"].schema["tariff"].config["options"]
-    assert [o["label"] for o in options[1:]] == [
+    assert options[1:] == [
         "P Energy \u2013 Flat",
         "P Energy \u2013 Plan",
     ]
@@ -98,10 +98,11 @@ async def test_own_rates_are_the_first_choice_on_the_plan_page(
     result = await _start(hass)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     options = result["data_schema"].schema["tariff"].config["options"]
-    assert options[0] == {"value": "own_rates", "label": "Type in my own rates"}
+    assert options[0] == "Type in my own rates"
+    assert result["data_schema"].schema["tariff"].config["custom_value"] is True  # gives a search box
 
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"tariff": "own_rates"}
+        result["flow_id"], {"tariff": "Type in my own rates"}
     )
     assert result["step_id"] == "manual"
 
@@ -113,13 +114,22 @@ async def test_the_own_rates_choice_is_in_the_language_of_the_home(
     result = await _to(hass, ("country", "IE"))
     options = result["data_schema"].schema["tariff"].config["options"]
 
-    assert options[0]["label"] == "Saisir mes propres tarifs"
+    assert options[0] == "Saisir mes propres tarifs"
+
+
+async def test_a_typed_value_that_is_not_a_listed_plan_is_refused(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    result = await _to(hass, ("country", "IE"), ("tariff", "Not a plan"))
+
+    assert result["step_id"] == "plan"
+    assert result["errors"] == {"base": "unknown_plan"}
 
 
 async def test_the_area_page_names_the_plan(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
-    result = await _to(hass, ("country", "IE"), ("tariff", "p/plan"))
+    result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Plan"))
 
     assert result["step_id"] == "area"
     assert result["description_placeholders"] == {"step": "3", "plan": "P Energy Plan"}
@@ -130,7 +140,7 @@ async def test_a_plan_with_one_price_skips_the_area_step(
 ) -> None:
     result = await _start(hass)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "p/flat"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "P Energy \u2013 Flat"})
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "P Energy Flat"
@@ -239,7 +249,7 @@ async def test_a_plan_whose_file_cannot_be_read_aborts_at_the_area(
         raise StoreError("down")
 
     monkeypatch.setattr(TariffStoreAccess, "async_areas", fail)
-    result = await _to(hass, ("country", "IE"), ("tariff", "p/plan"))
+    result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Plan"))
 
     assert result["reason"] == "cannot_connect"
 
@@ -250,7 +260,7 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
     from homeassistant.helpers import entity_registry as er
 
     first = await _to(
-        hass, ("country", "IE"), ("tariff", "p/plan"), ("area", "urban")
+        hass, ("country", "IE"), ("tariff", "P Energy \u2013 Plan"), ("area", "urban")
     )
     entry = first["result"]
     await hass.async_block_till_done()
@@ -263,7 +273,7 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
 
     result = await _reconfigure(hass, entry)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "p/flat"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "P Energy \u2013 Flat"})
     await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.ABORT
@@ -304,7 +314,7 @@ async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
     assert all(uid.startswith("IE/p/plan/urban_") for uid in before)
 
     result = await _reconfigure(hass, old)
-    for key, value in (("country", "IE"), ("tariff", "p/flat")):
+    for key, value in (("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
     await hass.async_block_till_done()
 
@@ -323,7 +333,7 @@ async def test_changing_to_a_plan_already_followed_is_refused(
     other = MockConfigEntry(domain=DOMAIN, unique_id="IE/p/plan/urban", data={"entity_key": "x"})
     other.add_to_hass(hass)
     result = await _reconfigure(hass, other)
-    for key, value in (("country", "IE"), ("tariff", "p/flat")):
+    for key, value in (("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
 
     assert result["reason"] == "already_configured"
@@ -332,7 +342,7 @@ async def test_changing_to_a_plan_already_followed_is_refused(
 async def test_the_bill_dates_are_saved_as_options(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
-    result = await _to(hass, ("country", "IE"), ("tariff", "p/flat"))
+    result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Flat"))
     entry = result["result"]
     flow = await hass.config_entries.options.async_init(entry.entry_id)
     flow = await hass.config_entries.options.async_configure(

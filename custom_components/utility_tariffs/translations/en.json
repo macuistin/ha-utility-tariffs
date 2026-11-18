@@ -18,7 +18,7 @@
           "tariff": "Supplier and plan"
         },
         "data_description": {
-          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed. Choose your supplier and plan, or choose Type in my own rates at the top of the list."
+          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed. Choose your supplier and plan, or choose Type in my own rates at the top of the list. Type to search the list."
         }
       },
       "area": {
@@ -96,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
-      "empty_period": "The rate must start and end at different times."
+      "empty_period": "The rate must start and end at different times.",
+      "unknown_plan": "Choose a plan from the list."
     }
   },
   "entity": {

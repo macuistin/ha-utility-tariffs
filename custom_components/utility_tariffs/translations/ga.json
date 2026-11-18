@@ -18,7 +18,7 @@
           "tariff": "Soláthraí agus plean"
         },
         "data_description": {
-          "tariff": "Do sholáthraí leictreachais agus an plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu. Roghnaigh do sholáthraí agus do phlean, nó roghnaigh Cuir isteach mo phraghsanna féin ag barr an liosta."
+          "tariff": "Do sholáthraí leictreachais agus an plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu. Roghnaigh do sholáthraí agus do phlean, nó roghnaigh Cuir isteach mo phraghsanna féin ag barr an liosta. Clóscríobh chun cuardach a dhéanamh ar an liosta."
         }
       },
       "area": {
@@ -96,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "Ní féidir na rátaí seo a úsáid. Seiceáil an cód airgeadra agus na luachanna.",
-      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla."
+      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla.",
+      "unknown_plan": "Roghnaigh plean ón liosta."
     }
   },
   "entity": {

@@ -65,7 +65,7 @@ from .helper.store_access import TariffStoreAccess
 from .manual import problem_with
 from .store import store_access
 
-OWN_RATES = "own_rates"  # the first choice on the plan page, never a plan id
+OWN_RATES = "own_rates"  # the key of the first choice label in the translations
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
 SINGLE_AREA = "all"
 
@@ -87,6 +87,26 @@ class _Plan:
     tariff: str
     provider_name: str
     tariff_name: str
+
+
+def _choices(plans: dict[str, _Plan], own_rates: str) -> dict[str, _Plan | None]:
+    """Readable name to plan, own rates first. A name two plans share gets the plan id added."""
+    ordered = sorted(plans.values(), key=lambda p: (p.provider_name, p.tariff_name))
+    names = [f"{p.provider_name} \u2013 {p.tariff_name}" for p in ordered]
+    choices: dict[str, _Plan | None] = {own_rates: None}
+    for name, plan in zip(names, ordered, strict=True):
+        choices[f"{name} ({plan.tariff})" if names.count(name) > 1 else name] = plan
+    return choices
+
+
+def _plan_schema(names: list[str], previous: dict[str, Any] | None) -> Any:
+    """A searchable list. `custom_value` is what gives the frontend its search box."""
+    selector = SelectSelector(
+        SelectSelectorConfig(options=names, mode=SelectSelectorMode.DROPDOWN, custom_value=True)
+    )
+    default = (previous or {}).get(CONF_TARIFF)
+    key = vol.Required(CONF_TARIFF, description={"suggested_value": default})
+    return _schema({key: selector})
 
 
 def _progress(step: int) -> dict[str, str]:
@@ -147,7 +167,11 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         return country if isinstance(country, str) else None
 
     async def async_step_plan(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Step 2: one list of every plan in force today, each named by supplier and plan."""
+        """Step 2: a searchable list of every plan in force today, own rates first.
+
+        The list allows a typed value so that the frontend shows a search box. The value of a
+        choice is its readable name, and anything that is not one of the names is refused.
+        """
         access = store_access(self.hass)
         try:
             plans = await self._plans(access)
@@ -156,32 +180,26 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cannot_connect")
         if not plans:
             return self.async_abort(reason="no_tariffs")
-        if user_input is not None and user_input[CONF_TARIFF] == OWN_RATES:
-            return await self.async_step_manual()
+        choices = _choices(plans, await self._own_rates_label())
+        errors: dict[str, str] = {}
         if user_input is not None:
-            plan = plans[user_input[CONF_TARIFF]]
-            self._chosen[CONF_PROVIDER], self._chosen[CONF_TARIFF] = plan.provider, plan.tariff
-            self._names["provider"], self._names["tariff"] = plan.provider_name, plan.tariff_name
-            return await self.async_step_area()
-        options = [SelectOptionDict(value=OWN_RATES, label=await self._own_rates_label())]
-        options += [
-            SelectOptionDict(value=key, label=f"{plan.provider_name} \u2013 {plan.tariff_name}")
-            for key, plan in sorted(
-                plans.items(), key=lambda item: (item[1].provider_name, item[1].tariff_name)
-            )
-        ]
-        schema = _schema(
-            {
-                vol.Required(CONF_TARIFF): SelectSelector(
-                    SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN)
-                )
-            }
-        )
+            if user_input[CONF_TARIFF] in choices:
+                return await self._take(choices[user_input[CONF_TARIFF]])
+            errors["base"] = "unknown_plan"
         return self.async_show_form(
             step_id="plan",
-            data_schema=schema,
+            data_schema=_plan_schema(list(choices), user_input),
             description_placeholders={**_progress(2), "country_note": note},
+            errors=errors,
         )
+
+    async def _take(self, plan: _Plan | None) -> ConfigFlowResult:
+        """Go on with the chosen plan, or to the own-rates form when none was chosen."""
+        if plan is None:
+            return await self.async_step_manual()
+        self._chosen[CONF_PROVIDER], self._chosen[CONF_TARIFF] = plan.provider, plan.tariff
+        self._names["provider"], self._names["tariff"] = plan.provider_name, plan.tariff_name
+        return await self.async_step_area()
 
     async def _own_rates_label(self) -> str:
         """The first choice on the plan page, in the language of the home."""

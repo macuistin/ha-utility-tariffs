@@ -18,7 +18,7 @@
           "tariff": "Fournisseur et offre"
         },
         "data_description": {
-          "tariff": "Votre fournisseur d'électricité et l'offre que vous avez souscrite. Seules les offres dont les prix sont en vigueur aujourd'hui sont listées. Choisissez votre fournisseur et votre offre, ou « Saisir mes propres tarifs » en haut de la liste."
+          "tariff": "Votre fournisseur d'électricité et l'offre que vous avez souscrite. Seules les offres dont les prix sont en vigueur aujourd'hui sont listées. Choisissez votre fournisseur et votre offre, ou « Saisir mes propres tarifs » en haut de la liste. Saisissez du texte pour chercher dans la liste."
         }
       },
       "area": {
@@ -96,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "Ces tarifs ne peuvent pas être utilisés. Vérifiez le code de devise et les valeurs.",
-      "empty_period": "Le tarif doit commencer et se terminer à des heures différentes."
+      "empty_period": "Le tarif doit commencer et se terminer à des heures différentes.",
+      "unknown_plan": "Choisissez une offre dans la liste."
     }
   },
   "entity": {

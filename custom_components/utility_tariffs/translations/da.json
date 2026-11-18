@@ -18,7 +18,7 @@
           "tariff": "Leverandør og plan"
         },
         "data_description": {
-          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises. Vælg din leverandør og din plan, eller vælg Indtast mine egne priser øverst på listen."
+          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises. Vælg din leverandør og din plan, eller vælg Indtast mine egne priser øverst på listen. Skriv for at søge i listen."
         }
       },
       "area": {
@@ -96,7 +96,8 @@
     },
     "error": {
       "invalid_tariff": "Disse priser kan ikke bruges. Tjek valutakoden og værdierne.",
-      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter."
+      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter.",
+      "unknown_plan": "Vælg en plan fra listen."
     }
   },
   "entity": {
