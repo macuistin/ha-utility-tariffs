@@ -5,6 +5,15 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Changed**
+
+- Setup has two pages instead of three for most plans: the country, then one list of every supplier
+  and plan for it. The area page appears only for a plan priced by area. Each page says which step
+  it is, and the buttons read Next until the last page. Where the store holds only part of a
+  country's prices, the plan page says what is missing.
+- The Tariff summary sensor has two new attributes, `country_availability` and `country_reason`,
+  taken from the store's country index.
+
 **Added**
 
 - Translations of the setup, options, entity names, service actions and repairs into French, Danish,

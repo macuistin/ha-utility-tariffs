@@ -9,28 +9,19 @@
           "manual": "Mo ráta féin a chlóscríobh isteach"
         }
       },
-      "provider": {
-        "title": "Roghnaigh soláthraí",
+      "plan": {
+        "title": "Roghnaigh soláthraí agus plean",
+        "description": "Céim {step} de {total}. Pleananna a bhfuil praghsanna i bhfeidhm inniu acu. {country_note}",
         "data": {
-          "provider": "Soláthraí"
+          "tariff": "Soláthraí agus plean"
         },
         "data_description": {
-          "provider": "Do sholáthraí leictreachais."
-        }
-      },
-      "tariff": {
-        "title": "Roghnaigh plean",
-        "description": "Pleananna a bhfuil praghsanna i bhfeidhm inniu acu.",
-        "data": {
-          "tariff": "Plean"
-        },
-        "data_description": {
-          "tariff": "An plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu."
+          "tariff": "Do sholáthraí leictreachais agus an plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu."
         }
       },
       "area": {
         "title": "Roghnaigh ceantar",
-        "description": "Tá praghsanna éagsúla ag an bplean seo i gceantair éagsúla.",
+        "description": "Céim {step} de {total}. Tá praghsanna éagsúla ag an bplean seo i gceantair éagsúla.",
         "data": {
           "area": "Ceantar"
         },
@@ -40,7 +31,7 @@
       },
       "store": {
         "title": "Roghnaigh tír",
-        "description": "Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte.",
+        "description": "Céim {step} de {total}. Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte.",
         "data": {
           "country": "Tír"
         },

@@ -88,6 +88,8 @@ class TariffData:
     feeds: tuple[str, ...] = ()  # the price feeds the tariff reads, empty for fixed prices
     horizon_end: datetime | None = None  # how far ahead the prices were asked for
     read_at: datetime | None = None  # when the store was last read, UTC. Unchanged on a failed read
+    country_availability: str | None = None  # "available" or "partial", from the store's index
+    country_reason: str | None = None  # what the store says is missing for a partial country
 
     @property
     def on_a_feed(self) -> bool:
@@ -285,6 +287,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             except StoreError:
                 is_holiday, holidays_known = no_holidays, False
             revisions = [Revision(today, definition), *await self._later_revisions(today)]
+        availability, reason = await self._country_status()
         names = tuple(dict.fromkeys(n for r in revisions for n in series_names(r.definition)))
         runs = await self._read_feeds(names, today)
         start, end = self._range(definition, today, feed=bool(names))
@@ -299,8 +302,18 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             )
         return TariffData(
             definition, slots, holidays_known, is_holiday, tuple(revisions),
-            tuple(feed_of(name) for name in names), end, self._read_time(),
+            tuple(feed_of(name) for name in names), end, self._read_time(), availability, reason,
         )
+
+    async def _country_status(self) -> tuple[str | None, str | None]:
+        """How complete the store says this country is, and why. Nothing for own rates."""
+        if CONF_MANUAL in self.config_entry.data:
+            return None, None
+        try:
+            row = (await self._access.async_countries()).get(self.config_entry.data[CONF_COUNTRY])
+        except STORE_ERRORS:
+            return None, None
+        return (row.get("availability"), row.get("reason")) if row else (None, None)
 
     def _read_time(self) -> datetime | None:
         """Now, unless the store was unreachable and the answer came from saved files: then the

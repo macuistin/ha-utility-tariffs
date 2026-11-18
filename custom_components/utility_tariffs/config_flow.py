@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import voluptuous as vol
@@ -24,6 +25,7 @@ from homeassistant.helpers.selector import (
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
+    SelectSelectorMode,
     TimeSelector,
 )
 from homeassistant.util import dt as dt_util
@@ -58,6 +60,7 @@ from .const import (
     MIN_WINDOW_MINUTES,
     WINDOW_STEP_MINUTES,
 )
+from .helper.store_access import TariffStoreAccess
 from .manual import problem_with
 from .store import store_access
 
@@ -76,8 +79,21 @@ def _choice(key: str, options: dict[str, str]) -> Any:
     return _schema({vol.Required(key): SelectSelector(SelectSelectorConfig(options=items))})
 
 
+@dataclass(frozen=True)
+class _Plan:
+    provider: str
+    tariff: str
+    provider_name: str
+    tariff_name: str
+
+
+def _progress(step: int, total: int) -> dict[str, str]:
+    """Where the person is in the flow, for the page text."""
+    return {"step": str(step), "total": str(total)}
+
+
 class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Four short steps, each limited to what the store holds."""
+    """Country, then supplier and plan together, then an area only where the plan has one."""
 
     VERSION = 1
 
@@ -98,6 +114,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_menu(step_id="user", menu_options=["store", "manual"])
 
     async def async_step_store(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Step 1: the country. The supplier and plan share the next page."""
         access = store_access(self.hass)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]
@@ -105,46 +122,69 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cannot_connect")
         if user_input is not None:
             self._chosen[CONF_COUNTRY] = user_input[CONF_COUNTRY]
-            return await self.async_step_provider()
+            return await self.async_step_plan()
         schema = _schema(
             {vol.Required(CONF_COUNTRY): CountrySelector(CountrySelectorConfig(countries=held))}
         )
-        return self.async_show_form(step_id="store", data_schema=schema)
-
-    async def async_step_provider(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        access = store_access(self.hass)
-        try:
-            providers = await access.async_providers(self._chosen[CONF_COUNTRY])
-        except STORE_ERRORS:
-            return self.async_abort(reason="cannot_connect")
-        if user_input is not None:
-            self._chosen[CONF_PROVIDER] = user_input[CONF_PROVIDER]
-            self._names["provider"] = providers[user_input[CONF_PROVIDER]]
-            return await self.async_step_tariff()
         return self.async_show_form(
-            step_id="provider", data_schema=_choice(CONF_PROVIDER, providers)
+            step_id="store",
+            data_schema=schema,
+            description_placeholders=_progress(1, 2),
+            last_step=False,
         )
 
-    async def async_step_tariff(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_plan(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Step 2: one list of every plan in force today, each named by supplier and plan."""
         access = store_access(self.hass)
-        today = dt_util.now().date()
         try:
-            tariffs = await access.async_tariffs(
-                self._chosen[CONF_COUNTRY], self._chosen[CONF_PROVIDER], today
-            )
+            plans = await self._plans(access)
+            note = await self._country_note(access)
         except STORE_ERRORS:
             return self.async_abort(reason="cannot_connect")
-        if not tariffs:
+        if not plans:
             return self.async_abort(reason="no_tariffs")
         if user_input is not None:
-            self._chosen[CONF_TARIFF] = user_input[CONF_TARIFF]
-            self._names["tariff"] = tariffs[user_input[CONF_TARIFF]]
+            plan = plans[user_input[CONF_TARIFF]]
+            self._chosen[CONF_PROVIDER], self._chosen[CONF_TARIFF] = plan.provider, plan.tariff
+            self._names["provider"], self._names["tariff"] = plan.provider_name, plan.tariff_name
             return await self.async_step_area()
-        return self.async_show_form(step_id="tariff", data_schema=_choice(CONF_TARIFF, tariffs))
+        options = [
+            SelectOptionDict(value=key, label=f"{plan.provider_name} \u2013 {plan.tariff_name}")
+            for key, plan in sorted(
+                plans.items(), key=lambda item: (item[1].provider_name, item[1].tariff_name)
+            )
+        ]
+        schema = _schema(
+            {
+                vol.Required(CONF_TARIFF): SelectSelector(
+                    SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN)
+                )
+            }
+        )
+        return self.async_show_form(
+            step_id="plan",
+            data_schema=schema,
+            description_placeholders={**_progress(2, 2), "country_note": note},
+        )
+
+    async def _plans(self, access: TariffStoreAccess) -> dict[str, _Plan]:
+        """Plans with prices in force today, by `provider/tariff`."""
+        today = dt_util.now().date()
+        country = self._chosen[CONF_COUNTRY]
+        plans: dict[str, _Plan] = {}
+        for provider, provider_name in (await access.async_providers(country)).items():
+            for tariff, name in (await access.async_tariffs(country, provider, today)).items():
+                plans[f"{provider}/{tariff}"] = _Plan(provider, tariff, provider_name, name)
+        return plans
+
+    async def _country_note(self, access: TariffStoreAccess) -> str:
+        """What the store says is missing for this country, as a read-only line. Empty if nothing."""
+        row = (await access.async_countries()).get(self._chosen[CONF_COUNTRY], {})
+        reason = row.get("reason")
+        return f"\n\n**{self._chosen[CONF_COUNTRY]}:** {reason}" if reason else ""
 
     async def async_step_area(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Step 3, only for a plan that is priced by area."""
         access = store_access(self.hass)
         try:
             areas = await access.async_areas(
@@ -158,11 +198,14 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is None and len(areas) == 1:
             user_input = {CONF_AREA: next(iter(areas))}
         if user_input is None:
-            return self.async_show_form(step_id="area", data_schema=_choice(CONF_AREA, areas))
+            return self.async_show_form(
+                step_id="area",
+                data_schema=_choice(CONF_AREA, areas),
+                description_placeholders=_progress(3, 3),
+            )
         self._chosen[CONF_AREA] = user_input[CONF_AREA]
         suffix = "" if len(areas) == 1 else f" ({areas[user_input[CONF_AREA]]})"
         return await self._create(f"{self._names['provider']} {self._names['tariff']}{suffix}")
-
 
     async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """The base rates of a tariff that is not in the store."""
@@ -178,6 +221,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="manual",
             data_schema=_manual_schema(self.hass, user_input),
             errors=errors,
+            last_step=False,
         )
 
     async def async_step_manual_more(
@@ -201,7 +245,10 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._manual = trial
                 return await self.async_step_manual_more()
         return self.async_show_form(
-            step_id="manual_period", data_schema=_period_schema(user_input), errors=errors
+            step_id="manual_period",
+            data_schema=_period_schema(user_input),
+            errors=errors,
+            last_step=False,
         )
 
     async def async_step_manual_done(

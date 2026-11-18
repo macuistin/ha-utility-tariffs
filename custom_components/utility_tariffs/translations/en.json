@@ -9,28 +9,19 @@
           "manual": "Type in my own rates"
         }
       },
-      "provider": {
-        "title": "Choose a supplier",
+      "plan": {
+        "title": "Choose a supplier and plan",
+        "description": "Step {step} of {total}. Plans with prices in force today. {country_note}",
         "data": {
-          "provider": "Supplier"
+          "tariff": "Supplier and plan"
         },
         "data_description": {
-          "provider": "Your electricity supplier."
-        }
-      },
-      "tariff": {
-        "title": "Choose a plan",
-        "description": "Plans with prices in force today.",
-        "data": {
-          "tariff": "Plan"
-        },
-        "data_description": {
-          "tariff": "The plan you are on. Only plans with prices in force today are listed."
+          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed."
         }
       },
       "area": {
         "title": "Choose an area",
-        "description": "This plan has different prices in different areas.",
+        "description": "Step {step} of {total}. This plan has different prices in different areas.",
         "data": {
           "area": "Area"
         },
@@ -40,7 +31,7 @@
       },
       "store": {
         "title": "Choose a country",
-        "description": "Only countries whose tariffs the open store holds are listed.",
+        "description": "Step {step} of {total}. Only countries whose tariffs the open store holds are listed.",
         "data": {
           "country": "Country"
         },
