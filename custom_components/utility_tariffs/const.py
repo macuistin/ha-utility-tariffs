@@ -33,6 +33,7 @@ MAX_BILL_START_DAY = 28
 
 # Actions in the options form, never saved: read the store again now, or delete the saved files.
 CONF_REFRESH_NOW = "refresh_now"
+CONF_OWN_RATES = "own_rates"  # setup only: a ticked box on the first page, never stored
 CONF_CLEAR_CACHE = "clear_cache"
 
 CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows

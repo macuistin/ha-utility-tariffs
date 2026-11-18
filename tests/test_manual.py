@@ -34,8 +34,7 @@ async def _step(hass: HomeAssistant, result, user_input):
 
 async def _to_base_form(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert result["type"] is FlowResultType.MENU
-    return await _step(hass, result, {"next_step_id": "manual"})
+    return await _step(hass, result, {"own_rates": True})
 
 
 async def _make(hass: HomeAssistant):
@@ -122,7 +121,6 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     freezer.move_to("2026-11-14 12:00:00+00:00")
     await hass.config.async_set_time_zone("Europe/Dublin")
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    result = await _step(hass, result, {"next_step_id": "store"})
     for key, value in (("country", "IE"), ("tariff", "p/flat")):
         result = await _step(hass, result, {key: value})
     entry = result["result"]
@@ -136,7 +134,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id}
     )
-    result = await _step(hass, result, {"next_step_id": "manual"})
+    result = await _step(hass, result, {"own_rates": True})
     result = await _step(hass, result, BASE)
     result = await _step(hass, result, {"next_step_id": "manual_done"})
     await hass.async_block_till_done()

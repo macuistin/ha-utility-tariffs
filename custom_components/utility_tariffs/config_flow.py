@@ -49,6 +49,7 @@ from .const import (
     CONF_IMPORT_ENERGY,
     CONF_MANUAL,
     CONF_NAME,
+    CONF_OWN_RATES,
     CONF_PROVIDER,
     CONF_REFRESH_NOW,
     CONF_TARIFF,
@@ -87,9 +88,9 @@ class _Plan:
     tariff_name: str
 
 
-def _progress(step: int, total: int) -> dict[str, str]:
-    """Where the person is in the flow, for the page text."""
-    return {"step": str(step), "total": str(total)}
+def _progress(step: int) -> dict[str, str]:
+    """Which step this page is. The total is not known: the area page only follows some plans."""
+    return {"step": str(step)}
 
 
 class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -108,30 +109,49 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._manual: dict[str, Any] = {}
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Pick a plan from the store, or type in the household's own rates."""
+        """Step 1: the country, or a way out to the household's own rates."""
         if self.source != SOURCE_RECONFIGURE and self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
-        return self.async_show_menu(step_id="user", menu_options=["store", "manual"])
-
-    async def async_step_store(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Step 1: the country. The supplier and plan share the next page."""
         access = store_access(self.hass)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]
         except STORE_ERRORS:
             return self.async_abort(reason="cannot_connect")
+        errors: dict[str, str] = {}
         if user_input is not None:
-            self._chosen[CONF_COUNTRY] = user_input[CONF_COUNTRY]
-            return await self.async_step_plan()
-        schema = _schema(
-            {vol.Required(CONF_COUNTRY): CountrySelector(CountrySelectorConfig(countries=held))}
-        )
+            if user_input.get(CONF_OWN_RATES):
+                return await self.async_step_manual()
+            if user_input.get(CONF_COUNTRY):
+                self._chosen[CONF_COUNTRY] = user_input[CONF_COUNTRY]
+                return await self.async_step_plan()
+            errors["base"] = "choose_country"
         return self.async_show_form(
-            step_id="store",
-            data_schema=schema,
-            description_placeholders=_progress(1, 2),
+            step_id="user",
+            data_schema=self._country_schema(held),
+            description_placeholders=_progress(1),
+            errors=errors,
             last_step=False,
         )
+
+    def _country_schema(self, held: list[str]) -> Any:
+        """The country list, starting at the followed plan's country or else the home's."""
+        current = self._reconfigure_country() or self.hass.config.country
+        config = CountrySelectorConfig(countries=held)
+        suggested = current if current in held else None
+        return _schema(
+            {
+                vol.Optional(CONF_COUNTRY, description={"suggested_value": suggested}): (
+                    CountrySelector(config)
+                ),
+                vol.Optional(CONF_OWN_RATES, default=False): bool,
+            }
+        )
+
+    def _reconfigure_country(self) -> str | None:
+        if self.source != SOURCE_RECONFIGURE:
+            return None
+        country = self._get_reconfigure_entry().data.get(CONF_COUNTRY)
+        return country if isinstance(country, str) else None
 
     async def async_step_plan(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Step 2: one list of every plan in force today, each named by supplier and plan."""
@@ -164,7 +184,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="plan",
             data_schema=schema,
-            description_placeholders={**_progress(2, 2), "country_note": note},
+            description_placeholders={**_progress(2), "country_note": note},
         )
 
     async def _plans(self, access: TariffStoreAccess) -> dict[str, _Plan]:
@@ -201,7 +221,10 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_show_form(
                 step_id="area",
                 data_schema=_choice(CONF_AREA, areas),
-                description_placeholders=_progress(3, 3),
+                description_placeholders={
+                    **_progress(3),
+                    "plan": f"{self._names['provider']} {self._names['tariff']}",
+                },
             )
         self._chosen[CONF_AREA] = user_input[CONF_AREA]
         suffix = "" if len(areas) == 1 else f" ({areas[user_input[CONF_AREA]]})"

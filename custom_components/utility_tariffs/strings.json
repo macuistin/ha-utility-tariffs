@@ -2,16 +2,20 @@
   "config": {
     "step": {
       "user": {
-        "title": "Choose a tariff",
-        "description": "Pick a plan from the open store, or type in your own rates.",
-        "menu_options": {
-          "store": "Pick a plan from the store",
-          "manual": "Type in my own rates"
+        "title": "Choose a country",
+        "description": "Step {step}. Only countries whose tariffs the open store holds are listed. Leave the box unticked to pick a plan from the store.",
+        "data": {
+          "country": "Country",
+          "own_rates": "My plan is not listed: type in my own rates"
+        },
+        "data_description": {
+          "country": "The country whose suppliers you want to choose from.",
+          "own_rates": "Tick this to enter the prices from your bill instead of choosing from the store."
         }
       },
       "plan": {
         "title": "Choose a supplier and plan",
-        "description": "Step {step} of {total}. Plans with prices in force today. {country_note}",
+        "description": "Step {step}. Plans with prices in force today. A third step follows only if the plan's prices differ by area. {country_note}",
         "data": {
           "tariff": "Supplier and plan"
         },
@@ -21,22 +25,12 @@
       },
       "area": {
         "title": "Choose an area",
-        "description": "Step {step} of {total}. This plan has different prices in different areas.",
+        "description": "Step {step}. {plan} has different prices in different areas.",
         "data": {
           "area": "Area"
         },
         "data_description": {
           "area": "Pick the area of your supply. It is usually in the name of your distribution network or on your bill."
-        }
-      },
-      "store": {
-        "title": "Choose a country",
-        "description": "Step {step} of {total}. Only countries whose tariffs the open store holds are listed.",
-        "data": {
-          "country": "Country"
-        },
-        "data_description": {
-          "country": "The country whose suppliers you want to choose from."
         }
       },
       "manual": {
@@ -104,7 +98,8 @@
     },
     "error": {
       "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
-      "empty_period": "The rate must start and end at different times."
+      "empty_period": "The rate must start and end at different times.",
+      "choose_country": "Choose a country, or tick the box to type in your own rates."
     }
   },
   "entity": {

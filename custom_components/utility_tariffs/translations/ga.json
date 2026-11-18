@@ -2,16 +2,20 @@
   "config": {
     "step": {
       "user": {
-        "title": "Roghnaigh taraif",
-        "description": "Roghnaigh plean as an stór oscailte, nó clóscríobh isteach do ráta féin.",
-        "menu_options": {
-          "store": "Roghnaigh plean as an stór",
-          "manual": "Mo ráta féin a chlóscríobh isteach"
+        "title": "Roghnaigh tír",
+        "description": "Céim {step}. Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte. Fág an bosca gan tic chun plean a roghnú ón stór.",
+        "data": {
+          "country": "Tír",
+          "own_rates": "Níl mo phlean liostaithe: cuir isteach mo phraghsanna féin"
+        },
+        "data_description": {
+          "country": "An tír a bhfuil tú ag iarraidh soláthraí di a roghnú.",
+          "own_rates": "Cuir tic leis seo chun na praghsanna ó do bhille a chur isteach in ionad roghnú ón stór."
         }
       },
       "plan": {
         "title": "Roghnaigh soláthraí agus plean",
-        "description": "Céim {step} de {total}. Pleananna a bhfuil praghsanna i bhfeidhm inniu acu. {country_note}",
+        "description": "Céim {step}. Pleananna a bhfuil praghsanna i bhfeidhm inniu acu. Leanann tríú céim ach amháin má tá praghsanna an phlean éagsúil de réir ceantair. {country_note}",
         "data": {
           "tariff": "Soláthraí agus plean"
         },
@@ -21,22 +25,12 @@
       },
       "area": {
         "title": "Roghnaigh ceantar",
-        "description": "Céim {step} de {total}. Tá praghsanna éagsúla ag an bplean seo i gceantair éagsúla.",
+        "description": "Céim {step}. Tá praghsanna éagsúla ag {plan} i gceantair éagsúla.",
         "data": {
           "area": "Ceantar"
         },
         "data_description": {
           "area": "Roghnaigh ceantar do sholáthair. De ghnáth bíonn sé in ainm do líonra dáiliúcháin nó ar do bhille."
-        }
-      },
-      "store": {
-        "title": "Roghnaigh tír",
-        "description": "Céim {step} de {total}. Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte.",
-        "data": {
-          "country": "Tír"
-        },
-        "data_description": {
-          "country": "An tír a bhfuil tú ag iarraidh soláthraí di a roghnú."
         }
       },
       "manual": {
@@ -104,7 +98,8 @@
     },
     "error": {
       "invalid_tariff": "Ní féidir na rátaí seo a úsáid. Seiceáil an cód airgeadra agus na luachanna.",
-      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla."
+      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla.",
+      "choose_country": "Roghnaigh tír, nó cuir tic sa bhosca chun do phraghsanna féin a chur isteach."
     }
   },
   "entity": {

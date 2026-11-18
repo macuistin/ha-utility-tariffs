@@ -2,16 +2,20 @@
   "config": {
     "step": {
       "user": {
-        "title": "Choisir un tarif",
-        "description": "Choisissez une offre dans la base ouverte ou saisissez vos propres tarifs.",
-        "menu_options": {
-          "store": "Choisir une offre dans la base",
-          "manual": "Saisir mes propres tarifs"
+        "title": "Choisir un pays",
+        "description": "Étape {step}. Seuls les pays dont la base ouverte contient les tarifs sont listés. Laissez la case décochée pour choisir une offre dans la base.",
+        "data": {
+          "country": "Pays",
+          "own_rates": "Mon offre n'est pas listée : saisir mes propres tarifs"
+        },
+        "data_description": {
+          "country": "Le pays dont vous voulez choisir un fournisseur.",
+          "own_rates": "Cochez pour saisir les prix de votre facture au lieu de choisir dans la base."
         }
       },
       "plan": {
         "title": "Choisir un fournisseur et une offre",
-        "description": "Étape {step} sur {total}. Offres dont les prix sont en vigueur aujourd'hui. {country_note}",
+        "description": "Étape {step}. Offres dont les prix sont en vigueur aujourd'hui. Une troisième étape ne suit que si les prix de l'offre diffèrent selon la zone. {country_note}",
         "data": {
           "tariff": "Fournisseur et offre"
         },
@@ -21,22 +25,12 @@
       },
       "area": {
         "title": "Choisir une zone",
-        "description": "Étape {step} sur {total}. Cette offre a des prix différents selon la zone.",
+        "description": "Étape {step}. {plan} a des prix différents selon la zone.",
         "data": {
           "area": "Zone"
         },
         "data_description": {
           "area": "Choisissez la zone de votre alimentation. Elle figure généralement dans le nom de votre réseau de distribution ou sur votre facture."
-        }
-      },
-      "store": {
-        "title": "Choisir un pays",
-        "description": "Étape {step} sur {total}. Seuls les pays dont la base ouverte contient les tarifs sont listés.",
-        "data": {
-          "country": "Pays"
-        },
-        "data_description": {
-          "country": "Le pays dont vous voulez choisir un fournisseur."
         }
       },
       "manual": {
@@ -104,7 +98,8 @@
     },
     "error": {
       "invalid_tariff": "Ces tarifs ne peuvent pas être utilisés. Vérifiez le code de devise et les valeurs.",
-      "empty_period": "Le tarif doit commencer et se terminer à des heures différentes."
+      "empty_period": "Le tarif doit commencer et se terminer à des heures différentes.",
+      "choose_country": "Choisissez un pays, ou cochez la case pour saisir vos propres tarifs."
     }
   },
   "entity": {
