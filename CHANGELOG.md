@@ -5,6 +5,8 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.2.0
+
 **Changed**
 
 - Setup has two pages instead of three for most plans: the country, then one list of every supplier
