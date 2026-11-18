@@ -9,13 +9,13 @@ the Reconfigure flow, which asks the same questions as first setup.
 ```mermaid
 flowchart TD
     A[Settings, Devices & services,<br/>Add integration] --> B[Choose Utility Tariffs]
-    B --> D[Country, or tick<br/>own rates]
-    D -->|A country| F[Supplier and plan]
-    F --> G{Prices differ<br/>by area?}
+    B --> D[Country]
+    D --> F[Supplier and plan,<br/>or Type in my own rates]
+    F -->|A plan| G{Prices differ<br/>by area?}
     G -->|yes| H[Area]
     G -->|no| I[Done]
     H --> I
-    D -->|Own rates| J[Rates, standing charge,<br/>VAT, timed rates]
+    F -->|Own rates| J[Rates, standing charge,<br/>VAT, timed rates]
     J --> I
     I --> K[Optional: Configure<br/>to add meters]
 ```
@@ -24,16 +24,15 @@ flowchart TD
 
    ![Add integration](images/setup-1-add-integration.png)
 
-2. On the first page, pick your country. If your plan is not in the store, tick **My plan is not
-   listed** instead and type in your own rates. The page starts at your Home Assistant country when
-   the store holds it.
+2. On the first page, pick your country. It starts at your Home Assistant country when the store
+   holds it.
 
    ![Choose a country](images/setup-3-country.png)
 
-3. For a store plan, the second page lists every supplier and plan for that country in one list.
-   Where the store holds only part of a country's prices, the page says what is missing. A third
-   page names the plan and asks for your area, only where its prices differ by area. Each page shows
-   which step it is.
+3. The second page is one list. **Type in my own rates** is at the top, for a plan that is not in
+   the store. Below it is every supplier and plan for the country. Where the store holds only part
+   of a country's prices, the page says what is missing. A third page names the plan and asks for
+   your area, only where its prices differ by area. Each page shows which step it is.
 
 4. Open the integration, choose the three dots, then **Configure**, to set the meters, window
    length and bill dates. Each is explained in [Configuration](configuration.md).

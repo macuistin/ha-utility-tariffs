@@ -34,7 +34,8 @@ async def _step(hass: HomeAssistant, result, user_input):
 
 async def _to_base_form(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    return await _step(hass, result, {"own_rates": True})
+    result = await _step(hass, result, {"country": "IE"})
+    return await _step(hass, result, {"tariff": "own_rates"})
 
 
 async def _make(hass: HomeAssistant):
@@ -134,7 +135,8 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id}
     )
-    result = await _step(hass, result, {"own_rates": True})
+    result = await _step(hass, result, {"country": "IE"})
+    result = await _step(hass, result, {"tariff": "own_rates"})
     result = await _step(hass, result, BASE)
     result = await _step(hass, result, {"next_step_id": "manual_done"})
     await hass.async_block_till_done()

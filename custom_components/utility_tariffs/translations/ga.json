@@ -3,14 +3,12 @@
     "step": {
       "user": {
         "title": "Roghnaigh tír",
-        "description": "Céim {step}. Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte. Fág an bosca gan tic chun plean a roghnú ón stór.",
+        "description": "Céim {step}. Ní liostaítear ach tíortha a bhfuil a dtaraifí san stór oscailte.",
         "data": {
-          "country": "Tír",
-          "own_rates": "Níl mo phlean liostaithe: cuir isteach mo phraghsanna féin"
+          "country": "Tír"
         },
         "data_description": {
-          "country": "An tír a bhfuil tú ag iarraidh soláthraí di a roghnú.",
-          "own_rates": "Cuir tic leis seo chun na praghsanna ó do bhille a chur isteach in ionad roghnú ón stór."
+          "country": "An tír a bhfuil tú ag iarraidh soláthraí di a roghnú."
         }
       },
       "plan": {
@@ -20,7 +18,7 @@
           "tariff": "Soláthraí agus plean"
         },
         "data_description": {
-          "tariff": "Do sholáthraí leictreachais agus an plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu."
+          "tariff": "Do sholáthraí leictreachais agus an plean atá agat. Ní liostaítear ach pleananna a bhfuil praghsanna i bhfeidhm inniu acu. Roghnaigh do sholáthraí agus do phlean, nó roghnaigh Cuir isteach mo phraghsanna féin ag barr an liosta."
         }
       },
       "area": {
@@ -98,8 +96,7 @@
     },
     "error": {
       "invalid_tariff": "Ní féidir na rátaí seo a úsáid. Seiceáil an cód airgeadra agus na luachanna.",
-      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla.",
-      "choose_country": "Roghnaigh tír, nó cuir tic sa bhosca chun do phraghsanna féin a chur isteach."
+      "empty_period": "Caithfidh an ráta tosú agus deireadh a chur ag amanna éagsúla."
     }
   },
   "entity": {
@@ -341,10 +338,9 @@
     }
   },
   "selector": {
-    "flow": {
+    "plan_choice": {
       "options": {
-        "import": "Allmhairiú",
-        "export": "Easpórtáil"
+        "own_rates": "Cuir isteach mo phraghsanna féin"
       }
     }
   },

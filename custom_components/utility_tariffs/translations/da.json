@@ -3,14 +3,12 @@
     "step": {
       "user": {
         "title": "Vælg et land",
-        "description": "Trin {step}. Kun lande, hvis tariffer det åbne lager rummer, vises. Lad feltet stå uden kryds for at vælge en plan fra lageret.",
+        "description": "Trin {step}. Kun lande, hvis tariffer det åbne lager rummer, vises.",
         "data": {
-          "country": "Land",
-          "own_rates": "Min plan er ikke på listen: indtast mine egne priser"
+          "country": "Land"
         },
         "data_description": {
-          "country": "Det land, hvis leverandører du vil vælge imellem.",
-          "own_rates": "Sæt kryds for at indtaste priserne fra din regning i stedet for at vælge fra lageret."
+          "country": "Det land, hvis leverandører du vil vælge imellem."
         }
       },
       "plan": {
@@ -20,7 +18,7 @@
           "tariff": "Leverandør og plan"
         },
         "data_description": {
-          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises."
+          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises. Vælg din leverandør og din plan, eller vælg Indtast mine egne priser øverst på listen."
         }
       },
       "area": {
@@ -98,8 +96,7 @@
     },
     "error": {
       "invalid_tariff": "Disse priser kan ikke bruges. Tjek valutakoden og værdierne.",
-      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter.",
-      "choose_country": "Vælg et land, eller sæt kryds i feltet for at indtaste dine egne priser."
+      "empty_period": "Prisen skal starte og slutte på forskellige tidspunkter."
     }
   },
   "entity": {
@@ -341,10 +338,9 @@
     }
   },
   "selector": {
-    "flow": {
+    "plan_choice": {
       "options": {
-        "import": "Import",
-        "export": "Eksport"
+        "own_rates": "Indtast mine egne priser"
       }
     }
   },

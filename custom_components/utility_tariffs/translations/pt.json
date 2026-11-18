@@ -3,14 +3,12 @@
     "step": {
       "user": {
         "title": "Escolher um país",
-        "description": "Passo {step}. Só são listados os países cujos tarifários o repositório aberto contém. Deixe a caixa desmarcada para escolher um plano do repositório.",
+        "description": "Passo {step}. Só são listados os países cujos tarifários o repositório aberto contém.",
         "data": {
-          "country": "País",
-          "own_rates": "O meu plano não está na lista: introduzir os meus preços"
+          "country": "País"
         },
         "data_description": {
-          "country": "O país de cujos fornecedores quer escolher.",
-          "own_rates": "Marque para introduzir os preços da sua fatura em vez de escolher no repositório."
+          "country": "O país de cujos fornecedores quer escolher."
         }
       },
       "plan": {
@@ -20,7 +18,7 @@
           "tariff": "Fornecedor e plano"
         },
         "data_description": {
-          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje."
+          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje. Escolha o seu fornecedor e o seu plano, ou escolha Introduzir os meus preços no topo da lista."
         }
       },
       "area": {
@@ -98,8 +96,7 @@
     },
     "error": {
       "invalid_tariff": "Estes preços não podem ser usados. Verifique o código da moeda e os valores.",
-      "empty_period": "O preço tem de começar e terminar a horas diferentes.",
-      "choose_country": "Escolha um país ou marque a caixa para introduzir os seus preços."
+      "empty_period": "O preço tem de começar e terminar a horas diferentes."
     }
   },
   "entity": {
@@ -341,10 +338,9 @@
     }
   },
   "selector": {
-    "flow": {
+    "plan_choice": {
       "options": {
-        "import": "Importação",
-        "export": "Exportação"
+        "own_rates": "Introduzir os meus preços"
       }
     }
   },

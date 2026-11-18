@@ -3,14 +3,12 @@
     "step": {
       "user": {
         "title": "Choose a country",
-        "description": "Step {step}. Only countries whose tariffs the open store holds are listed. Leave the box unticked to pick a plan from the store.",
+        "description": "Step {step}. Only countries whose tariffs the open store holds are listed.",
         "data": {
-          "country": "Country",
-          "own_rates": "My plan is not listed: type in my own rates"
+          "country": "Country"
         },
         "data_description": {
-          "country": "The country whose suppliers you want to choose from.",
-          "own_rates": "Tick this to enter the prices from your bill instead of choosing from the store."
+          "country": "The country whose suppliers you want to choose from."
         }
       },
       "plan": {
@@ -20,7 +18,7 @@
           "tariff": "Supplier and plan"
         },
         "data_description": {
-          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed."
+          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed. Choose your supplier and plan, or choose Type in my own rates at the top of the list."
         }
       },
       "area": {
@@ -98,8 +96,7 @@
     },
     "error": {
       "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
-      "empty_period": "The rate must start and end at different times.",
-      "choose_country": "Choose a country, or tick the box to type in your own rates."
+      "empty_period": "The rate must start and end at different times."
     }
   },
   "entity": {
@@ -341,10 +338,9 @@
     }
   },
   "selector": {
-    "flow": {
+    "plan_choice": {
       "options": {
-        "import": "Import",
-        "export": "Export"
+        "own_rates": "Type in my own rates"
       }
     }
   },

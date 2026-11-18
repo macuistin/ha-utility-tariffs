@@ -7,10 +7,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Changed**
 
-- Setup starts at the country, with a box to tick if your plan is not in the store and you want to
-  type in your own rates. The separate "how do you want to set the tariff" page is gone, so a store
-  plan takes two pages, or three when its prices differ by area. The country starts at your Home
-  Assistant country, or at the followed plan's country on Reconfigure.
+- Setup starts at the country, then one list of every supplier and plan for it. **Type in my own
+  rates** is the first choice in that list, so there is no separate "how do you want to set the
+  tariff" page. A store plan takes two pages, or three when its prices differ by area. The country
+  starts at your Home Assistant country, or at the followed plan's country on Reconfigure.
 - The step numbers no longer promise a total, because the area page only follows some plans. The
   area page names the plan it is for.
 
