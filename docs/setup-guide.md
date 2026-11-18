@@ -30,13 +30,12 @@ flowchart TD
 
    ![Choose how to set the tariff](images/setup-2-choose-source.png)
 
-3. For a store plan, pick the country, supplier, plan and, where prices differ by area, your area.
+3. For a store plan, pick the country on the first page. The second page lists every supplier and
+   plan for that country in one list. Where the store holds only part of a country's prices, the
+   page says what is missing. A third page asks for your area, only where the plan's prices differ
+   by area. Each page shows which step it is.
 
    ![Choose a country](images/setup-3-country.png)
-
-   ![Choose a supplier](images/setup-3-supplier.png)
-
-   ![Choose a plan](images/setup-3-plan.png)
 
 4. Open the integration, choose the three dots, then **Configure**, to set the meters, window
    length and bill dates. Each is explained in [Configuration](configuration.md).

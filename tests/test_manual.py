@@ -123,7 +123,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     await hass.config.async_set_time_zone("Europe/Dublin")
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await _step(hass, result, {"next_step_id": "store"})
-    for key, value in (("country", "IE"), ("provider", "p"), ("tariff", "flat")):
+    for key, value in (("country", "IE"), ("tariff", "p/flat")):
         result = await _step(hass, result, {key: value})
     entry = result["result"]
     await hass.async_block_till_done()

@@ -48,6 +48,8 @@ async def test_the_summary_names_the_plan_and_describes_it(
     assert state is not None
     attributes = state.attributes
     assert attributes["provider"] == "P Energy"
+    assert attributes["country_availability"] == "available"
+    assert attributes["country_reason"] is None
     assert attributes["currency"] == "EUR"
     assert attributes["revision"] == 1
     assert attributes["valid_from"] == "2026-11-01"

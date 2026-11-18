@@ -9,28 +9,19 @@
           "manual": "Saisir mes propres tarifs"
         }
       },
-      "provider": {
-        "title": "Choisir un fournisseur",
+      "plan": {
+        "title": "Choisir un fournisseur et une offre",
+        "description": "Étape {step} sur {total}. Offres dont les prix sont en vigueur aujourd'hui. {country_note}",
         "data": {
-          "provider": "Fournisseur"
+          "tariff": "Fournisseur et offre"
         },
         "data_description": {
-          "provider": "Votre fournisseur d'électricité."
-        }
-      },
-      "tariff": {
-        "title": "Choisir une offre",
-        "description": "Offres dont les prix sont en vigueur aujourd'hui.",
-        "data": {
-          "tariff": "Offre"
-        },
-        "data_description": {
-          "tariff": "L'offre que vous avez souscrite. Seules les offres dont les prix sont en vigueur aujourd'hui sont listées."
+          "tariff": "Votre fournisseur d'électricité et l'offre que vous avez souscrite. Seules les offres dont les prix sont en vigueur aujourd'hui sont listées."
         }
       },
       "area": {
         "title": "Choisir une zone",
-        "description": "Cette offre a des prix différents selon la zone.",
+        "description": "Étape {step} sur {total}. Cette offre a des prix différents selon la zone.",
         "data": {
           "area": "Zone"
         },
@@ -40,7 +31,7 @@
       },
       "store": {
         "title": "Choisir un pays",
-        "description": "Seuls les pays dont la base ouverte contient les tarifs sont listés.",
+        "description": "Étape {step} sur {total}. Seuls les pays dont la base ouverte contient les tarifs sont listés.",
         "data": {
           "country": "Pays"
         },

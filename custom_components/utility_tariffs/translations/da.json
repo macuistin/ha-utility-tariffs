@@ -9,28 +9,19 @@
           "manual": "Indtast mine egne priser"
         }
       },
-      "provider": {
-        "title": "Vælg en leverandør",
+      "plan": {
+        "title": "Vælg en leverandør og en plan",
+        "description": "Trin {step} af {total}. Planer med priser, der gælder i dag. {country_note}",
         "data": {
-          "provider": "Leverandør"
+          "tariff": "Leverandør og plan"
         },
         "data_description": {
-          "provider": "Din elleverandør."
-        }
-      },
-      "tariff": {
-        "title": "Vælg en plan",
-        "description": "Planer med priser, der gælder i dag.",
-        "data": {
-          "tariff": "Plan"
-        },
-        "data_description": {
-          "tariff": "Den plan, du er på. Kun planer med priser, der gælder i dag, vises."
+          "tariff": "Din elleverandør og den plan, du er på. Kun planer med priser, der gælder i dag, vises."
         }
       },
       "area": {
         "title": "Vælg et område",
-        "description": "Denne plan har forskellige priser i forskellige områder.",
+        "description": "Trin {step} af {total}. Denne plan har forskellige priser i forskellige områder.",
         "data": {
           "area": "Område"
         },
@@ -40,7 +31,7 @@
       },
       "store": {
         "title": "Vælg et land",
-        "description": "Kun lande, hvis tariffer det åbne lager rummer, vises.",
+        "description": "Trin {step} af {total}. Kun lande, hvis tariffer det åbne lager rummer, vises.",
         "data": {
           "country": "Land"
         },

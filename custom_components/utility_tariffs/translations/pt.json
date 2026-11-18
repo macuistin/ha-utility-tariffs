@@ -9,28 +9,19 @@
           "manual": "Introduzir os meus próprios preços"
         }
       },
-      "provider": {
-        "title": "Escolher um fornecedor",
+      "plan": {
+        "title": "Escolher um fornecedor e um plano",
+        "description": "Passo {step} de {total}. Planos com preços em vigor hoje. {country_note}",
         "data": {
-          "provider": "Fornecedor"
+          "tariff": "Fornecedor e plano"
         },
         "data_description": {
-          "provider": "O seu fornecedor de eletricidade."
-        }
-      },
-      "tariff": {
-        "title": "Escolher um plano",
-        "description": "Planos com preços em vigor hoje.",
-        "data": {
-          "tariff": "Plano"
-        },
-        "data_description": {
-          "tariff": "O plano que tem. Só são listados os planos com preços em vigor hoje."
+          "tariff": "O seu fornecedor de eletricidade e o plano que tem. Só são listados os planos com preços em vigor hoje."
         }
       },
       "area": {
         "title": "Escolher uma zona",
-        "description": "Este plano tem preços diferentes consoante a zona.",
+        "description": "Passo {step} de {total}. Este plano tem preços diferentes consoante a zona.",
         "data": {
           "area": "Zona"
         },
@@ -40,7 +31,7 @@
       },
       "store": {
         "title": "Escolher um país",
-        "description": "Só são listados os países cujos tarifários o repositório aberto contém.",
+        "description": "Passo {step} de {total}. Só são listados os países cujos tarifários o repositório aberto contém.",
         "data": {
           "country": "País"
         },

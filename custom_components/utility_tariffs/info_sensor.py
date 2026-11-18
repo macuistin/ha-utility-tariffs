@@ -85,6 +85,8 @@ class TariffSummarySensor(_Diagnostic, SensorEntity):
         return {
             "provider": definition.provider.name,
             "country": definition.country,
+            "country_availability": data.country_availability,
+            "country_reason": data.country_reason,
             "region": definition.region,
             "currency": definition.currency,
             "revision": definition.revision,
