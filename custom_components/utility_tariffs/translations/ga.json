@@ -338,6 +338,12 @@
     }
   },
   "selector": {
+    "flow": {
+      "options": {
+        "import": "Allmhairiú",
+        "export": "Easpórtáil"
+      }
+    },
     "plan_choice": {
       "options": {
         "own_rates": "Cuir isteach mo phraghsanna féin"

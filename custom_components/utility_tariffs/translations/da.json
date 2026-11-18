@@ -338,6 +338,12 @@
     }
   },
   "selector": {
+    "flow": {
+      "options": {
+        "import": "Import",
+        "export": "Eksport"
+      }
+    },
     "plan_choice": {
       "options": {
         "own_rates": "Indtast mine egne priser"

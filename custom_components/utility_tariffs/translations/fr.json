@@ -338,6 +338,12 @@
     }
   },
   "selector": {
+    "flow": {
+      "options": {
+        "import": "Achat",
+        "export": "Rachat"
+      }
+    },
     "plan_choice": {
       "options": {
         "own_rates": "Saisir mes propres tarifs"

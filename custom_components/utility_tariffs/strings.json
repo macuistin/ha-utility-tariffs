@@ -338,6 +338,12 @@
     }
   },
   "selector": {
+    "flow": {
+      "options": {
+        "import": "Import",
+        "export": "Export"
+      }
+    },
     "plan_choice": {
       "options": {
         "own_rates": "Type in my own rates"
