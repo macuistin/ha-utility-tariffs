@@ -1,5 +1,10 @@
 # Utility Tariffs
 
+> **Note on the data.** The tariff data comes from an open tariff store. It is gathered by the methods
+> that store uses, and each source has its own way of being read. Some sources will need updating over
+> time and may change significantly. We will try to keep on top of as many as we can. The list is
+> not exhaustive, because not every tariff is easy to gather. We will try to add more over time.
+
 <p align="center"><img src="custom_components/utility_tariffs/brand/logo.png" alt="Utility Tariffs" width="320"></p>
 
 A Home Assistant integration that knows your tariff. It prices every half hour from the open
