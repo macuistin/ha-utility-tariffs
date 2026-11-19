@@ -85,6 +85,30 @@
           "start": "A hora a que este preço começa todos os dias.",
           "end": "A hora a que este preço termina. Pode ser anterior ao início, para um preço que se prolonga pela noite."
         }
+      },
+      "options": {
+        "title": "Os seus contadores e a fatura",
+        "description": "Tudo é opcional e pode ser alterado mais tarde nas opções. Um contador é um sensor em kWh que só aumenta. São sugeridos os contadores do painel de Energia. Sem um contador de importação, só vê preços.",
+        "data": {
+          "import_energy_entity": "Energia importada da rede",
+          "export_energy_entity": "Energia exportada para a rede",
+          "house_energy_entity": "Energia usada por toda a casa",
+          "battery_discharge_energy_entity": "Energia retirada da bateria",
+          "battery_soc_entity": "Carga da bateria (percentagem)",
+          "bill_start_day": "Dia do mês em que começa uma fatura",
+          "bill_months": "Meses numa fatura",
+          "bill_start_month": "Um mês em que começa uma fatura"
+        },
+        "data_description": {
+          "import_energy_entity": "Necessário para a fatura. Lido todos os minutos.",
+          "export_energy_entity": "Opcional. Credita o que exporta.",
+          "house_energy_entity": "Necessário para as poupanças. Um contador de toda a energia usada pela casa, da rede, solar e bateria.",
+          "battery_discharge_energy_entity": "Opcional. Deduz o desgaste da bateria às poupanças.",
+          "battery_soc_entity": "Opcional. Com a capacidade da bateria, valoriza a energia que a bateria contém.",
+          "bill_start_day": "De 1 a 28. Deixe vazio para seguir o tarifário.",
+          "bill_months": "1, 2, 3, 4, 6 ou 12. Deixe vazio para seguir o tarifário.",
+          "bill_start_month": "Apenas para faturas com mais de um mês, para que coincidam com as do seu fornecedor. Por exemplo, 2 para uma fatura de dois meses que começa em fevereiro."
+        }
       }
     },
     "abort": {

@@ -2,6 +2,9 @@
 
 ## Options
 
+The last page of setup asks for the meters and bill dates below, with the meters from your Energy
+dashboard suggested. Leave it empty to show prices only. The same fields are in the options.
+
 Open the integration, choose the three dots, then **Configure**. Saving the options reloads the
 integration.
 

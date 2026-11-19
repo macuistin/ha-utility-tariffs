@@ -85,6 +85,30 @@
           "start": "Det tidspunkt, hvor denne pris starter hver dag.",
           "end": "Det tidspunkt, hvor denne pris slutter. Det kan være før starten, for en pris, der løber natten over."
         }
+      },
+      "options": {
+        "title": "Dine målere og din regning",
+        "description": "Alt er valgfrit og kan ændres senere i indstillingerne. En måler er en sensor i kWh, der kun stiger. Målere fra Energi-dashboardet foreslås. Uden en importmåler vises kun priser.",
+        "data": {
+          "import_energy_entity": "Energi importeret fra nettet",
+          "export_energy_entity": "Energi eksporteret til nettet",
+          "house_energy_entity": "Energi brugt af hele hjemmet",
+          "battery_discharge_energy_entity": "Energi taget ud af batteriet",
+          "battery_soc_entity": "Batteriets opladning (procent)",
+          "bill_start_day": "Dag i måneden, hvor en regning starter",
+          "bill_months": "Måneder på én regning",
+          "bill_start_month": "En måned, hvor en regning starter"
+        },
+        "data_description": {
+          "import_energy_entity": "Nødvendig for regningen. Læses hvert minut.",
+          "export_energy_entity": "Valgfri. Krediterer det, du eksporterer.",
+          "house_energy_entity": "Nødvendig for besparelserne. En måler for al den energi, hjemmet brugte, fra nettet, solen og batteriet.",
+          "battery_discharge_energy_entity": "Valgfri. Trækker batterislid fra besparelserne.",
+          "battery_soc_entity": "Valgfri. Sammen med batteriets størrelse værdisætter den energien i batteriet.",
+          "bill_start_day": "1 til 28. Lad den stå tom for at følge tariffen.",
+          "bill_months": "1, 2, 3, 4, 6 eller 12. Lad den stå tom for at følge tariffen.",
+          "bill_start_month": "Kun for regninger på mere end en måned, så de passer til din leverandørs. Fx 2 for en regning på to måneder, der starter i februar."
+        }
       }
     },
     "abort": {

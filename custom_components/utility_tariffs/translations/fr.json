@@ -85,6 +85,30 @@
           "start": "L'heure à laquelle ce tarif commence chaque jour.",
           "end": "L'heure à laquelle ce tarif se termine. Elle peut précéder le début, pour un tarif qui court pendant la nuit."
         }
+      },
+      "options": {
+        "title": "Vos compteurs et votre facture",
+        "description": "Tout est facultatif et modifiable plus tard dans les options. Un compteur est un capteur en kWh qui ne fait que monter. Les compteurs du tableau de bord Énergie sont proposés. Sans compteur d'import, seuls les prix s'affichent.",
+        "data": {
+          "import_energy_entity": "Énergie achetée au réseau",
+          "export_energy_entity": "Énergie injectée dans le réseau",
+          "house_energy_entity": "Énergie consommée par toute la maison",
+          "battery_discharge_energy_entity": "Énergie sortie de la batterie",
+          "battery_soc_entity": "Charge de la batterie (pourcentage)",
+          "bill_start_day": "Jour du mois où commence une facture",
+          "bill_months": "Mois par facture",
+          "bill_start_month": "Un mois où commence une facture"
+        },
+        "data_description": {
+          "import_energy_entity": "Nécessaire pour la facture. Lu chaque minute.",
+          "export_energy_entity": "Facultatif. Crédite ce que vous injectez.",
+          "house_energy_entity": "Nécessaire pour les économies. Un compteur de toute l'énergie consommée par la maison, du réseau, du solaire et de la batterie.",
+          "battery_discharge_energy_entity": "Facultatif. Déduit l'usure de la batterie des économies.",
+          "battery_soc_entity": "Facultatif. Avec la capacité de la batterie, valorise l'énergie qu'elle contient.",
+          "bill_start_day": "De 1 à 28. Laissez vide pour suivre le tarif.",
+          "bill_months": "1, 2, 3, 4, 6 ou 12. Laissez vide pour suivre le tarif.",
+          "bill_start_month": "Uniquement pour les factures de plus d'un mois, afin qu'elles coïncident avec celles de votre fournisseur. Par exemple 2 pour une facture de deux mois commençant en février."
+        }
       }
     },
     "abort": {
