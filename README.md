@@ -1,5 +1,19 @@
 # Utility Tariffs
 
+![Utility Tariffs logo](custom_components/utility_tariffs/brand/logo.png)
+
+[![HACS][hacs-badge]](https://github.com/hacs/integration)
+![Installs][analytics-badge]
+[![Release][release-badge]](https://github.com/macuistin/ha-utility-tariffs/releases)
+[![Commit activity][commits-badge]](https://github.com/macuistin/ha-utility-tariffs/commits/main)
+[![Licence][licence-badge]](LICENSE)
+
+[hacs-badge]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
+[analytics-badge]: https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=integration%20usage&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.utility_tariffs.total
+[release-badge]: https://img.shields.io/github/v/release/macuistin/ha-utility-tariffs
+[commits-badge]: https://img.shields.io/github/commit-activity/y/macuistin/ha-utility-tariffs
+[licence-badge]: https://img.shields.io/github/license/macuistin/ha-utility-tariffs
+
 > **Note on the data.** The tariff data comes from an open tariff store. It is gathered by the methods
 > that store uses, and each source has its own way of being read. Some sources will need updating over
 > time and may change significantly. We will try to keep on top of as many as we can. The list is
@@ -9,8 +23,6 @@
 > notice, so the store holds only tariffs that a source reads from a published page, file or feed.
 > That is why this integration lets you type in your own rates for your own use. To ask for a
 > supplier or to give feedback, [suggest a source](https://github.com/macuistin/utility-tariffs/issues/new?template=suggestion.md).
-
-<p align="center"><img src="custom_components/utility_tariffs/brand/logo.png" alt="Utility Tariffs" width="320"></p>
 
 A Home Assistant integration that knows your tariff. It prices every half hour from the open
 tariff store, and works out the cheapest and dearest windows, the bill so far and, with your own
