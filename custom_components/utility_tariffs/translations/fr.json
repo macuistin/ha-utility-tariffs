@@ -252,7 +252,8 @@
           "bill_months": "Mois par facture",
           "bill_start_month": "Un mois où commence une facture",
           "refresh_now": "Relire la base de tarifs maintenant",
-          "clear_cache": "Supprimer d'abord les fichiers de tarifs enregistrés"
+          "clear_cache": "Supprimer d'abord les fichiers de tarifs enregistrés",
+          "connected_load_kw": "Puissance raccordée (kW)"
         },
         "data_description": {
           "refresh_now": "Relit l'index de la base et votre offre à l'enregistrement, au lieu d'attendre ce soir. À utiliser après qu'un changement a été publié dans la base.",
@@ -266,7 +267,8 @@
           "battery_wear_per_kwh": "Facultatif. Ce que coûte en usure chaque kWh sorti de la batterie, dans la devise du tarif.",
           "bill_start_day": "De 1 à 28. Laissez vide pour suivre le tarif.",
           "bill_months": "1, 2, 3, 4, 6 ou 12. Laissez vide pour suivre le tarif.",
-          "bill_start_month": "Uniquement pour les factures de plus d'un mois, afin qu'elles coïncident avec celles de votre fournisseur. Par exemple 2 pour une facture de deux mois commençant en février."
+          "bill_start_month": "Uniquement pour les factures de plus d'un mois, afin qu'elles coïncident avec celles de votre fournisseur. Par exemple 2 pour une facture de deux mois commençant en février.",
+          "connected_load_kw": "Uniquement pour un tarif facturé par kW de puissance raccordée (autorisée). Elle figure sur votre facture ou votre contrat. Sans elle, ce tarif n'affiche aucune facture."
         }
       }
     },
@@ -366,6 +368,9 @@
     },
     "store_unreadable": {
       "message": "La base de tarifs n'a pas pu être lue : {error}"
+    },
+    "no_load": {
+      "message": "Ce tarif facture par kW de puissance raccordée. Définissez d'abord votre puissance raccordée dans les options."
     }
   },
   "issues": {

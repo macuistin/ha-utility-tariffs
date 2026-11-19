@@ -75,7 +75,7 @@ class PlanRanker:
         others = [
             Candidate(c.key, c.label, c.definition, Decimal(export)) for c in found.candidates
         ]
-        usage = Usage(accountant.store.history, spans, data.is_holiday)
+        usage = Usage(accountant.store.history, spans, data.is_holiday, rules.load_kw)
         result = await coordinator.hass.async_add_executor_job(search, usage, current, others)
         if result.days_recorded == 0:
             return self.ranking

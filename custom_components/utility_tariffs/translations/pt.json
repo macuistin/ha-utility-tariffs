@@ -252,7 +252,8 @@
           "bill_months": "Meses numa fatura",
           "bill_start_month": "Um mês em que começa uma fatura",
           "refresh_now": "Ler o repositório de tarifários de novo agora",
-          "clear_cache": "Eliminar primeiro os ficheiros de tarifários guardados"
+          "clear_cache": "Eliminar primeiro os ficheiros de tarifários guardados",
+          "connected_load_kw": "Potência ligada (kW)"
         },
         "data_description": {
           "refresh_now": "Lê de novo o índice do repositório e o seu plano ao guardar, em vez de esperar pela noite. Use depois de o repositório publicar uma alteração.",
@@ -266,7 +267,8 @@
           "battery_wear_per_kwh": "Opcional. O que custa em desgaste cada kWh retirado da bateria, na moeda do tarifário.",
           "bill_start_day": "De 1 a 28. Deixe vazio para seguir o tarifário.",
           "bill_months": "1, 2, 3, 4, 6 ou 12. Deixe vazio para seguir o tarifário.",
-          "bill_start_month": "Apenas para faturas com mais de um mês, para que coincidam com as do seu fornecedor. Por exemplo, 2 para uma fatura de dois meses que começa em fevereiro."
+          "bill_start_month": "Apenas para faturas com mais de um mês, para que coincidam com as do seu fornecedor. Por exemplo, 2 para uma fatura de dois meses que começa em fevereiro.",
+          "connected_load_kw": "Apenas para uma tarifa cobrada por kW de potência ligada (autorizada). Encontra-a na fatura ou no contrato. Sem ela, essa tarifa não mostra fatura."
         }
       }
     },
@@ -366,6 +368,9 @@
     },
     "store_unreadable": {
       "message": "Não foi possível ler o repositório de tarifários: {error}"
+    },
+    "no_load": {
+      "message": "Esta tarifa cobra por kW de potência ligada. Defina primeiro a potência ligada nas opções."
     }
   },
   "issues": {
