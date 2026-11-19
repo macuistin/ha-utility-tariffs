@@ -12,7 +12,7 @@
   "issue_tracker": "https://github.com/macuistin/ha-utility-tariffs/issues",
   "quality_scale": "platinum",
   "requirements": [
-    "utility-tariffs-lib==0.2.0"
+    "utility-tariffs-lib==0.3.1"
   ],
   "version": "1.2.0"
 }

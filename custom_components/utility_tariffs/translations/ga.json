@@ -252,7 +252,8 @@
           "bill_months": "Míonna in aon bhille amháin",
           "bill_start_month": "Mí ina dtosaíonn bille",
           "refresh_now": "Léigh an stór taraifí arís anois",
-          "clear_cache": "Scrios na comhaid taraife shábháilte ar dtús"
+          "clear_cache": "Scrios na comhaid taraife shábháilte ar dtús",
+          "connected_load_kw": "Ualach ceangailte (kW)"
         },
         "data_description": {
           "refresh_now": "Léann sé innéacs an stóir agus do phlean arís nuair a shábháileann tú, in ionad fanacht go dtí anocht. Úsáid é tar éis don stór athrú a fhoilsiú.",
@@ -266,7 +267,8 @@
           "battery_wear_per_kwh": "Roghnach. An costas caitheamh a bhaineann le gach kWh a bhaintear den bhaitéir, in airgeadra na taraife.",
           "bill_start_day": "1 go 28. Fág folamh chun an taraif a leanúint.",
           "bill_months": "1, 2, 3, 4, 6 nó 12. Fág folamh chun an taraif a leanúint.",
-          "bill_start_month": "Do billí níos faide ná mí amháin, ionas go mbeidh siad ailínithe le billí do sholáthraí. Mar shampla 2 le bille dhá mhí a thosaíonn i bhFeabhra."
+          "bill_start_month": "Do billí níos faide ná mí amháin, ionas go mbeidh siad ailínithe le billí do sholáthraí. Mar shampla 2 le bille dhá mhí a thosaíonn i bhFeabhra.",
+          "connected_load_kw": "Le haghaidh taraife a ghearrann in aghaidh an kW de ualach ceangailte (údaraithe) amháin. Faigh é ar do bhille nó ar do chonradh. Gan é, ní thaispeánann an taraif sin aon bhille."
         }
       }
     },
@@ -366,6 +368,9 @@
     },
     "store_unreadable": {
       "message": "Níorbh fhéidir an stór taraifí a léamh: {error}"
+    },
+    "no_load": {
+      "message": "Gearrann an taraif seo in aghaidh an kW de ualach ceangailte. Socraigh do ualach ceangailte sna roghanna ar dtús."
     }
   },
   "issues": {

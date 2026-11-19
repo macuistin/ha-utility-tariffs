@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from utility_tariffs_lib.tariff import (
@@ -14,7 +15,13 @@ from utility_tariffs_lib.tariff import (
     start_month_of,
 )
 
-from .const import CONF_BILL_MONTHS, CONF_BILL_START_DAY, CONF_BILL_START_MONTH
+from .const import (
+    CONF_BILL_MONTHS,
+    CONF_BILL_START_DAY,
+    CONF_BILL_START_MONTH,
+    CONF_CONNECTED_LOAD,
+    LOAD_NAME,
+)
 
 
 def period_rules(options: Mapping[str, Any], is_holiday: Callable[[date], bool]) -> PeriodRules:
@@ -24,11 +31,13 @@ def period_rules(options: Mapping[str, Any], is_holiday: Callable[[date], bool])
         value = options.get(key)
         return int(value) if value else None
 
+    load = options.get(CONF_CONNECTED_LOAD)
     return PeriodRules(
         start_day=chosen(CONF_BILL_START_DAY),
         months=chosen(CONF_BILL_MONTHS),
         start_month=chosen(CONF_BILL_START_MONTH),
         is_holiday=is_holiday,
+        load_kw={LOAD_NAME: Decimal(str(load))} if load else {},
     )
 
 
