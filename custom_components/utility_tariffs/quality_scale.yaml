@@ -78,7 +78,7 @@ rules:
   # Platinum
   async-dependency:
     status: done
-    comment: utility-tariffs-lib 0.2.0 reads the store with an async client. No executor job does I/O.
+    comment: utility-tariffs-lib reads the store with an async client. No executor job does I/O.
   inject-websession:
     status: done
     comment: The store client reads through Home Assistant's shared aiohttp session.

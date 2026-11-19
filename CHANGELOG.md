@@ -5,6 +5,15 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.3.0
+
+**Added**
+
+- Plans for five more places in the tariff store: Zambia, Manitoba (Manitoba Hydro), New Brunswick
+  (NB Power), Brazil and India. They appear in the country list at setup like any other country.
+  The India plans include a charge per kW of sanctioned load. A kept price day is also read again
+  once it is six hours old, so a corrected price day is no longer shown for ever.
+
 **Changed**
 
 - Setup starts at the country, then one list of every supplier and plan for it. **Type in my own
@@ -14,6 +23,10 @@ Each release has a section here. The release workflow publishes the section for 
 - The plan list is searchable: type to filter it. A value that is not in the list is refused.
 - The step numbers no longer promise a total, because the area page only follows some plans. The
   area page names the plan it is for.
+
+**Upgrading**
+
+- Home Assistant installs `utility-tariffs-lib` 0.3.0 when it restarts. Nothing else to do.
 
 ## 1.2.0
 
