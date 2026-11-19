@@ -5,6 +5,8 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.3.1
+
 **Added**
 
 - Setting up a new tariff now ends with a page for your energy meters and bill dates, so you no
