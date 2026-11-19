@@ -5,11 +5,17 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.3.0
+
 **Added**
 
-- A **Connected load (kW)** option for a tariff that charges per kW of connected (sanctioned) load. Until
-  it is set, that tariff shows its prices but no bill, and the bill summary service says the load is
-  missing. The plan ranking prices every plan with the same load.
+- Plans for five more places in the tariff store: Zambia, Manitoba (Manitoba Hydro), New Brunswick
+  (NB Power), Brazil and India. They appear in the country list at setup like any other country.
+- A **Connected load (kW)** option for a tariff that charges per kW of connected (sanctioned) load,
+  as the India plans do. Until it is set, that tariff shows its prices but no bill, and the bill
+  summary service says the load is missing. The plan ranking prices every plan with the same load.
+- A kept price day is read again once it is six hours old, so a corrected price day is no longer
+  shown for ever.
 
 **Changed**
 
@@ -20,6 +26,10 @@ Each release has a section here. The release workflow publishes the section for 
 - The plan list is searchable: type to filter it. A value that is not in the list is refused.
 - The step numbers no longer promise a total, because the area page only follows some plans. The
   area page names the plan it is for.
+
+**Upgrading**
+
+- Home Assistant installs `utility-tariffs-lib` 0.3.1 when it restarts. Nothing else to do.
 
 ## 1.2.0
 
