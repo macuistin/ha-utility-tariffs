@@ -7,6 +7,9 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- Setting up a new tariff now ends with a page for your energy meters and bill dates, so you no
+  longer have to open the options afterwards. The grid import, export and battery meters from your
+  Energy dashboard are suggested. Every field is optional, and they stay in the options.
 - The note on what a country's plans are missing, shown on the plan page and as an attribute of
   the tariff info sensor, is now read in your Home Assistant language when the store holds it in
   that language. Each country holds English and one other language, its own. Other languages

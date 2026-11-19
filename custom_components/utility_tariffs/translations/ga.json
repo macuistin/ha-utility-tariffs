@@ -85,6 +85,30 @@
           "start": "An t-am a thosaíonn an ráta seo gach lá.",
           "end": "An t-am a chríochnaíonn an ráta seo. Is féidir é a bheith níos luaithe ná an tosach, i gcás ráta a ritheann thar oíche."
         }
+      },
+      "options": {
+        "title": "Do mhéadair agus do bhille",
+        "description": "Tá gach rud roghnach agus is féidir é a athrú níos déanaí sna roghanna. Is braiteoir i kWh é méadar nach dtéann ach suas. Moltar méadair ó phainéal an Fhuinnimh. Gan méadar allmhairithe, ní fheicfidh tú ach praghsanna.",
+        "data": {
+          "import_energy_entity": "Fuinneamh allmhairithe ón eangach",
+          "export_energy_entity": "Fuinneamh easpórtáilte chuig an eangach",
+          "house_energy_entity": "Fuinneamh a d'úsáid an teach ar fad",
+          "battery_discharge_energy_entity": "Fuinneamh a baineadh den bhaitéir",
+          "battery_soc_entity": "Muirear an bhaitéir (céatadán)",
+          "bill_start_day": "Lá den mhí a thosaíonn bille",
+          "bill_months": "Míonna in aon bhille amháin",
+          "bill_start_month": "Mí ina dtosaíonn bille"
+        },
+        "data_description": {
+          "import_energy_entity": "Ag teastáil don bhille. Léitear gach nóiméad é.",
+          "export_energy_entity": "Roghnach. Creidiúnaíonn sé an méid a easpórtálann tú.",
+          "house_energy_entity": "Ag teastáil do na sábháilníochtaí. Méadar de gach fuinneamh a d'úsáid an teach, ón eangach, ón ngrian agus ón mbaitéir.",
+          "battery_discharge_energy_entity": "Roghnach. Baineann sé caitheamh an bhaitéir de na sábháilníochtaí.",
+          "battery_soc_entity": "Roghnach. Le méid an bhaitéir, luachálann sé an fuinneamh atá sa bhaitéir.",
+          "bill_start_day": "1 go 28. Fág folamh chun an taraif a leanúint.",
+          "bill_months": "1, 2, 3, 4, 6 nó 12. Fág folamh chun an taraif a leanúint.",
+          "bill_start_month": "Do billí níos faide ná mí amháin, ionas go mbeidh siad ailínithe le billí do sholáthraí. Mar shampla 2 le bille dhá mhí a thosaíonn i bhFeabhra."
+        }
       }
     },
     "abort": {

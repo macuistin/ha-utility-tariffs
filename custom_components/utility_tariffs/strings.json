@@ -85,6 +85,30 @@
           "start": "The time this rate starts each day.",
           "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight."
         }
+      },
+      "options": {
+        "title": "Your meters and bill",
+        "description": "Both are optional and can be changed later in the options. A meter is a sensor in kWh that only ever rises, such as your smart meter's totals. Meters from your Energy dashboard are suggested. Without an import meter you see prices only.",
+        "data": {
+          "import_energy_entity": "Energy imported from the grid",
+          "export_energy_entity": "Energy exported to the grid",
+          "house_energy_entity": "Energy used by the whole home",
+          "battery_discharge_energy_entity": "Energy taken out of the battery",
+          "battery_soc_entity": "Battery charge (percent)",
+          "bill_start_day": "Day of the month a bill starts",
+          "bill_months": "Months in one bill",
+          "bill_start_month": "A month a bill starts in"
+        },
+        "data_description": {
+          "import_energy_entity": "Needed for the bill. Read every minute.",
+          "export_energy_entity": "Optional. Credits what you export.",
+          "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
+          "battery_discharge_energy_entity": "Optional. Takes battery wear off the savings.",
+          "battery_soc_entity": "Optional. With the battery size, values the energy the battery holds.",
+          "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
+          "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
+        }
       }
     },
     "abort": {

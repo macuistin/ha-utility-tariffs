@@ -48,6 +48,7 @@ async def _make(hass: HomeAssistant):
         hass, result, {"name": "Night", "rate": 0.12, "start": "23:00:00", "end": "08:00:00"}
     )
     result = await _step(hass, result, {"next_step_id": "manual_done"})
+    result = await _step(hass, result, {})  # the meters and bill dates page, left empty
     await hass.async_block_till_done()
     return result
 
@@ -124,6 +125,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     for key, value in (("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
         result = await _step(hass, result, {key: value})
+    result = await _step(hass, result, {})
     entry = result["result"]
     await hass.async_block_till_done()
     registry = er.async_get(hass)

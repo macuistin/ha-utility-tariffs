@@ -63,6 +63,7 @@ from .const import (
     WINDOW_STEP_MINUTES,
 )
 from .country_reason import reason_for
+from .energy_suggest import energy_dashboard_meters
 from .helper.store_access import TariffStoreAccess
 from .manual import problem_with
 from .store import store_access
@@ -130,6 +131,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._chosen: dict[str, str] = {}
         self._names: dict[str, str] = {}
         self._manual: dict[str, Any] = {}
+        self._pending: tuple[str, str, dict[str, Any]] = ("", "", {})
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Step 1: the country. Own rates are the first choice on the next page."""
@@ -302,7 +304,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         title = self._manual[CONF_NAME]
-        return await self._save("manual", title, {CONF_MANUAL: self._manual})
+        return await self._finish("manual", title, {CONF_MANUAL: self._manual})
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
@@ -310,13 +312,37 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         """Follow a different plan. The entities keep their ids, history and place in dashboards."""
         return await self.async_step_user()
 
+    async def async_step_options(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """The last page of a new entry: the bill dates and the meters, all optional.
+
+        The meters are suggested from the Energy dashboard, so most homes only confirm them.
+        """
+        if user_input is not None:
+            return await self._save(*self._pending, options=_saved_setup(user_input))
+        suggested = await energy_dashboard_meters(self.hass)
+        fields = {**_meter_fields(suggested), **_bill_fields(suggested)}
+        return self.async_show_form(step_id="options", data_schema=_schema(fields))
+
+    async def _finish(self, unique: str, title: str, plan: dict[str, Any]) -> ConfigFlowResult:
+        """Ask for the options when making a new entry. A plan change keeps what is set."""
+        if self.source == SOURCE_RECONFIGURE:
+            return await self._save(unique, title, plan)
+        await self.async_set_unique_id(unique)
+        self._abort_if_unique_id_configured()
+        self._pending = (unique, title, plan)
+        return await self.async_step_options()
+
     async def _create(self, title: str) -> ConfigFlowResult:
         unique = "/".join(
             self._chosen[key] for key in (CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, CONF_AREA)
         )
-        return await self._save(unique, title, dict(self._chosen))
+        return await self._finish(unique, title, dict(self._chosen))
 
-    async def _save(self, unique: str, title: str, plan: dict[str, Any]) -> ConfigFlowResult:
+    async def _save(
+        self, unique: str, title: str, plan: dict[str, Any], options: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         """Make the entry, or on reconfigure move it to this plan and keep its entities."""
         await self.async_set_unique_id(unique)
         self._abort_if_unique_id_configured()
@@ -330,7 +356,9 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
                 data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: key},
             )
         return self.async_create_entry(
-            title=title, data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: unique}
+            title=title,
+            data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: unique},
+            options=options or {},
         )
 
 
@@ -424,15 +452,7 @@ class TariffOptionsFlow(OptionsFlowWithReload):
                 )
             )
         }
-        meter = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="energy"))
-        for key in _METERS:
-            fields[vol.Optional(key, description={"suggested_value": options.get(key)})] = meter
-        charge = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="battery"))
-        fields[
-            vol.Optional(
-                CONF_BATTERY_SOC, description={"suggested_value": options.get(CONF_BATTERY_SOC)}
-            )
-        ] = charge
+        fields.update(_meter_fields(options))
         fields.update(_bill_fields(options))
         for key, unit in _NUMBERS.items():
             config = NumberSelectorConfig(min=0, step="any", mode=NumberSelectorMode.BOX)
@@ -447,6 +467,22 @@ class TariffOptionsFlow(OptionsFlowWithReload):
         return self.async_show_form(
             step_id="init", data_schema=_schema(fields), errors=errors
         )
+
+
+def _meter_fields(options: Any) -> dict[Any, Any]:
+    """The energy meters and the battery charge, each with its current value suggested."""
+    meter = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="energy"))
+    charge = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="battery"))
+    fields: dict[Any, Any] = {
+        vol.Optional(key, description={"suggested_value": options.get(key)}): meter
+        for key in _METERS
+    }
+    fields[
+        vol.Optional(
+            CONF_BATTERY_SOC, description={"suggested_value": options.get(CONF_BATTERY_SOC)}
+        )
+    ] = charge
+    return fields
 
 
 def _bill_fields(options: Any) -> dict[Any, Any]:
@@ -475,10 +511,17 @@ def _bill_fields(options: Any) -> dict[Any, Any]:
 def _saved(user_input: dict[str, Any]) -> dict[str, Any]:
     """The options to keep: the window, and every meter and battery setting that was filled in."""
     data: dict[str, Any] = {CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])}
+    data.update(_saved_setup(user_input))
+    data.update({k: float(user_input[k]) for k in _NUMBERS if user_input.get(k) is not None})
+    return data
+
+
+def _saved_setup(user_input: dict[str, Any]) -> dict[str, Any]:
+    """The meters, battery charge and bill dates that were filled in."""
+    data: dict[str, Any] = {}
     data.update({k: user_input[k] for k in (*_METERS, CONF_BATTERY_SOC) if user_input.get(k)})
     data.update(
         {k: int(user_input[k]) for k in (CONF_BILL_START_DAY, CONF_BILL_MONTHS, CONF_BILL_START_MONTH)
          if user_input.get(k)}
     )
-    data.update({k: float(user_input[k]) for k in _NUMBERS if user_input.get(k) is not None})
     return data

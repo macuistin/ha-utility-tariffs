@@ -35,6 +35,8 @@ async def test_a_plan_with_areas_is_chosen_in_three_pages(
     )
     assert result["step_id"] == "area"
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"area": "urban"})
+    assert result["step_id"] == "options"
+    result = await _skip_options(hass, result)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "P Energy Plan (Urban)"
@@ -173,6 +175,7 @@ async def test_a_plan_with_one_price_skips_the_area_step(
     result = await _start(hass)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"tariff": "P Energy \u2013 Flat"})
+    result = await _skip_options(hass, result)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "P Energy Flat"
@@ -214,6 +217,12 @@ async def _reconfigure(hass: HomeAssistant, entry):
     return await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id}
     )
+
+
+async def _skip_options(hass: HomeAssistant, result):
+    """Leave the meters and bill dates page empty, which is allowed."""
+    assert result["step_id"] == "options"
+    return await hass.config_entries.flow.async_configure(result["flow_id"], {})
 
 
 async def _to(hass: HomeAssistant, *steps: tuple[str, str]):
@@ -291,8 +300,9 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
 ) -> None:
     from homeassistant.helpers import entity_registry as er
 
-    first = await _to(
-        hass, ("country", "IE"), ("tariff", "P Energy \u2013 Plan"), ("area", "urban")
+    first = await _skip_options(
+        hass,
+        await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Plan"), ("area", "urban")),
     )
     entry = first["result"]
     await hass.async_block_till_done()
@@ -374,7 +384,9 @@ async def test_changing_to_a_plan_already_followed_is_refused(
 async def test_the_bill_dates_are_saved_as_options(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
-    result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Flat"))
+    result = await _skip_options(
+        hass, await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Flat"))
+    )
     entry = result["result"]
     flow = await hass.config_entries.options.async_init(entry.entry_id)
     flow = await hass.config_entries.options.async_configure(
@@ -393,3 +405,60 @@ async def test_the_bill_dates_are_saved_as_options(
     assert flow["data"]["bill_start_month"] == 2
     await hass.async_block_till_done()
     await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_setup_asks_for_the_meters_and_bill_dates_and_keeps_them_as_options(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Flat"))
+    assert result["step_id"] == "options"
+    fields = {str(key) for key in result["data_schema"].schema}
+    assert {"import_energy_entity", "bill_start_day", "bill_months"} <= fields
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"import_energy_entity": "sensor.grid_in", "bill_start_day": 16, "bill_months": "2"},
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["options"] == {
+        "import_energy_entity": "sensor.grid_in",
+        "bill_start_day": 16,
+        "bill_months": 2,
+    }
+    await hass.async_block_till_done()
+    await hass.config_entries.async_unload(result["result"].entry_id)
+
+
+async def test_the_meters_are_suggested_from_the_energy_dashboard(
+    hass: HomeAssistant, use_store: Callable[..., Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from types import SimpleNamespace
+
+    saved = {
+        "energy_sources": [
+            {
+                "type": "grid",
+                "flow_from": [{"stat_energy_from": "sensor.grid_in"}],
+                "flow_to": [{"stat_energy_to": "sensor.grid_out"}],
+            },
+            {"type": "battery", "stat_energy_from": "sensor.battery_out"},
+            {"type": "solar", "stat_energy_from": "sensor.solar"},
+        ]
+    }
+
+    async def manager(_hass):
+        return SimpleNamespace(data=saved)
+
+    monkeypatch.setattr("homeassistant.components.energy.data.async_get_manager", manager)
+    result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Flat"))
+
+    suggested = {
+        str(key): key.description["suggested_value"]
+        for key in result["data_schema"].schema
+        if key.description
+    }
+    assert suggested["import_energy_entity"] == "sensor.grid_in"
+    assert suggested["export_energy_entity"] == "sensor.grid_out"
+    assert suggested["battery_discharge_energy_entity"] == "sensor.battery_out"
+    assert suggested["house_energy_entity"] is None
