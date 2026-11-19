@@ -49,6 +49,7 @@ from .const import (
     CONF_TARIFF,
     DOMAIN,
 )
+from .country_reason import reason_for
 from .freshness import days_unreached, plan_ending
 from .manual import definition_from
 from .store import price_access, store_access
@@ -313,7 +314,9 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             row = (await self._access.async_countries()).get(self.config_entry.data[CONF_COUNTRY])
         except STORE_ERRORS:
             return None, None
-        return (row.get("availability"), row.get("reason")) if row else (None, None)
+        if not row:
+            return None, None
+        return row.get("availability"), reason_for(row, self.hass.config.language)
 
     def _read_time(self) -> datetime | None:
         """Now, unless the store was unreachable and the answer came from saved files: then the

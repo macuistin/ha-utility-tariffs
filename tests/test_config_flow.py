@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from pathlib import Path
 
@@ -80,6 +81,37 @@ async def test_a_partial_country_shows_its_reason_as_text_on_the_plan_page(
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
 
     assert "Only the energy price is held." in result["description_placeholders"]["country_note"]
+
+
+async def test_a_partial_country_shows_its_reason_in_the_home_language_when_the_store_has_it(
+    hass: HomeAssistant, use_store: Callable[..., Path], tmp_path: Path
+) -> None:
+    from tests.support.fixtures import country
+
+    block = {**country(), "availability": "partial", "reason": "Only the energy price is held."}
+    folder = write_store(
+        tmp_path / "local", {"p/plan/1.json": tariff(), "p/flat/1.json": flat()}, block
+    )
+    build_store(folder)
+    # The pinned library does not know the field yet, so it is added to the built countries index.
+    root = json.loads((folder / "index.json").read_text(encoding="utf-8"))
+    root["countries"]["IE"]["reason_local"] = {
+        "language": "fr",
+        "text": "Seul le prix de l'énergie est inclus.",
+    }
+    (folder / "index.json").write_text(json.dumps(root), encoding="utf-8")
+    use_store(folder_reader(folder))
+    await hass.config.async_update(language="fr")
+    result = await _start(hass)
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
+
+    assert "Seul le prix" in result["description_placeholders"]["country_note"]
+
+    await hass.config.async_update(language="de")
+    result = await _start(hass)
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
+
+    assert "Only the energy price" in result["description_placeholders"]["country_note"]
 
 
 async def test_the_country_starts_at_the_home_country_when_the_store_holds_it(

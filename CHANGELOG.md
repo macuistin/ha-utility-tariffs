@@ -5,6 +5,13 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- The note on what a country's plans are missing, shown on the plan page and as an attribute of
+  the tariff info sensor, is now read in your Home Assistant language when the store holds it in
+  that language. Each country holds English and one other language, its own. Other languages
+  read the English note.
+
 ## 1.3.0
 
 **Added**

@@ -62,6 +62,7 @@ from .const import (
     MIN_WINDOW_MINUTES,
     WINDOW_STEP_MINUTES,
 )
+from .country_reason import reason_for
 from .helper.store_access import TariffStoreAccess
 from .manual import problem_with
 from .store import store_access
@@ -223,7 +224,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _country_note(self, access: TariffStoreAccess) -> str:
         """What the store says is missing for this country, as a read-only line. Empty if nothing."""
         row = (await access.async_countries()).get(self._chosen[CONF_COUNTRY], {})
-        reason = row.get("reason")
+        reason = reason_for(row, self.hass.config.language)
         return f"\n\n**{self._chosen[CONF_COUNTRY]}:** {reason}" if reason else ""
 
     async def async_step_area(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
