@@ -43,8 +43,9 @@ flowchart LR
 
 ## Quick install
 
-1. In HACS, add `macuistin/ha-utility-tariffs` as a custom repository of type Integration, then
-   download **Utility Tariffs**. Restart Home Assistant.
+1. In HACS, search for **Utility Tariffs** and download it. Restart Home Assistant.
+   If it is not in the search yet, add `macuistin/ha-utility-tariffs` as a custom repository of
+   type Integration, then download it.
 2. Open Settings, Devices & services, Add integration, and choose **Utility Tariffs**.
 3. Pick your country, supplier, plan and area, or type in your own rates.
 
