@@ -1,5 +1,17 @@
 # Utility Tariffs
 
+![Utility Tariffs logo](custom_components/utility_tariffs/brand/logo.png)
+
+[![HACS][hacs-badge]](https://github.com/hacs/integration)
+[![Release][release-badge]](https://github.com/macuistin/ha-utility-tariffs/releases)
+[![Commit activity][commits-badge]](https://github.com/macuistin/ha-utility-tariffs/commits/main)
+[![Licence][licence-badge]](LICENSE)
+
+[hacs-badge]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
+[release-badge]: https://img.shields.io/github/v/release/macuistin/ha-utility-tariffs
+[commits-badge]: https://img.shields.io/github/commit-activity/y/macuistin/ha-utility-tariffs
+[licence-badge]: https://img.shields.io/github/license/macuistin/ha-utility-tariffs
+
 > **Note on the data.** The tariff data comes from an open tariff store. It is gathered by the methods
 > that store uses, and each source has its own way of being read. Some sources will need updating over
 > time and may change significantly. We will try to keep on top of as many as we can. The list is
