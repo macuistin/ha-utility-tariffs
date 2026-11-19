@@ -26,7 +26,7 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Upgrading**
 
-- Home Assistant installs `utility-tariffs-lib` 0.3.0 when it restarts. Nothing else to do.
+- Home Assistant installs `utility-tariffs-lib` 0.3.1 when it restarts. Nothing else to do.
 
 ## 1.2.0
 
