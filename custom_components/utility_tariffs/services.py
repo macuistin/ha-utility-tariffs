@@ -140,6 +140,8 @@ async def _bill_summary(call: ServiceCall) -> ServiceResponse:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_meter")
     data = coordinator.data
     bill = bill_so_far(accountant.store.history, data, entry.options, dt_util.now())
+    if bill is None:
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_load")
     return {
         "html": render_bill_html(bill, data.definition, entry.data[CONF_NAME]),
         "total": float(bill.priced.total),

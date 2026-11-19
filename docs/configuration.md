@@ -10,6 +10,7 @@ integration.
 | Window length | Minutes in the cheapest and dearest windows, 30 to 720 in steps of 30 (default 120) |
 | Energy imported, exported, used by the home, taken out of the battery | Sensors in kWh that only ever rise. The import meter switches the bill on |
 | Battery charge, size and wear per kWh | Used with the home meter to value the energy the battery holds |
+| Connected load (kW) | Only for a tariff that charges per kW of connected (sanctioned) load, as some in India do. Find it on your bill or supply agreement. Without it that tariff shows prices but no bill, and its bill service reports that the load is missing |
 | Day of the month a bill starts, months in one bill, a month a bill starts in | Line the bill up with your supplier's. Empty follows the tariff |
 
 Two tick boxes in the same form act once and are not saved: **Read the tariff store again now** and

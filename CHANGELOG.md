@@ -5,6 +5,12 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- A **Connected load (kW)** option for a tariff that charges per kW of connected (sanctioned) load. Until
+  it is set, that tariff shows its prices but no bill, and the bill summary service says the load is
+  missing. The plan ranking prices every plan with the same load.
+
 **Changed**
 
 - Setup starts at the country, then one list of every supplier and plan for it. **Type in my own
