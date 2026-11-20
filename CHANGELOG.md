@@ -11,6 +11,11 @@ Each release has a section here. The release workflow publishes the section for 
   off-peak, a cheap midday, a cheap overnight window, or nothing. The shape fills in the rate names
   and hours, and you type the prices. You can still add more timed rates afterwards.
 
+## 1.4.0b1
+
+A beta. It adds filling the bill from your meters' history, which reads your recorder, so tell
+us if a bill period looks wrong.
+
 **Fixed**
 
 - A negative reading from an energy meter is no longer used as the starting point for the next
