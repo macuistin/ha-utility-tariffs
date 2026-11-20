@@ -57,6 +57,11 @@ period began is added or taken off. A sensor for the energy taken out of the bat
 cost per kWh, take wear off. Without a record of what was bought for the battery, stored energy is
 valued at the cheapest rate band.
 
+A second sensor, "Savings share this bill period", gives the saving as a percentage of what the
+bill would have been without it. It has `days_covered`, `days_in_period` and `coverage` attributes,
+so a new plan with a short history does not look like a full period. It is unknown when the bill
+without the saving is zero.
+
 ## Cheaper plans
 
 When an import meter is set, the integration prices your last whole bill under every other plan of

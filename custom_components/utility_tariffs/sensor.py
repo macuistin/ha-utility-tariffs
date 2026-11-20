@@ -32,7 +32,7 @@ from .forecast_sensor import (
 )
 from .info_sensor import info_sensors
 from .plan_sensor import CheapestPlanSavingSensor, PlanRankSensor
-from .savings_sensor import SavingsSensor
+from .savings_sensor import SavingsSensor, SavingsShareSensor
 from .windows import current_window
 
 if TYPE_CHECKING:
@@ -254,7 +254,7 @@ async def async_setup_entry(
             CheapShareSensor(coordinator, description) for description in CHEAP_SHARE_SENSORS
         )
         if entry.options.get(CONF_HOUSE_ENERGY):
-            async_add_entities([SavingsSensor(coordinator)])
+            async_add_entities([SavingsSensor(coordinator), SavingsShareSensor(coordinator)])
 
 
 class TariffSensor(TariffEntity, SensorEntity):

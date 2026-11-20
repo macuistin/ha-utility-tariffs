@@ -26,6 +26,7 @@ from tests.test_sensor import NOON, _setup, _state
 HOUSE = "sensor.house_energy"
 SOC = "sensor.battery_charge"
 SAVING = "sensor.utility_tariff_savings_this_bill_period"
+SHARE = "sensor.utility_tariff_savings_share_this_bill_period"
 DUBLIN = ZoneInfo("Europe/Dublin")
 
 
@@ -56,6 +57,40 @@ async def test_the_saving_is_the_grid_energy_the_system_avoided(
     assert float(state.state) == pytest.approx(0.15)  # half a kWh at the day price
     assert state.attributes["bill_difference"] == pytest.approx(0.15)
     assert state.attributes["unit_of_measurement"] == "EUR"
+
+
+async def test_the_share_is_the_saving_over_the_bill_without_it(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    _set(hass, HOUSE, 50.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER, CONF_HOUSE_ENERGY: HOUSE})
+    _set(hass, METER, 100.5)
+    _set(hass, HOUSE, 51.0)
+    await _minute(hass, freezer)
+
+    saving = hass.states.get(SAVING)
+    share = hass.states.get(SHARE)
+
+    assert saving is not None
+    assert share is not None
+    expected = 100 * float(saving.state) / saving.attributes["bill_without_system"]
+    assert float(share.state) == pytest.approx(expected, abs=0.05)
+    assert share.attributes["unit_of_measurement"] == "%"
+    assert share.attributes["days_covered"] == 1
+    assert share.attributes["days_in_period"] >= 1
+
+
+async def test_the_share_is_unknown_before_anything_is_recorded(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    _set(hass, HOUSE, 50.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER, CONF_HOUSE_ENERGY: HOUSE})
+
+    assert hass.states.get(SHARE).state == "unknown"  # type: ignore[union-attr]
 
 
 async def test_a_battery_that_lost_charge_takes_its_value_off(

@@ -266,6 +266,9 @@
       },
       "cheap_share_30_days": {
         "name": "Leictreachas saor a úsáideadh, 30 lá seo caite"
+      },
+      "savings_share_this_period": {
+        "name": "Sciar an tsábhála sa tréimhse bhille"
       }
     },
     "binary_sensor": {

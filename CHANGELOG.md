@@ -11,6 +11,9 @@ Each release has a section here. The release workflow publishes the section for 
   imported that was used in the tariff's cheapest band, for today, the bill period so far and the
   last 30 days (off until you enable it). A tariff with one price all day shows 0. They are
   unavailable for a tariff that follows a price feed.
+- A **Savings share this bill period** sensor beside the savings figure: the saving as a percentage
+  of what the bill would have been without it. Its `days_covered` attribute says how much of the
+  period the history holds.
 
 ## 1.4.0b1
 
