@@ -278,6 +278,9 @@
       },
       "cheap_share_30_days": {
         "name": "Cheap electricity used, last 30 days"
+      },
+      "savings_share_this_period": {
+        "name": "Savings share this bill period"
       }
     },
     "binary_sensor": {

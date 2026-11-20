@@ -278,6 +278,9 @@
       },
       "cheap_share_30_days": {
         "name": "Billig strøm brugt, seneste 30 dage"
+      },
+      "savings_share_this_period": {
+        "name": "Andel sparet i afregningsperioden"
       }
     },
     "binary_sensor": {
