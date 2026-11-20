@@ -5,6 +5,13 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- Three **Cheap electricity used** sensors with an import meter set: the share of the electricity
+  imported that was used in the tariff's cheapest band, for today, the bill period so far and the
+  last 30 days (off until you enable it). A tariff with one price all day shows 0. They are
+  unavailable for a tariff that follows a price feed.
+
 **Fixed**
 
 - A negative reading from an energy meter is no longer used as the starting point for the next
