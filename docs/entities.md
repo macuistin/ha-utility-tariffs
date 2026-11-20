@@ -62,3 +62,22 @@ series:
 
 Use `export_rates` for the export price. The rows are not checked against a live evcc or Predbat
 install: the shape is the one evcc's custom tariff reads, so verify it there before relying on it.
+
+## Units and state classes
+
+Every price sensor has the unit `<currency>/kWh`, which is what the Energy dashboard checks for
+a price entity. It needs a numeric state and a unit ending in a price per energy unit, and nothing
+else, so it does not ask for a device class or a state class.
+
+Only the **Import price** and **Export price** (the price in force now) have the `measurement`
+state class, so Home Assistant keeps long-term statistics for them. The next and previous price,
+the day's lowest, highest and average, the price rating and the window and forecast sensors have
+no state class, so they are not summarised into statistics. Their values come from the same held
+prices, and a long history of them adds nothing the current price does not already hold.
+
+This follows the integrations that the maintainers compared. In Home Assistant 2026.10, Nord Pool,
+Amber Electric, easyEnergy and EnergyZero give the `measurement` class to the price in force now.
+Nord Pool also gives it to its optional block averages and its optional daily average, and Amber
+to its forecast. None of them gives it to the last, next, lowest or highest price. Changing a state
+class later changes what is kept in statistics, so do not add one to another sensor without a
+reason.
