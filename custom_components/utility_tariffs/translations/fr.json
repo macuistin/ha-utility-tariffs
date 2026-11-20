@@ -279,8 +279,35 @@
       "cheap_share_30_days": {
         "name": "Électricité bon marché utilisée, 30 derniers jours"
       },
+      "cheap_use_rating": {
+        "name": "Note de l'électricité bon marché aujourd'hui",
+        "state": {
+          "very_good": "Très bonne",
+          "good": "Bonne",
+          "average": "Moyenne",
+          "poor": "Faible"
+        }
+      },
       "savings_share_this_period": {
         "name": "Part d'économie sur la période de facturation"
+      },
+      "lowest_price_time_today": {
+        "name": "Heure du prix d'import le plus bas aujourd'hui"
+      },
+      "lowest_price_time_tomorrow": {
+        "name": "Heure du prix d'import le plus bas demain"
+      },
+      "highest_price_time_today": {
+        "name": "Heure du prix d'import le plus haut aujourd'hui"
+      },
+      "highest_price_time_tomorrow": {
+        "name": "Heure du prix d'import le plus haut demain"
+      },
+      "import_price_percent_of_highest": {
+        "name": "Prix d'import en part du plus haut d'aujourd'hui"
+      },
+      "cheaper_periods_today": {
+        "name": "Périodes moins chères aujourd'hui"
       }
     },
     "binary_sensor": {
@@ -333,7 +360,8 @@
           "clear_cache": "Supprimer d'abord les fichiers de tarifs enregistrés",
           "connected_load_kw": "Puissance raccordée (kW)",
           "max_meter_kw": "Hausse maximale d'un compteur (kW)",
-          "history_start": "Début de l'historique"
+          "history_start": "Début de l'historique",
+          "cheap_rule": "Quelles demi-heures comptent comme bon marché"
         },
         "data_description": {
           "refresh_now": "Relit l'index de la base et votre offre à l'enregistrement, au lieu d'attendre ce soir. À utiliser après qu'un changement a été publié dans la base.",
@@ -456,6 +484,12 @@
         "cheap_midday": "Midi bon marché (11 h à 15 h)",
         "cheap_overnight": "Nuit bon marché (2 h à 6 h)",
         "blank": "Partir de zéro"
+      }
+    },
+    "cheap_rule": {
+      "options": {
+        "cheapest_band": "Seulement la tranche la moins chère",
+        "at_or_below_average": "Toute tranche au prix moyen du jour ou en dessous"
       }
     }
   },

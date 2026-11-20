@@ -14,13 +14,14 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.const import PERCENTAGE
 from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import price_rating
 from utility_tariffs_lib.tariff.price_stats import RATINGS
 
 from .band_sensor import async_setup_band_sensors
 from .bill_sensor import BILL_SENSORS, BillSensor
-from .cheap_sensor import CHEAP_SHARE_SENSORS, CheapShareSensor
+from .cheap_sensor import CHEAP_SHARE_SENSORS, CheapRatingSensor, CheapShareSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
@@ -32,6 +33,7 @@ from .forecast_sensor import (
 )
 from .info_sensor import info_sensors
 from .plan_sensor import CheapestPlanSavingSensor, PlanRankSensor
+from .price_figures import cheaper_periods, extreme_time, percent_of_highest
 from .savings_sensor import SavingsSensor, SavingsShareSensor
 from .windows import current_window
 
@@ -104,6 +106,23 @@ def _tomorrow(
         return _price(getattr(stats, field))
 
     return read
+
+
+def _extreme_time(
+    *, highest: bool, days: int = 0
+) -> Callable[[TariffData, datetime, int], datetime | None]:
+    def read(data: TariffData, now: datetime, _minutes: int) -> datetime | None:
+        return extreme_time(data, now + timedelta(days=days), highest=highest)
+
+    return read
+
+
+def _percent_of_highest(data: TariffData, now: datetime, _minutes: int) -> float | None:
+    return percent_of_highest(data, now)
+
+
+def _cheaper(data: TariffData, now: datetime, _minutes: int) -> int | None:
+    return cheaper_periods(data, now)
 
 
 def _rating(data: TariffData, now: datetime, _minutes: int) -> str | None:
@@ -197,6 +216,33 @@ SENSORS = (
             ("average", "average"),
         )
     ),
+    *(
+        TariffSensorDescription(
+            key=f"{kind}_price_time_{day}",
+            translation_key=f"{kind}_price_time_{day}",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            entity_registry_enabled_default=False,
+            value=_extreme_time(highest=kind == "highest", days=offset),
+        )
+        for kind in ("lowest", "highest")
+        for day, offset in (("today", 0), ("tomorrow", 1))
+    ),
+    TariffSensorDescription(
+        key="import_price_percent_of_highest",
+        translation_key="import_price_percent_of_highest",
+        native_unit_of_measurement=PERCENTAGE,
+        suggested_display_precision=0,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
+        value=_percent_of_highest,
+    ),
+    TariffSensorDescription(
+        key="cheaper_periods_today",
+        translation_key="cheaper_periods_today",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
+        value=_cheaper,
+    ),
     TariffSensorDescription(
         key="next_price_change",
         translation_key="next_price_change",
@@ -253,6 +299,7 @@ async def async_setup_entry(
         async_add_entities(
             CheapShareSensor(coordinator, description) for description in CHEAP_SHARE_SENSORS
         )
+        async_add_entities([CheapRatingSensor(coordinator)])
         if entry.options.get(CONF_HOUSE_ENERGY):
             async_add_entities([SavingsSensor(coordinator), SavingsShareSensor(coordinator)])
 

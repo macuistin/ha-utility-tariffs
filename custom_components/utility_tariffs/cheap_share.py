@@ -36,12 +36,27 @@ class CheapShare:
         return 100.0 * self.cheap_kwh / self.total_kwh if self.total_kwh > 0 else 0.0
 
 
-def cheap_bands(import_prices: Mapping[str, Decimal]) -> frozenset[str]:
-    """The bands at the lowest import price, or none when every band costs the same."""
+def cheap_bands(
+    import_prices: Mapping[str, Decimal], average: Decimal | None = None
+) -> frozenset[str]:
+    """The bands that count as cheap, or none when every band costs the same.
+
+    Without an *average* the cheap bands are those at the lowest import price. With one, they are
+    those priced at or below it.
+    """
     if len(set(import_prices.values())) < 2:
         return frozenset()
-    lowest = min(import_prices.values())
-    return frozenset(name for name, price in import_prices.items() if price == lowest)
+    limit = min(import_prices.values()) if average is None else average
+    return frozenset(name for name, price in import_prices.items() if price <= limit)
+
+
+RATING_STEPS = (("very_good", 75.0), ("good", 50.0), ("average", 25.0), ("poor", 0.0))
+RATINGS = tuple(name for name, _ in RATING_STEPS)
+
+
+def share_rating(percent: float) -> str:
+    """A label for a cheap share: very good from 75%, good from 50%, average from 25%, else poor."""
+    return next(name for name, floor in RATING_STEPS if percent >= floor)
 
 
 def cheap_share(
