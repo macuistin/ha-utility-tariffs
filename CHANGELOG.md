@@ -5,6 +5,12 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- Typing in your own rates now starts with a choice of shape: a flat rate, day and night, peak and
+  off-peak, a cheap midday, a cheap overnight window, or nothing. The shape fills in the rate names
+  and hours, and you type the prices. You can still add more timed rates afterwards.
+
 **Fixed**
 
 - A negative reading from an energy meter is no longer used as the starting point for the next

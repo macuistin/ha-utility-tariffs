@@ -139,7 +139,7 @@ async def test_own_rates_are_the_first_choice_on_the_plan_page(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {"tariff": "Type in my own rates"}
     )
-    assert result["step_id"] == "manual"
+    assert result["step_id"] == "manual_template"
 
 
 async def test_the_own_rates_choice_is_in_the_language_of_the_home(

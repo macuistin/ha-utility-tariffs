@@ -31,6 +31,16 @@
           "area": "Pick the area of your supply. It is usually in the name of your distribution network or on your bill."
         }
       },
+      "manual_template": {
+        "title": "Your own rates: start from a shape",
+        "description": "Pick the shape closest to your tariff. It fills in the rate names and hours on the next page, and you type the prices. Choose the last option to start from nothing.",
+        "data": {
+          "template": "Shape of the tariff"
+        },
+        "data_description": {
+          "template": "Only the names and hours are filled in. You can add more timed rates afterwards."
+        }
+      },
       "manual": {
         "title": "Your own rates",
         "description": "Prices as they appear on your bill. Timed rates, such as a night rate, are added next.",
@@ -46,7 +56,8 @@
           "discount_rate": "Discount on energy",
           "vat_rate": "VAT",
           "vat_included": "Prices already include VAT",
-          "bill_start_day": "Day of the month a bill starts"
+          "bill_start_day": "Day of the month a bill starts",
+          "timed_rate": "Price of the timed rate"
         },
         "data_description": {
           "name": "A name for the tariff, shown as the integration's title.",
@@ -60,7 +71,8 @@
           "discount_rate": "A percentage taken off the energy charge, such as a prompt payment discount.",
           "vat_rate": "The VAT rate in percent. Leave at 0 if your prices already include it.",
           "vat_included": "Turn on when the rates above are the prices you pay, with VAT in them.",
-          "bill_start_day": "The day of the month your supplier's bill period starts, 1 to 28."
+          "bill_start_day": "The day of the month your supplier's bill period starts, 1 to 28.",
+          "timed_rate": "The price of one kWh in the timed rate of the shape you chose, as it appears on your bill. For example 0.15."
         }
       },
       "manual_more": {
@@ -422,6 +434,16 @@
     "plan_choice": {
       "options": {
         "own_rates": "Type in my own rates"
+      }
+    },
+    "manual_template": {
+      "options": {
+        "flat": "Flat rate, one price all day",
+        "day_night": "Day and night (night 23:00 to 08:00)",
+        "peak_offpeak": "Peak and off-peak (peak 17:00 to 19:00)",
+        "cheap_midday": "Cheap midday (11:00 to 15:00)",
+        "cheap_overnight": "Cheap overnight (02:00 to 06:00)",
+        "blank": "Start from nothing"
       }
     }
   },

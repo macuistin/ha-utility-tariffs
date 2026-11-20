@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
@@ -36,7 +37,9 @@ async def _step(hass: HomeAssistant, result, user_input):
 async def _to_base_form(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await _step(hass, result, {"country": "IE"})
-    return await _step(hass, result, {"tariff": "Type in my own rates"})
+    result = await _step(hass, result, {"tariff": "Type in my own rates"})
+    assert result["step_id"] == "manual_template"
+    return await _step(hass, result, {"template": "blank"})
 
 
 async def _make(hass: HomeAssistant):
@@ -140,6 +143,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     )
     result = await _step(hass, result, {"country": "IE"})
     result = await _step(hass, result, {"tariff": "Type in my own rates"})
+    result = await _step(hass, result, {"template": "blank"})
     result = await _step(hass, result, BASE)
     result = await _step(hass, result, {"next_step_id": "manual_done"})
     await hass.async_block_till_done()
@@ -152,3 +156,62 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     }
     assert without_bands(after) == without_bands(before)
     assert hass.states.get("sensor.utility_tariff_import_price").state == "0.327"
+
+
+@pytest.mark.parametrize(
+    ("template", "base_name", "timed"),
+    [
+        ("flat", "All day", None),
+        ("day_night", "Day", ("Night", "23:00:00", "08:00:00")),
+        ("peak_offpeak", "Off-peak", ("Peak", "17:00:00", "19:00:00")),
+        ("cheap_midday", "Day", ("Midday", "11:00:00", "15:00:00")),
+        ("cheap_overnight", "Day", ("Overnight", "02:00:00", "06:00:00")),
+    ],
+)
+async def test_each_template_fills_the_form_and_makes_a_valid_tariff(
+    hass: HomeAssistant,
+    use_store: Callable[..., Path],
+    template: str,
+    base_name: str,
+    timed: tuple[str, str, str] | None,
+) -> None:
+    from custom_components.utility_tariffs.manual import problem_with
+
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    result = await _step(hass, result, {"country": "IE"})
+    result = await _step(hass, result, {"tariff": "Type in my own rates"})
+    result = await _step(hass, result, {"template": template})
+    fields = {str(key): key for key in result["data_schema"].schema}
+    assert fields["base_rate_name"].default() == base_name
+    assert ("timed_rate" in fields) == (timed is not None)
+
+    typed = {**BASE, "base_rate_name": base_name}
+    if timed is not None:
+        typed["timed_rate"] = 0.12
+    result = await _step(hass, result, typed)
+    assert result["step_id"] == "manual_more"
+    result = await _step(hass, result, {"next_step_id": "manual_done"})
+    result = await _step(hass, result, {})
+    saved = result["data"]["manual"]
+    assert problem_with(saved, "My plan") is None
+    expected = []
+    if timed is not None:
+        expected = [{"name": timed[0], "start": timed[1], "end": timed[2], "rate": 0.12}]
+    assert [
+        {k: p[k] for k in ("name", "start", "end", "rate")} for p in saved["periods"]
+    ] == expected
+    assert "timed_rate" not in saved
+
+
+async def test_a_template_price_that_cannot_be_used_keeps_the_form(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    result = await _step(hass, result, {"country": "IE"})
+    result = await _step(hass, result, {"tariff": "Type in my own rates"})
+    result = await _step(hass, result, {"template": "day_night"})
+
+    result = await _step(hass, result, {**BASE, "currency": "??", "timed_rate": 0.1})
+
+    assert result["step_id"] == "manual"
+    assert result["errors"] == {"base": "invalid_tariff"}

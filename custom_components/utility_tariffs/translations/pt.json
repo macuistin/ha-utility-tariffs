@@ -31,6 +31,16 @@
           "area": "Escolha a zona do seu fornecimento. Costuma constar do nome da sua rede de distribuição ou da sua fatura."
         }
       },
+      "manual_template": {
+        "title": "As suas próprias tarifas: comece por um modelo",
+        "description": "Escolha o modelo mais próximo da sua tarifa. Preenche os nomes e as horas das tarifas na página seguinte, e você escreve os preços. Escolha a última opção para começar do zero.",
+        "data": {
+          "template": "Modelo da tarifa"
+        },
+        "data_description": {
+          "template": "Só os nomes e as horas são preenchidos. Pode juntar mais tarifas horárias depois."
+        }
+      },
       "manual": {
         "title": "Os seus próprios preços",
         "description": "Os preços tal como constam da sua fatura. Os preços por horário, como um preço de noite, são adicionados a seguir.",
@@ -46,7 +56,8 @@
           "discount_rate": "Desconto na energia",
           "vat_rate": "IVA",
           "vat_included": "Preços com IVA incluído",
-          "bill_start_day": "Dia do mês em que começa uma fatura"
+          "bill_start_day": "Dia do mês em que começa uma fatura",
+          "timed_rate": "Preço da tarifa horária"
         },
         "data_description": {
           "name": "Um nome para o tarifário, mostrado como título da integração.",
@@ -60,7 +71,8 @@
           "discount_rate": "Uma percentagem deduzida ao custo da energia, como um desconto por pagamento pontual.",
           "vat_rate": "A taxa de IVA em percentagem. Deixe 0 se os seus preços já a incluírem.",
           "vat_included": "Ative quando os preços acima são os que paga, com IVA incluído.",
-          "bill_start_day": "O dia do mês em que começa o período de faturação do seu fornecedor, de 1 a 28."
+          "bill_start_day": "O dia do mês em que começa o período de faturação do seu fornecedor, de 1 a 28.",
+          "timed_rate": "O preço de um kWh na tarifa horária do modelo escolhido, como aparece na sua fatura. Por exemplo 0,15."
         }
       },
       "manual_more": {
@@ -422,6 +434,16 @@
     "plan_choice": {
       "options": {
         "own_rates": "Introduzir os meus preços"
+      }
+    },
+    "manual_template": {
+      "options": {
+        "flat": "Tarifa simples, um preço o dia todo",
+        "day_night": "Dia e noite (noite das 23:00 às 08:00)",
+        "peak_offpeak": "Ponta e vazio (ponta das 17:00 às 19:00)",
+        "cheap_midday": "Meio-dia barato (11:00 às 15:00)",
+        "cheap_overnight": "Madrugada barata (02:00 às 06:00)",
+        "blank": "Começar do zero"
       }
     }
   },

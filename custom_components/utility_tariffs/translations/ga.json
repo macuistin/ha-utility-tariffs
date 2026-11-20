@@ -31,6 +31,16 @@
           "area": "Roghnaigh ceantar do sholáthair. De ghnáth bíonn sé in ainm do líonra dáiliúcháin nó ar do bhille."
         }
       },
+      "manual_template": {
+        "title": "Do phraghsanna féin: tosaigh ó phatrún",
+        "description": "Roghnaigh an patrún is gaire do do tharaif. Líonann sé ainmneacha agus uaireanta na rátaí ar an gcéad leathanach eile, agus clóscríobhann tú na praghsanna. Roghnaigh an rogha dheireanach chun tosú ó rud ar bith.",
+        "data": {
+          "template": "Patrún na taraife"
+        },
+        "data_description": {
+          "template": "Ní líontar ach ainmneacha agus uaireanta. Is féidir leat níos mó rátaí ama a chur leis ina dhiaidh."
+        }
+      },
       "manual": {
         "title": "Do ráta féin",
         "description": "Praghsanna mar atá siad ar do bhille. Cuirtear ráthaí ama, mar ráta oíche, leis ina dhiaidh sin.",
@@ -46,7 +56,8 @@
           "discount_rate": "Lascaine ar fhuinneamh",
           "vat_rate": "CBL",
           "vat_included": "Tá CBL san áireamh sna praghsanna cheana",
-          "bill_start_day": "Lá den mhí a thosaíonn bille"
+          "bill_start_day": "Lá den mhí a thosaíonn bille",
+          "timed_rate": "Praghas an ráta ama"
         },
         "data_description": {
           "name": "Ainm don taraif, a thaispeántar mar theideal an lánpháirtithe.",
@@ -60,7 +71,8 @@
           "discount_rate": "Céatadán a bhaintear den mhuirear fuinnimh, mar lascaine as íoc go pras.",
           "vat_rate": "An ráta CBL i gcéatadán. Fág ag 0 má tá sé sna praghsanna cheana.",
           "vat_included": "Cuir air nuair is iad na rátaí thuas na praghsanna a íocann tú, CBL san áireamh.",
-          "bill_start_day": "Lá den mhí a thosaíonn tréimhse billeála do sholáthraí, 1 go 28."
+          "bill_start_day": "Lá den mhí a thosaíonn tréimhse billeála do sholáthraí, 1 go 28.",
+          "timed_rate": "Praghas kWh amháin sa ráta ama den phatrún a roghnaigh tú, mar a fheictear ar do bhille é. Mar shampla 0.15."
         }
       },
       "manual_more": {
@@ -422,6 +434,16 @@
     "plan_choice": {
       "options": {
         "own_rates": "Cuir isteach mo phraghsanna féin"
+      }
+    },
+    "manual_template": {
+      "options": {
+        "flat": "Ráta cothrom, praghas amháin ar feadh an lae",
+        "day_night": "Lá agus oíche (oíche 23:00 go 08:00)",
+        "peak_offpeak": "Buaic agus lasbuaic (buaic 17:00 go 19:00)",
+        "cheap_midday": "Meán lae saor (11:00 go 15:00)",
+        "cheap_overnight": "Thar oíche saor (02:00 go 06:00)",
+        "blank": "Tosaigh ó rud ar bith"
       }
     }
   },

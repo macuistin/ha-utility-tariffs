@@ -33,6 +33,10 @@ bill period both use these dates.
 ## Your own rates
 
 When your plan is not in the store, choose **Type in my own rates** at setup, or in Reconfigure.
+First pick the shape closest to your tariff: a flat rate, day and night (night 23:00 to 08:00), peak
+and off-peak (peak 17:00 to 19:00), a cheap midday (11:00 to 15:00) or a cheap overnight window
+(02:00 to 06:00), or start from nothing. The shape only fills in the rate names and hours. You type
+the prices, and can add more timed rates afterwards.
 Enter the main unit rate, export rate, standing charge per day, monthly levy, discount on energy,
 VAT, whether your prices already include VAT, and the day of the month a bill starts (1 to 28). Then
 add any timed rates, such as a night rate, with their hours. Where timed rates overlap, the

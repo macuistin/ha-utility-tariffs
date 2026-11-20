@@ -32,7 +32,9 @@ flowchart TD
 3. The second page is one list. **Type in my own rates** is at the top, for a plan that is not in
    the store. Below it is every supplier and plan for the country. Where the store holds only part
    of a country's prices, the page says what is missing. A third page names the plan and asks for
-   your area, only where its prices differ by area. Each page shows which step it is.
+   your area, only where its prices differ by area. Each page shows which step it is. For your own
+   rates, a shape page comes first, with flat, day and night, peak and off-peak, cheap midday and
+   cheap overnight, so the form starts with the rate names and hours filled in.
 
 4. Open the integration, choose the three dots, then **Configure**, to set the meters, window
    length and bill dates. Each is explained in [Configuration](configuration.md).
