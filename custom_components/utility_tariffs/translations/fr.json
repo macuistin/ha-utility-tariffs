@@ -247,6 +247,9 @@
       },
       "dearest_window_active": {
         "name": "Période la plus chère active"
+      },
+      "off_peak": {
+        "name": "Heures creuses"
       }
     },
     "number": {

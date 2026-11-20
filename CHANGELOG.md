@@ -15,6 +15,9 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- An **Off-peak** binary sensor, on while the tariff's lowest import price is in force, with the
+  start and end of the current and the next off-peak stretch as attributes. A tariff with one price
+  all day, or one that follows a price feed, has no off-peak, so the sensor is unavailable.
 - A **Largest rise a meter can show (kW)** option. A rise faster than this is left out of the bill.
   Leave it empty for 100 kW.
 

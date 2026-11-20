@@ -71,6 +71,12 @@
         "state": {
           "on": "mdi:clock-check"
         }
+      },
+      "off_peak": {
+        "default": "mdi:weather-sunny",
+        "state": {
+          "on": "mdi:weather-night"
+        }
       }
     },
     "number": {

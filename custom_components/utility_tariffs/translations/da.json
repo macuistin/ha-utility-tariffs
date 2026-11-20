@@ -247,6 +247,9 @@
       },
       "dearest_window_active": {
         "name": "Dyreste tidsrum er aktivt"
+      },
+      "off_peak": {
+        "name": "Lavpris"
       }
     },
     "number": {

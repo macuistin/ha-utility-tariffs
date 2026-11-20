@@ -247,6 +247,9 @@
       },
       "dearest_window_active": {
         "name": "Janela mais cara ativa"
+      },
+      "off_peak": {
+        "name": "Vazio"
       }
     },
     "number": {

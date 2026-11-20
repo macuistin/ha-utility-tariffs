@@ -247,6 +247,9 @@
       },
       "dearest_window_active": {
         "name": "Dearest window active"
+      },
+      "off_peak": {
+        "name": "Off-peak"
       }
     },
     "number": {
