@@ -257,6 +257,9 @@
       },
       "average_export_price_tomorrow": {
         "name": "Gennemsnitlig eksportpris i morgen"
+      },
+      "savings_share_this_period": {
+        "name": "Andel sparet i afregningsperioden"
       }
     },
     "binary_sensor": {

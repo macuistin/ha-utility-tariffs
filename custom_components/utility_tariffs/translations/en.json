@@ -257,6 +257,9 @@
       },
       "average_export_price_tomorrow": {
         "name": "Average export price tomorrow"
+      },
+      "savings_share_this_period": {
+        "name": "Savings share this bill period"
       }
     },
     "binary_sensor": {

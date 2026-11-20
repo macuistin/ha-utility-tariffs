@@ -257,6 +257,9 @@
       },
       "average_export_price_tomorrow": {
         "name": "Meánphraghas easpórtála amárach"
+      },
+      "savings_share_this_period": {
+        "name": "Sciar an tsábhála sa tréimhse bhille"
       }
     },
     "binary_sensor": {

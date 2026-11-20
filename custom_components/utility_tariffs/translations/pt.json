@@ -257,6 +257,9 @@
       },
       "average_export_price_tomorrow": {
         "name": "Preço de exportação médio amanhã"
+      },
+      "savings_share_this_period": {
+        "name": "Parte poupada no período de faturação"
       }
     },
     "binary_sensor": {

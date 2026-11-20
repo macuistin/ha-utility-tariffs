@@ -257,6 +257,9 @@
       },
       "average_export_price_tomorrow": {
         "name": "Prix de rachat moyen demain"
+      },
+      "savings_share_this_period": {
+        "name": "Part d'économie sur la période de facturation"
       }
     },
     "binary_sensor": {
