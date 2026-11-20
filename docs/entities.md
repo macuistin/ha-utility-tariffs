@@ -17,7 +17,7 @@ Each followed tariff is one device. Prices are in the tariff's currency per kWh.
 
 | Entity | Meaning |
 | --- | --- |
-| Price forecast | The time the prices are known until. Its `slots` attribute lists the next 48 hours (start, end, price, band and whether the price is `fixed` or `published`). `changes` lists revisions the store already holds, with each band's new price. `window_percentiles` and `history_percentiles` give the low, 50th and high percentile of the prices ahead and of this time of day over the last 28 days (shown after 7 days). `complete` says whether prices are known to the end of the range asked for |
+| Price forecast | The time the prices are known until. Its `slots` attribute lists the next 48 hours (start, end, import price, export price, band and whether the price is `fixed` or `published`). `import_rates` and `export_rates` hold today's and tomorrow's prices as rows of `start`, `end` and `value`, the shape evcc reads, with neighbouring half hours at the same price joined into one row. None of these attributes are kept in the history. `changes` lists revisions the store already holds, with each band's new price. `window_percentiles` and `history_percentiles` give the low, 50th and high percentile of the prices ahead and of this time of day over the last 28 days (shown after 7 days). `complete` says whether prices are known to the end of the range asked for |
 | Next tariff change | The day the next revision starts, with the band prices before and after |
 | Next low price, Next high price | When the price next falls to the low percentile of the prices known ahead, or rises to the high one, with when that stretch ends |
 | Price level (tariffs on a half-hourly price feed only) | Low, mid or high for the price now, compared with this time of day over the last 28 days, or with the prices ahead until a week of history is held. The `basis` attribute says which |
@@ -35,3 +35,30 @@ price known, with the import and export price, band and source, and says whether
 fully covered and where the prices are known until. The
 `find_window` action finds the cheapest or dearest stretch for a load of a given power. Both return
 their answer, so use them with `response_variable`.
+
+### Charting the prices
+
+The price forecast sensor holds the prices as attributes, so a chart card needs no template. This
+apexcharts-card example draws today's and tomorrow's import price as steps:
+
+```yaml
+type: custom:apexcharts-card
+graph_span: 48h
+span:
+  start: day
+header:
+  show: true
+  title: Import price
+series:
+  - entity: sensor.utility_tariff_price_forecast
+    type: line
+    curve: stepline
+    data_generator: |
+      return entity.attributes.import_rates.flatMap((row) => [
+        [new Date(row.start).getTime(), row.value],
+        [new Date(row.end).getTime(), row.value],
+      ]);
+```
+
+Use `export_rates` for the export price. The rows are not checked against a live evcc or Predbat
+install: the shape is the one evcc's custom tariff reads, so verify it there before relying on it.

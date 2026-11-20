@@ -275,3 +275,46 @@ async def test_tomorrow_available_follows_what_the_feed_has_published(
     state = hass.states.get("binary_sensor.utility_tariff_tomorrow_s_prices_available")
     assert state is not None
     assert state.state == ("on" if published else "off")
+
+
+async def test_a_two_band_tariff_gives_a_handful_of_rate_rows_in_the_evcc_shape(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: object
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass)
+
+    rows = attributes(hass, "price_forecast")["import_rates"]
+
+    assert rows == [
+        {"start": "2026-11-14T00:00:00+00:00", "end": "2026-11-14T08:00:00+00:00", "value": 0.15},
+        {"start": "2026-11-14T08:00:00+00:00", "end": "2026-11-14T23:00:00+00:00", "value": 0.3},
+        {"start": "2026-11-14T23:00:00+00:00", "end": "2026-11-15T08:00:00+00:00", "value": 0.15},
+        {"start": "2026-11-15T08:00:00+00:00", "end": "2026-11-15T23:00:00+00:00", "value": 0.3},
+        {"start": "2026-11-15T23:00:00+00:00", "end": "2026-11-16T00:00:00+00:00", "value": 0.15},
+    ]
+
+
+async def test_the_export_rates_follow_the_export_price(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, FLAT)
+
+    [row] = attributes(hass, "price_forecast")["export_rates"]
+
+    assert (row["start"], row["end"]) == ("2026-11-14T00:00:00+00:00", "2026-11-16T00:00:00+00:00")
+    assert row["value"] == 0.0
+
+
+async def test_a_feed_tariff_stays_far_below_the_recorder_limit(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 15))
+    freezer.move_to(EVENING)
+    await _setup(hass, FEED)
+
+    forecast = attributes(hass, "price_forecast")
+
+    assert len(forecast["import_rates"]) > 4  # a price per band change, not per half hour
+    assert len(json.dumps(forecast)) < 16384
+    assert forecast["slots"][0]["export_price"] == 0.0

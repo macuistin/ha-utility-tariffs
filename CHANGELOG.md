@@ -15,6 +15,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- The price forecast sensor has `import_rates` and `export_rates` attributes: today's and
+  tomorrow's prices as `start`, `end` and `value` rows, with half hours at the same price joined.
+  A chart card can read them without a template, and `docs/entities.md` has an apexcharts-card
+  example. The `slots` attribute gains `export_price`. None of these are kept in the history.
 - An **Off-peak** binary sensor, on while the tariff's lowest import price is in force, with the
   start and end of the current and the next off-peak stretch as attributes. A tariff with one price
   all day, or one that follows a price feed, has no off-peak, so the sensor is unavailable.
