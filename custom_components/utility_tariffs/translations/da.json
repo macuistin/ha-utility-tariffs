@@ -281,6 +281,24 @@
       },
       "savings_share_this_period": {
         "name": "Andel sparet i afregningsperioden"
+      },
+      "lowest_price_time_today": {
+        "name": "Tidspunkt for laveste importpris i dag"
+      },
+      "lowest_price_time_tomorrow": {
+        "name": "Tidspunkt for laveste importpris i morgen"
+      },
+      "highest_price_time_today": {
+        "name": "Tidspunkt for højeste importpris i dag"
+      },
+      "highest_price_time_tomorrow": {
+        "name": "Tidspunkt for højeste importpris i morgen"
+      },
+      "import_price_percent_of_highest": {
+        "name": "Importpris som andel af dagens højeste"
+      },
+      "cheaper_periods_today": {
+        "name": "Billigere perioder i dag"
       }
     },
     "binary_sensor": {

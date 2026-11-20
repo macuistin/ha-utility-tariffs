@@ -281,6 +281,24 @@
       },
       "savings_share_this_period": {
         "name": "Sciar an tsábhála sa tréimhse bhille"
+      },
+      "lowest_price_time_today": {
+        "name": "Am an phraghais allmhairithe is ísle inniu"
+      },
+      "lowest_price_time_tomorrow": {
+        "name": "Am an phraghais allmhairithe is ísle amárach"
+      },
+      "highest_price_time_today": {
+        "name": "Am an phraghais allmhairithe is airde inniu"
+      },
+      "highest_price_time_tomorrow": {
+        "name": "Am an phraghais allmhairithe is airde amárach"
+      },
+      "import_price_percent_of_highest": {
+        "name": "Praghas allmhairithe mar chuid de phraghas is airde an lae inniu"
+      },
+      "cheaper_periods_today": {
+        "name": "Tréimhsí níos saoire inniu"
       }
     },
     "binary_sensor": {

@@ -9,6 +9,9 @@ Each followed tariff is one device. Prices are in the tariff's currency per kWh.
 | Previous import price, Next import price, Next price change | The price before the current one, the one after it, and when it starts |
 | Import price rating | Where the current price sits in today's range: very low, low, normal, high or very high. A flat tariff is always normal |
 | Lowest, highest and average import price today | Over the local day. The average is weighted by time. The export versions are off until you enable them |
+| Time of the lowest and highest import price, today and tomorrow | Timestamps, all off until you enable them. Tomorrow's is unknown until the whole day is priced. A band that began the day before gives the start of the day |
+| Import price as a share of today's highest | Percentage, off until you enable it |
+| Cheaper periods today | How many half hours of today cost less than now, off until you enable it. Unknown until the day is priced in full |
 | Lowest, highest and average import and export price tomorrow | The same figures for tomorrow, all off until you enable them. They are unknown until tomorrow's prices are all held, so a price-feed tariff shows nothing until the feed publishes the whole day, and never a guess |
 | Cheapest window start and end, Dearest window start, Cheapest window active | The best stretch of the length set in the options, from now to the end of tomorrow. The window starts at its earliest best time and ends where that price stops changing, so a window inside a long band ends with the band |
 | Off-peak | On while the tariff's lowest import price is in force. Off-peak means that lowest price only, not every band below the day's average, so a three-band tariff is off-peak in its cheapest band alone. Its attributes `current_start`, `current_end`, `next_start` and `next_end` hold the times. Unavailable, not off, for a tariff with one price all day and for one that follows a price feed |
