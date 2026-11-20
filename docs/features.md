@@ -67,6 +67,18 @@ a grid connection in the Energy dashboard, and as the entity for export compensa
 - The dashboard lists only price entities in your Home Assistant currency (Settings, System,
   General). A tariff in another currency does not appear in the picker.
 
+## History from your meters
+
+When a plan starts, and each time Home Assistant starts, the history is filled from your meters'
+hourly long-term statistics, so a new plan does not begin with an empty bill. Each hour is spread
+evenly over its two half hours. The result is exact only for a price that does not change within
+the hour. A half hour that was counted live is never changed. An hour the statistics have no
+figure for, or a rise no supply could deliver, is left empty and not counted as zero.
+
+The `utility_tariffs.backfill` action runs the fill again. Use it after you add or change a meter.
+Give `start` to fill from a later day than the one in the options. It replaces what an earlier fill
+wrote and answers with `half_hours_filled`, `first_day` and `last_day`.
+
 ## Bill summary
 
 The `utility_tariffs.bill_summary` action returns the bill so far as a self-contained HTML page in

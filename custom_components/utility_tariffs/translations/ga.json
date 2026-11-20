@@ -308,7 +308,8 @@
           "refresh_now": "Léigh an stór taraifí arís anois",
           "clear_cache": "Scrios na comhaid taraife shábháilte ar dtús",
           "connected_load_kw": "Ualach ceangailte (kW)",
-          "max_meter_kw": "An t-ardú is mó a thaispeánfaidh méadar (kW)"
+          "max_meter_kw": "An t-ardú is mó a thaispeánfaidh méadar (kW)",
+          "history_start": "Tús na staire"
         },
         "data_description": {
           "refresh_now": "Léann sé innéacs an stóir agus do phlean arís nuair a shábháileann tú, in ionad fanacht go dtí anocht. Úsáid é tar éis don stór athrú a fhoilsiú.",
@@ -324,7 +325,8 @@
           "bill_months": "1, 2, 3, 4, 6 nó 12. Fág folamh chun an taraif a leanúint.",
           "bill_start_month": "Do billí níos faide ná mí amháin, ionas go mbeidh siad ailínithe le billí do sholáthraí. Mar shampla 2 le bille dhá mhí a thosaíonn i bhFeabhra.",
           "connected_load_kw": "Le haghaidh taraife a ghearrann in aghaidh an kW de ualach ceangailte (údaraithe) amháin. Faigh é ar do bhille nó ar do chonradh. Gan é, ní thaispeánann an taraif sin aon bhille.",
-          "max_meter_kw": "Roghnach. An chumhacht is mó a bhféadfadh do theach a tharraingt. Fágtar léamh méadair a ardaíonn níos tapa as an mbille. Fág folamh le haghaidh 100 kW."
+          "max_meter_kw": "Roghnach. An chumhacht is mó a bhféadfadh do theach a tharraingt. Fágtar léamh méadair a ardaíonn níos tapa as an mbille. Fág folamh le haghaidh 100 kW.",
+          "history_start": "Roghnach. An chéad lá le líonadh ó staitisticí do mhéadar nuair a thosaíonn an plean. Fág folamh don bhliain seo caite."
         }
       }
     },
@@ -394,6 +396,20 @@
           "description": "An taraif a dtaispeánfar a bille."
         }
       }
+    },
+    "backfill": {
+      "name": "Líon an stair",
+      "description": "Líonann sé na leathuaireanta nár cláraíodh ó staitisticí uair-bhunaithe do mhéadar. Coinnítear na leathuaireanta a cláraíodh beo. Rith arís é tar éis duit méadar a athrú.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Taraif",
+          "description": "An taraif a bhfuil a stair le líonadh."
+        },
+        "start": {
+          "name": "An chéad lá",
+          "description": "Roghnach. An chéad lá le líonadh uaidh. Fág folamh chun tús na staire sna roghanna a úsáid."
+        }
+      }
     }
   },
   "selector": {
@@ -427,6 +443,9 @@
     },
     "no_load": {
       "message": "Gearrann an taraif seo in aghaidh an kW de ualach ceangailte. Socraigh do ualach ceangailte sna roghanna ar dtús."
+    },
+    "no_meter_history": {
+      "message": "Socraigh méadar allmhairithe fuinnimh sna roghanna ar dtús. Líontar an stair uaidh."
     }
   },
   "issues": {

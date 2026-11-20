@@ -308,7 +308,8 @@
           "refresh_now": "Ler o repositório de tarifários de novo agora",
           "clear_cache": "Eliminar primeiro os ficheiros de tarifários guardados",
           "connected_load_kw": "Potência ligada (kW)",
-          "max_meter_kw": "Maior subida que um contador pode mostrar (kW)"
+          "max_meter_kw": "Maior subida que um contador pode mostrar (kW)",
+          "history_start": "Início do histórico"
         },
         "data_description": {
           "refresh_now": "Lê de novo o índice do repositório e o seu plano ao guardar, em vez de esperar pela noite. Use depois de o repositório publicar uma alteração.",
@@ -324,7 +325,8 @@
           "bill_months": "1, 2, 3, 4, 6 ou 12. Deixe vazio para seguir o tarifário.",
           "bill_start_month": "Apenas para faturas com mais de um mês, para que coincidam com as do seu fornecedor. Por exemplo, 2 para uma fatura de dois meses que começa em fevereiro.",
           "connected_load_kw": "Apenas para uma tarifa cobrada por kW de potência ligada (autorizada). Encontra-a na fatura ou no contrato. Sem ela, essa tarifa não mostra fatura.",
-          "max_meter_kw": "Opcional. A maior potência que a sua casa pode consumir. Uma leitura do contador que suba mais depressa é deixada de fora da fatura. Deixe vazio para 100 kW."
+          "max_meter_kw": "Opcional. A maior potência que a sua casa pode consumir. Uma leitura do contador que suba mais depressa é deixada de fora da fatura. Deixe vazio para 100 kW.",
+          "history_start": "Opcional. O primeiro dia a preencher com as estatísticas dos seus contadores quando o plano começa. Deixe vazio para o último ano."
         }
       }
     },
@@ -394,6 +396,20 @@
           "description": "O tarifário cuja fatura mostrar."
         }
       }
+    },
+    "backfill": {
+      "name": "Preencher histórico",
+      "description": "Preenche as meias horas sem registo com as estatísticas horárias dos seus contadores. As meias horas registadas em direto são mantidas. Execute de novo depois de mudar de contador.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarifa",
+          "description": "A tarifa cujo histórico deve ser preenchido."
+        },
+        "start": {
+          "name": "Primeiro dia",
+          "description": "Opcional. O primeiro dia a preencher. Deixe vazio para usar o início do histórico das opções."
+        }
+      }
     }
   },
   "selector": {
@@ -427,6 +443,9 @@
     },
     "no_load": {
       "message": "Esta tarifa cobra por kW de potência ligada. Defina primeiro a potência ligada nas opções."
+    },
+    "no_meter_history": {
+      "message": "Defina primeiro um contador de energia importada nas opções. O histórico é preenchido a partir dele."
     }
   },
   "issues": {

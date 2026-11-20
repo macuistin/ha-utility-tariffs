@@ -58,3 +58,14 @@ bill_summary:
       selector:
         config_entry:
           integration: utility_tariffs
+
+backfill:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: utility_tariffs
+    start:
+      selector:
+        date:

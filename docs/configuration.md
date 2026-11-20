@@ -15,6 +15,7 @@ integration.
 | Battery charge, size and wear per kWh | Used with the home meter to value the energy the battery holds |
 | Connected load (kW) | Only for a tariff that charges per kW of connected (sanctioned) load, as some in India do. Find it on your bill or supply agreement. Without it that tariff shows prices but no bill, and its bill service reports that the load is missing |
 | Largest rise a meter can show (kW) | The most power your home could draw, default 100. A meter reading that rises faster than this is left out of the bill and raises a repair issue. A meter reset, or a meter that comes back after being unavailable, is left out without a repair |
+| Start of history | Optional. The first day to fill from your meters' hourly statistics when the plan starts. Leave empty for the last year. Saving the options runs the fill again |
 | Day of the month a bill starts, months in one bill, a month a bill starts in | Line the bill up with your supplier's. Empty follows the tariff |
 
 Two tick boxes in the same form act once and are not saved: **Read the tariff store again now** and

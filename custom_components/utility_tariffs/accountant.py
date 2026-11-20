@@ -8,7 +8,7 @@ less often than that books each step in the minute it appears.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.core import callback
@@ -16,8 +16,17 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import SlotEnergy
+from utility_tariffs_lib.tariff.slots import local_midnight
 
-from .const import CONF_BATTERY_SOC, DEFAULT_MAX_METER_KW, DOMAIN, METER_TARGETS
+from .backfill import BackfillResult, Filler, async_read_hours, slot_totals
+from .const import (
+    CONF_BATTERY_SOC,
+    CONF_IMPORT_ENERGY,
+    DEFAULT_HISTORY_DAYS,
+    DEFAULT_MAX_METER_KW,
+    DOMAIN,
+    METER_TARGETS,
+)
 from .energy_store import EnergyStore
 from .meter import Exclusion, RiseTracker, kwh_of
 
@@ -38,6 +47,7 @@ class MeterSetup:
 
     entities: dict[str, str]
     max_kw: float = DEFAULT_MAX_METER_KW
+    history_start: date | None = None  # the first day to fill from statistics
 
 
 _REASONS = {
@@ -63,6 +73,9 @@ class EnergyAccountant:
         self._soc_entity = entities.get(CONF_BATTERY_SOC)
         self._trackers = {key: RiseTracker(meters.max_kw) for key in self._meters}
         self._on_booked = on_booked
+        self._max_kw = meters.max_kw
+        self._history_start = meters.history_start
+        self.last_backfill = BackfillResult()
 
     async def async_start(self) -> Callable[[], None]:
         """Read the saved history, take the first readings and start the minute timer."""
@@ -74,6 +87,30 @@ class EnergyAccountant:
             self.sample(now)
 
         return async_track_time_interval(self._hass, tick, POLL)
+
+    async def async_backfill(self, first: date | None = None) -> BackfillResult:
+        """Fill half hours nothing was booked for from the meters' hourly statistics.
+
+        Runs from *first*, else the start day in the options, else a year back, up to the start of
+        this hour. A half hour booked live is left alone, one filled before is replaced.
+        """
+        tz = self.store.history.tz
+        today = dt_util.now().astimezone(tz).date()
+        day = first or self._history_start or today - timedelta(days=DEFAULT_HISTORY_DAYS)
+        start = local_midnight(day, tz)
+        end = dt_util.utcnow().replace(minute=0, second=0, microsecond=0)
+        if start >= end:
+            return BackfillResult()
+        hours = await async_read_hours(self._hass, self._meters, start, end)
+        totals = slot_totals(hours, tz, self._max_kw)
+        history = self.store.history
+        filler = Filler(history, self.store.backfilled, METER_TARGETS, CONF_IMPORT_ENERGY)
+        result = filler.fill(totals)
+        if result.slots:
+            self.last_backfill = result
+            self.store.schedule_save()
+            self._on_booked()
+        return result
 
     def sample(self, now: datetime) -> None:
         """Read every meter once and book what each counted since its last reading."""
