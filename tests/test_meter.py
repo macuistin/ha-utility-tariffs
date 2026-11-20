@@ -81,3 +81,69 @@ def test_a_jump_no_supply_could_deliver_is_refused() -> None:
     tracker.update(100.0, T0)
 
     assert tracker.update(160.0, T0 + timedelta(minutes=1)) is None
+
+
+def test_a_negative_reading_is_left_out_and_never_becomes_the_baseline() -> None:
+    tracker = RiseTracker()
+    tracker.update(100.0, T0)
+    assert tracker.update(-5.0, T0 + timedelta(minutes=1)) is None
+
+    # Counting from the negative value would book 105 kWh here.
+    assert tracker.update(100.2, T0 + timedelta(minutes=2)) is None
+    assert [item.reason for item in tracker.excluded] == ["negative", "gap"]
+    assert tracker.latest_suspect is not None
+    assert tracker.latest_suspect.reason == "negative"
+
+
+def test_a_jump_is_reported_with_its_size_and_time() -> None:
+    tracker = RiseTracker()
+    tracker.update(100.0, T0)
+    tracker.update(160.0, T0 + timedelta(minutes=1))
+
+    [item] = tracker.excluded
+    assert (item.reason, item.kwh, item.at) == ("too_large", 60.0, T0 + timedelta(minutes=1))
+
+
+def test_the_limit_is_the_one_given() -> None:
+    tracker = RiseTracker(max_kw=6.0)
+    tracker.update(100.0, T0)
+
+    assert tracker.update(100.2, T0 + timedelta(minutes=1)) is None  # 12 kW for a minute
+    assert tracker.excluded[-1].reason == "too_large"
+    assert tracker.update(100.3, T0 + timedelta(minutes=11)) is not None  # 0.6 kW over ten
+
+
+def test_a_reset_is_ordinary_and_not_suspect() -> None:
+    tracker = RiseTracker()
+    tracker.update(5000.0, T0)
+    tracker.update(3.0, T0 + timedelta(minutes=1))
+
+    assert [item.reason for item in tracker.excluded] == ["reset"]
+    assert tracker.latest_suspect is None
+
+
+def test_the_first_reading_is_not_a_gap() -> None:
+    tracker = RiseTracker()
+    tracker.update(None, T0)
+    tracker.update(100.0, T0 + timedelta(minutes=1))
+
+    assert not tracker.excluded
+
+
+def test_a_meter_that_comes_back_after_a_hole_reports_the_gap() -> None:
+    tracker = RiseTracker()
+    tracker.update(100.0, T0)
+    tracker.update(None, T0 + timedelta(minutes=1))
+    tracker.update(104.0, T0 + timedelta(minutes=2))
+
+    [item] = tracker.excluded
+    assert (item.reason, item.kwh) == ("gap", None)
+    assert tracker.latest_suspect is None  # a gap is not a bad reading
+
+
+def test_the_kept_exclusions_are_bounded() -> None:
+    tracker = RiseTracker()
+    for minute in range(60):
+        tracker.update(1000.0 if minute % 2 == 0 else 0.0, T0 + timedelta(minutes=minute))
+
+    assert len(tracker.excluded) == 20

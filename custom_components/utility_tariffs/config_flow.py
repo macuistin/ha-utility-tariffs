@@ -50,6 +50,7 @@ from .const import (
     CONF_HOUSE_ENERGY,
     CONF_IMPORT_ENERGY,
     CONF_MANUAL,
+    CONF_MAX_METER_KW,
     CONF_NAME,
     CONF_PROVIDER,
     CONF_REFRESH_NOW,
@@ -414,7 +415,12 @@ def _period_schema(previous: dict[str, Any] | None) -> Any:
 
 
 _METERS = (CONF_IMPORT_ENERGY, CONF_EXPORT_ENERGY, CONF_HOUSE_ENERGY, CONF_BATTERY_DISCHARGE_ENERGY)
-_NUMBERS = {CONF_BATTERY_CAPACITY: "kWh", CONF_BATTERY_WEAR: None, CONF_CONNECTED_LOAD: "kW"}
+_NUMBERS = {
+    CONF_BATTERY_CAPACITY: "kWh",
+    CONF_BATTERY_WEAR: None,
+    CONF_CONNECTED_LOAD: "kW",
+    CONF_MAX_METER_KW: "kW",
+}
 
 
 class TariffOptionsFlow(OptionsFlowWithReload):

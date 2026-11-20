@@ -10,9 +10,16 @@ from typing import Any
 import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
-from custom_components.utility_tariffs.const import CONF_EXPORT_ENERGY, CONF_IMPORT_ENERGY, DOMAIN
+from custom_components.utility_tariffs.const import (
+    CONF_EXPORT_ENERGY,
+    CONF_IMPORT_ENERGY,
+    CONF_MAX_METER_KW,
+    DOMAIN,
+)
+from custom_components.utility_tariffs.diagnostics import async_get_config_entry_diagnostics
 from custom_components.utility_tariffs.energy_store import storage_key
 from tests.test_sensor import NOON, _setup, _state
 
@@ -199,3 +206,90 @@ async def test_without_set_dates_the_tariffs_own_apply(
     attributes = hass.states.get("sensor.utility_tariff_bill_so_far").attributes
     assert attributes["period_start"] == "2026-11-01"
     assert attributes["next_period_start"] == "2026-12-01"
+
+
+async def test_a_jump_no_supply_could_deliver_is_not_billed_and_is_reported(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    await _setup_with_meters(hass, freezer)
+    before = float(_state(hass, "bill_so_far"))
+
+    _set(hass, METER, 5000.0)
+    await _minute(hass, freezer)
+
+    assert float(_state(hass, "import_this_bill_period")) == 0.0
+    assert float(_state(hass, "bill_so_far")) == before
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, "meter_readings_left_out")
+    assert issue is not None
+    assert issue.translation_placeholders is not None
+    assert issue.translation_placeholders["meter"] == METER
+
+
+async def test_the_repair_clears_a_day_after_the_last_bad_reading(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    await _setup_with_meters(hass, freezer)
+    _set(hass, METER, 5000.0)
+    await _minute(hass, freezer)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, "meter_readings_left_out") is not None
+
+    freezer.tick(timedelta(hours=25))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    assert ir.async_get(hass).async_get_issue(DOMAIN, "meter_readings_left_out") is None
+
+
+async def test_a_negative_reading_is_not_booked_as_use(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    await _setup_with_meters(hass, freezer)
+
+    _set(hass, METER, -3.0)
+    await _minute(hass, freezer)
+    _set(hass, METER, 100.4)
+    await _minute(hass, freezer)
+
+    assert float(_state(hass, "import_this_bill_period")) == 0.0
+
+
+async def test_a_reset_is_not_booked_and_raises_no_repair(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    await _setup_with_meters(hass, freezer)
+
+    _set(hass, METER, 2.0)
+    await _minute(hass, freezer)
+    _set(hass, METER, 2.5)
+    await _minute(hass, freezer)
+
+    assert float(_state(hass, "import_this_bill_period")) == 0.5
+    assert ir.async_get(hass).async_get_issue(DOMAIN, "meter_readings_left_out") is None
+
+
+async def test_the_limit_in_the_options_decides_what_is_too_large(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER, CONF_MAX_METER_KW: 6.0})
+
+    _set(hass, METER, 100.2)  # 12 kW for the minute
+    await _minute(hass, freezer)
+
+    assert float(_state(hass, "import_this_bill_period")) == 0.0
+
+
+async def test_diagnostics_list_what_was_left_out(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    await _setup_with_meters(hass, freezer)
+    _set(hass, METER, 5000.0)
+    await _minute(hass, freezer)
+    [entry] = hass.config_entries.async_entries(DOMAIN)
+
+    report = await async_get_config_entry_diagnostics(hass, entry)
+
+    [row] = report["coordinator"]["meter_readings_left_out"]
+    assert (row["meter"], row["reason"], row["kwh"]) == (CONF_IMPORT_ENERGY, "too_large", 4900.0)
+    assert METER not in str(report)

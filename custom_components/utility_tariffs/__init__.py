@@ -7,8 +7,14 @@ from typing import TYPE_CHECKING
 from homeassistant.const import Platform
 from homeassistant.util import dt as dt_util
 
-from .accountant import EnergyAccountant
-from .const import CONF_BATTERY_SOC, CONF_IMPORT_ENERGY, METER_TARGETS
+from .accountant import EnergyAccountant, MeterSetup
+from .const import (
+    CONF_BATTERY_SOC,
+    CONF_IMPORT_ENERGY,
+    CONF_MAX_METER_KW,
+    DEFAULT_MAX_METER_KW,
+    METER_TARGETS,
+)
 from .coordinator import TariffConfigEntry, TariffCoordinator
 from .energy_store import EnergyStore
 from .plan_ranker import PlanRanker
@@ -51,9 +57,15 @@ async def _async_start_accounting(
     if CONF_IMPORT_ENERGY not in meters:
         return
     store = EnergyStore(hass, entry.entry_id, coordinator.data.definition.timezone)
-    accountant = EnergyAccountant(hass, store, meters, coordinator.async_update_listeners)
+    accountant = EnergyAccountant(
+        hass,
+        store,
+        MeterSetup(meters, float(entry.options.get(CONF_MAX_METER_KW, DEFAULT_MAX_METER_KW))),
+        coordinator.async_update_listeners,
+    )
     entry.async_on_unload(await accountant.async_start())
     entry.async_on_unload(store.async_save)
+    entry.async_on_unload(accountant.clear_issue)
     coordinator.accountant = accountant
     coordinator.ranker = PlanRanker(coordinator)
     coordinator.ranker.async_start()

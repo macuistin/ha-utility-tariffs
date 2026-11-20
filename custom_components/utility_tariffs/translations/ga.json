@@ -277,7 +277,8 @@
           "bill_start_month": "Mí ina dtosaíonn bille",
           "refresh_now": "Léigh an stór taraifí arís anois",
           "clear_cache": "Scrios na comhaid taraife shábháilte ar dtús",
-          "connected_load_kw": "Ualach ceangailte (kW)"
+          "connected_load_kw": "Ualach ceangailte (kW)",
+          "max_meter_kw": "An t-ardú is mó a thaispeánfaidh méadar (kW)"
         },
         "data_description": {
           "refresh_now": "Léann sé innéacs an stóir agus do phlean arís nuair a shábháileann tú, in ionad fanacht go dtí anocht. Úsáid é tar éis don stór athrú a fhoilsiú.",
@@ -292,7 +293,8 @@
           "bill_start_day": "1 go 28. Fág folamh chun an taraif a leanúint.",
           "bill_months": "1, 2, 3, 4, 6 nó 12. Fág folamh chun an taraif a leanúint.",
           "bill_start_month": "Do billí níos faide ná mí amháin, ionas go mbeidh siad ailínithe le billí do sholáthraí. Mar shampla 2 le bille dhá mhí a thosaíonn i bhFeabhra.",
-          "connected_load_kw": "Le haghaidh taraife a ghearrann in aghaidh an kW de ualach ceangailte (údaraithe) amháin. Faigh é ar do bhille nó ar do chonradh. Gan é, ní thaispeánann an taraif sin aon bhille."
+          "connected_load_kw": "Le haghaidh taraife a ghearrann in aghaidh an kW de ualach ceangailte (údaraithe) amháin. Faigh é ar do bhille nó ar do chonradh. Gan é, ní thaispeánann an taraif sin aon bhille.",
+          "max_meter_kw": "Roghnach. An chumhacht is mó a bhféadfadh do theach a tharraingt. Fágtar léamh méadair a ardaíonn níos tapa as an mbille. Fág folamh le haghaidh 100 kW."
         }
       }
     },
@@ -413,6 +415,10 @@
     "prices_not_published": {
       "title": "Níl praghsanna an lae amárach foilsithe fós",
       "description": "Léann {tariff} praghsanna leathuaire, agus tá praghsanna an lae amárach in easnamh fós go déanach san oíche. Lean na praghsanna atá ann cheana ag obair. Is é an chéad léamh eile anocht ag leathuair tar éis gach uaire nó tar éis meán oíche. Má leanann sé seo, b'fhéidir go bhfuil an fotha praghsanna as feidhm."
+    },
+    "meter_readings_left_out": {
+      "title": "Fágadh léamha méadair as an mbille",
+      "description": "Thug {meter} léamh nach raibh sé indéanta a chomhaireamh ({reason}, ag {when}). Fágadh as an mbille é ionas nach muirear úsáid nár tharraing tú. Seiceáil braiteoir an mhéadair. Má bhí an léamh fíor, ardaigh an t-ardú is mó sna roghanna."
     }
   }
 }

@@ -7,17 +7,19 @@ less often than that books each step in the minute it appears.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.core import callback
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import SlotEnergy
 
-from .const import CONF_BATTERY_SOC, METER_TARGETS
+from .const import CONF_BATTERY_SOC, DEFAULT_MAX_METER_KW, DOMAIN, METER_TARGETS
 from .energy_store import EnergyStore
-from .meter import RiseTracker, kwh_of
+from .meter import Exclusion, RiseTracker, kwh_of
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -25,6 +27,23 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
 POLL = timedelta(minutes=1)
+ISSUE_ID = "meter_readings_left_out"
+# The repair issue stays this long after the last reading that was left out.
+ISSUE_HOLD = timedelta(hours=24)
+
+
+@dataclass(frozen=True)
+class MeterSetup:
+    """The entities to read, by option key, and the largest rise a meter may show, in kW."""
+
+    entities: dict[str, str]
+    max_kw: float = DEFAULT_MAX_METER_KW
+
+
+_REASONS = {
+    "too_large": "it rose faster than the largest rise set in the options",
+    "negative": "it was negative",
+}
 
 
 class EnergyAccountant:
@@ -34,14 +53,15 @@ class EnergyAccountant:
         self,
         hass: HomeAssistant,
         store: EnergyStore,
-        meters: dict[str, str],
+        meters: MeterSetup,
         on_booked: Callable[[], None],
     ) -> None:
         self._hass = hass
         self.store = store
-        self._meters = {key: entity for key, entity in meters.items() if key in METER_TARGETS}
-        self._soc_entity = meters.get(CONF_BATTERY_SOC)
-        self._trackers = {key: RiseTracker() for key in self._meters}
+        entities = meters.entities
+        self._meters = {key: entity for key, entity in entities.items() if key in METER_TARGETS}
+        self._soc_entity = entities.get(CONF_BATTERY_SOC)
+        self._trackers = {key: RiseTracker(meters.max_kw) for key in self._meters}
         self._on_booked = on_booked
 
     async def async_start(self) -> Callable[[], None]:
@@ -66,6 +86,7 @@ class EnergyAccountant:
                 self.store.record(energy, rise.start, rise.end)
                 booked = True
         self._note_charge(now)
+        self._report_suspect(now)
         if booked:
             self._on_booked()
 
@@ -80,3 +101,53 @@ class EnergyAccountant:
             return
         if percent is not None:
             self.store.record_soc(now, percent)
+
+    def excluded(self) -> list[dict[str, str | float | None]]:
+        """What was left out of the bill, oldest first, for the diagnostics. No entity ids."""
+        rows = [
+            (item.at, key, item)
+            for key, tracker in self._trackers.items()
+            for item in tracker.excluded
+        ]
+        return [
+            {
+                "meter": key,
+                "reason": item.reason,
+                "at": at.isoformat(),
+                "kwh": None if item.kwh is None else round(item.kwh, 3),
+            }
+            for at, key, item in sorted(rows, key=lambda row: row[0])
+        ]
+
+    def _report_suspect(self, now: datetime) -> None:
+        """Raise a repair issue for the latest reading no meter could have given, else clear it."""
+        latest = self._latest_suspect()
+        if latest is None or now - latest[1].at > ISSUE_HOLD:
+            ir.async_delete_issue(self._hass, DOMAIN, ISSUE_ID)
+            return
+        entity_id, item = latest
+        ir.async_create_issue(
+            self._hass,
+            DOMAIN,
+            ISSUE_ID,
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key=ISSUE_ID,
+            translation_placeholders={
+                "meter": entity_id,
+                "reason": _REASONS[item.reason],
+                "when": dt_util.as_local(item.at).strftime("%Y-%m-%d %H:%M"),
+            },
+        )
+
+    def _latest_suspect(self) -> tuple[str, Exclusion] | None:
+        found = [
+            (self._meters[key], tracker.latest_suspect)
+            for key, tracker in self._trackers.items()
+            if tracker.latest_suspect is not None
+        ]
+        return max(found, key=lambda pair: pair[1].at, default=None)
+
+    def clear_issue(self) -> None:
+        """Remove the repair issue, when the entry unloads."""
+        ir.async_delete_issue(self._hass, DOMAIN, ISSUE_ID)

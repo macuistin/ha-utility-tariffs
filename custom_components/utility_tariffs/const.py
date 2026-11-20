@@ -57,6 +57,8 @@ CONF_BATTERY_DISCHARGE_ENERGY = "battery_discharge_energy_entity"  # kWh taken o
 CONF_BATTERY_SOC = "battery_soc_entity"  # the battery's charge, in percent
 CONF_BATTERY_CAPACITY = "battery_capacity_kwh"
 CONF_BATTERY_WEAR = "battery_wear_per_kwh"  # what each kWh through the battery costs in wear
+CONF_MAX_METER_KW = "max_meter_kw"  # a meter rise faster than this is left out of the bill
+DEFAULT_MAX_METER_KW = 100.0
 CONF_CONNECTED_LOAD = "connected_load_kw"  # the kW the supplier bills a fixed charge for
 LOAD_NAME = "sanctioned"  # the name a tariff gives that load in the store
 

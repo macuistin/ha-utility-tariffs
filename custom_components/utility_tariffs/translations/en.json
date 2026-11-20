@@ -277,7 +277,8 @@
           "bill_months": "Months in one bill",
           "bill_start_month": "A month a bill starts in",
           "refresh_now": "Read the tariff store again now",
-          "clear_cache": "Delete the saved tariff files first"
+          "clear_cache": "Delete the saved tariff files first",
+          "max_meter_kw": "Largest rise a meter can show (kW)"
         },
         "data_description": {
           "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
@@ -292,7 +293,8 @@
           "connected_load_kw": "Only for a tariff that charges per kW of connected (sanctioned) load. Find it on your bill or supply agreement. Without it, that tariff shows no bill.",
           "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
-          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
+          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW."
         }
       }
     },
@@ -413,6 +415,10 @@
     "prices_not_published": {
       "title": "Tomorrow's prices are not published yet",
       "description": "{tariff} reads half-hourly prices, and tomorrow's are still missing late in the evening. The prices already held keep working. The next read is tonight at half past each hour or after midnight. If this continues, the price feed may be down."
+    },
+    "meter_readings_left_out": {
+      "title": "Meter readings were left out of the bill",
+      "description": "{meter} gave a reading that could not be counted ({reason}, at {when}). It was left out of the bill so that use you did not draw is not charged. Check the meter sensor. If the reading was real, raise the largest rise in the options."
     }
   }
 }

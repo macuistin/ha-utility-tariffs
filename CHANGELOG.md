@@ -5,6 +5,19 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Fixed**
+
+- A negative reading from an energy meter is no longer used as the starting point for the next
+  step. It used to book a large false rise as use once the meter read normally again.
+- A meter reading that rises faster than your home could draw is left out of the bill, as before,
+  and now raises a repair issue that names the meter and the time. The issue clears a day after the
+  last reading that was left out. The diagnostics list each reading left out and why.
+
+**Added**
+
+- A **Largest rise a meter can show (kW)** option. A rise faster than this is left out of the bill.
+  Leave it empty for 100 kW.
+
 ## 1.3.1
 
 **Added**
