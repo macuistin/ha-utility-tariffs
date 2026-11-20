@@ -258,6 +258,15 @@
       "average_export_price_tomorrow": {
         "name": "Average export price tomorrow"
       },
+      "cheap_share_today": {
+        "name": "Cheap electricity used today"
+      },
+      "cheap_share_period": {
+        "name": "Cheap electricity used this bill period"
+      },
+      "cheap_share_30_days": {
+        "name": "Cheap electricity used, last 30 days"
+      },
       "savings_share_this_period": {
         "name": "Savings share this bill period"
       }

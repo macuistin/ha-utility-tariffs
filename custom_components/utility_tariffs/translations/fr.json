@@ -258,6 +258,15 @@
       "average_export_price_tomorrow": {
         "name": "Prix de rachat moyen demain"
       },
+      "cheap_share_today": {
+        "name": "Électricité bon marché utilisée aujourd'hui"
+      },
+      "cheap_share_period": {
+        "name": "Électricité bon marché utilisée sur la période de facturation"
+      },
+      "cheap_share_30_days": {
+        "name": "Électricité bon marché utilisée, 30 derniers jours"
+      },
       "savings_share_this_period": {
         "name": "Part d'économie sur la période de facturation"
       }

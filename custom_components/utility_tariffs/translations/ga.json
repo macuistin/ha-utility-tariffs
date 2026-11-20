@@ -258,6 +258,15 @@
       "average_export_price_tomorrow": {
         "name": "Meánphraghas easpórtála amárach"
       },
+      "cheap_share_today": {
+        "name": "Leictreachas saor a úsáideadh inniu"
+      },
+      "cheap_share_period": {
+        "name": "Leictreachas saor a úsáideadh sa tréimhse bhille"
+      },
+      "cheap_share_30_days": {
+        "name": "Leictreachas saor a úsáideadh, 30 lá seo caite"
+      },
       "savings_share_this_period": {
         "name": "Sciar an tsábhála sa tréimhse bhille"
       }
