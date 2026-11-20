@@ -233,6 +233,30 @@
           "mid": "Médio",
           "high": "Alto"
         }
+      },
+      "import_band_price": {
+        "name": "Preço de importação: {band}"
+      },
+      "export_band_price": {
+        "name": "Preço de exportação: {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "Preço de importação mais baixo amanhã"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "Preço de importação mais alto amanhã"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Preço de importação médio amanhã"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "Preço de exportação mais baixo amanhã"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "Preço de exportação mais alto amanhã"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Preço de exportação médio amanhã"
       }
     },
     "binary_sensor": {
@@ -247,6 +271,12 @@
       },
       "dearest_window_active": {
         "name": "Janela mais cara ativa"
+      },
+      "off_peak": {
+        "name": "Vazio"
+      },
+      "negative_price": {
+        "name": "Preço negativo"
       }
     },
     "number": {
@@ -277,7 +307,8 @@
           "bill_start_month": "Um mês em que começa uma fatura",
           "refresh_now": "Ler o repositório de tarifários de novo agora",
           "clear_cache": "Eliminar primeiro os ficheiros de tarifários guardados",
-          "connected_load_kw": "Potência ligada (kW)"
+          "connected_load_kw": "Potência ligada (kW)",
+          "max_meter_kw": "Maior subida que um contador pode mostrar (kW)"
         },
         "data_description": {
           "refresh_now": "Lê de novo o índice do repositório e o seu plano ao guardar, em vez de esperar pela noite. Use depois de o repositório publicar uma alteração.",
@@ -292,7 +323,8 @@
           "bill_start_day": "De 1 a 28. Deixe vazio para seguir o tarifário.",
           "bill_months": "1, 2, 3, 4, 6 ou 12. Deixe vazio para seguir o tarifário.",
           "bill_start_month": "Apenas para faturas com mais de um mês, para que coincidam com as do seu fornecedor. Por exemplo, 2 para uma fatura de dois meses que começa em fevereiro.",
-          "connected_load_kw": "Apenas para uma tarifa cobrada por kW de potência ligada (autorizada). Encontra-a na fatura ou no contrato. Sem ela, essa tarifa não mostra fatura."
+          "connected_load_kw": "Apenas para uma tarifa cobrada por kW de potência ligada (autorizada). Encontra-a na fatura ou no contrato. Sem ela, essa tarifa não mostra fatura.",
+          "max_meter_kw": "Opcional. A maior potência que a sua casa pode consumir. Uma leitura do contador que suba mais depressa é deixada de fora da fatura. Deixe vazio para 100 kW."
         }
       }
     },
@@ -413,6 +445,10 @@
     "prices_not_published": {
       "title": "Os preços de amanhã ainda não foram publicados",
       "description": "{tariff} lê preços de meia em meia hora e os de amanhã ainda faltam ao fim da noite. Os preços já guardados continuam a funcionar. A próxima leitura é esta noite, aos 30 minutos de cada hora ou depois da meia-noite. Se isto continuar, o feed de preços pode estar em baixo."
+    },
+    "meter_readings_left_out": {
+      "title": "Leituras do contador foram deixadas de fora da fatura",
+      "description": "{meter} deu uma leitura que não pôde ser contada ({reason}, às {when}). Foi deixada de fora da fatura para não cobrar consumo que não existiu. Verifique o sensor do contador. Se a leitura era real, aumente a maior subida nas opções."
     }
   }
 }

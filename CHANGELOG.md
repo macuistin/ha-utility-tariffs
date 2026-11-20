@@ -5,6 +5,34 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Fixed**
+
+- A negative reading from an energy meter is no longer used as the starting point for the next
+  step. It used to book a large false rise as use once the meter read normally again.
+- A meter reading that rises faster than your home could draw is left out of the bill, as before,
+  and now raises a repair issue that names the meter and the time. The issue clears a day after the
+  last reading that was left out. The diagnostics list each reading left out and why.
+
+**Added**
+
+- A **Negative price** binary sensor for a tariff on a price feed. It is on while the import
+  price is below zero.
+- Lowest, highest and average import and export price tomorrow, off until you enable them. They
+  are unknown until tomorrow's prices are all held, never a guess.
+- A price sensor for each rate band, such as **Import price: Night**, so an automation can read
+  a band's price at any time of day and not only the band in force now. They follow the tariff:
+  a new revision that adds a band adds its sensor, and one that drops a band removes it. A tariff
+  with more than three bands has them off until you enable them.
+- The price forecast sensor has `import_rates` and `export_rates` attributes: today's and
+  tomorrow's prices as `start`, `end` and `value` rows, with half hours at the same price joined.
+  A chart card can read them without a template, and `docs/entities.md` has an apexcharts-card
+  example. The `slots` attribute gains `export_price`. None of these are kept in the history.
+- An **Off-peak** binary sensor, on while the tariff's lowest import price is in force, with the
+  start and end of the current and the next off-peak stretch as attributes. A tariff with one price
+  all day, or one that follows a price feed, has no off-peak, so the sensor is unavailable.
+- A **Largest rise a meter can show (kW)** option. A rise faster than this is left out of the bill.
+  Leave it empty for 100 kW.
+
 ## 1.3.1
 
 **Added**

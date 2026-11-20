@@ -42,6 +42,9 @@ async def async_get_config_entry_diagnostics(
             "revisions": len(data.revisions),
             "store_offline": coordinator.access.offline,
             "bill_kept": coordinator.accountant is not None,
+            "meter_readings_left_out": (
+                coordinator.accountant.excluded() if coordinator.accountant else []
+            ),
         }
     return {
         "entry": {

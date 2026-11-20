@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING, Literal
 
@@ -18,6 +18,7 @@ from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import price_rating
 from utility_tariffs_lib.tariff.price_stats import RATINGS
 
+from .band_sensor import async_setup_band_sensors
 from .bill_sensor import BILL_SENSORS, BillSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
@@ -86,6 +87,20 @@ def _day(
     def read(data: TariffData, now: datetime, _minutes: int) -> float | None:
         stats = data.day_stats(now, flow)
         return None if stats is None else _price(getattr(stats, field))
+
+    return read
+
+
+def _tomorrow(
+    flow: Literal["import", "export"], field: str
+) -> Callable[[TariffData, datetime, int], float | None]:
+    """A figure of tomorrow's prices. Unknown until the whole day is priced, never a guess."""
+
+    def read(data: TariffData, now: datetime, _minutes: int) -> float | None:
+        stats = data.day_stats(now + timedelta(days=1), flow)
+        if stats is None or not stats.complete:
+            return None
+        return _price(getattr(stats, field))
 
     return read
 
@@ -165,6 +180,22 @@ SENSORS = (
             ("average", "average"),
         )
     ),
+    *(
+        TariffSensorDescription(
+            key=f"{prefix}_{flow}_price_tomorrow",
+            translation_key=f"{prefix}_{flow}_price_tomorrow",
+            suggested_display_precision=4,
+            per_kwh=True,
+            entity_registry_enabled_default=False,
+            value=_tomorrow(flow, field),
+        )
+        for flow in ("import", "export")
+        for prefix, field in (
+            ("lowest", "lowest"),
+            ("highest", "highest"),
+            ("average", "average"),
+        )
+    ),
     TariffSensorDescription(
         key="next_price_change",
         translation_key="next_price_change",
@@ -206,6 +237,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
     async_add_entities(info_sensors(coordinator))
+    async_setup_band_sensors(entry, async_add_entities)
     async_add_entities([
         PriceForecastSensor(coordinator),
         NextTariffChangeSensor(coordinator),

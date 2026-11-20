@@ -233,6 +233,30 @@
           "mid": "Moyen",
           "high": "Élevé"
         }
+      },
+      "import_band_price": {
+        "name": "Prix d'import : {band}"
+      },
+      "export_band_price": {
+        "name": "Prix d'export : {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "Prix d'achat le plus bas demain"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "Prix d'achat le plus élevé demain"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Prix d'achat moyen demain"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "Prix de rachat le plus bas demain"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "Prix de rachat le plus élevé demain"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Prix de rachat moyen demain"
       }
     },
     "binary_sensor": {
@@ -247,6 +271,12 @@
       },
       "dearest_window_active": {
         "name": "Période la plus chère active"
+      },
+      "off_peak": {
+        "name": "Heures creuses"
+      },
+      "negative_price": {
+        "name": "Prix négatif"
       }
     },
     "number": {
@@ -277,7 +307,8 @@
           "bill_start_month": "Un mois où commence une facture",
           "refresh_now": "Relire la base de tarifs maintenant",
           "clear_cache": "Supprimer d'abord les fichiers de tarifs enregistrés",
-          "connected_load_kw": "Puissance raccordée (kW)"
+          "connected_load_kw": "Puissance raccordée (kW)",
+          "max_meter_kw": "Hausse maximale d'un compteur (kW)"
         },
         "data_description": {
           "refresh_now": "Relit l'index de la base et votre offre à l'enregistrement, au lieu d'attendre ce soir. À utiliser après qu'un changement a été publié dans la base.",
@@ -292,7 +323,8 @@
           "bill_start_day": "De 1 à 28. Laissez vide pour suivre le tarif.",
           "bill_months": "1, 2, 3, 4, 6 ou 12. Laissez vide pour suivre le tarif.",
           "bill_start_month": "Uniquement pour les factures de plus d'un mois, afin qu'elles coïncident avec celles de votre fournisseur. Par exemple 2 pour une facture de deux mois commençant en février.",
-          "connected_load_kw": "Uniquement pour un tarif facturé par kW de puissance raccordée (autorisée). Elle figure sur votre facture ou votre contrat. Sans elle, ce tarif n'affiche aucune facture."
+          "connected_load_kw": "Uniquement pour un tarif facturé par kW de puissance raccordée (autorisée). Elle figure sur votre facture ou votre contrat. Sans elle, ce tarif n'affiche aucune facture.",
+          "max_meter_kw": "Facultatif. La puissance maximale que votre logement peut appeler. Une valeur de compteur qui augmente plus vite est écartée de la facture. Laissez vide pour 100 kW."
         }
       }
     },
@@ -413,6 +445,10 @@
     "prices_not_published": {
       "title": "Les prix de demain ne sont pas encore publiés",
       "description": "{tariff} lit des prix à la demi-heure, et ceux de demain manquent encore tard dans la soirée. Les prix déjà détenus continuent de fonctionner. La prochaine lecture a lieu ce soir à la demie de chaque heure ou après minuit. Si cela persiste, le flux de prix est peut-être en panne."
+    },
+    "meter_readings_left_out": {
+      "title": "Des relevés de compteur ont été écartés de la facture",
+      "description": "{meter} a donné un relevé impossible à compter ({reason}, à {when}). Il a été écarté de la facture pour ne pas facturer une consommation inexistante. Vérifiez le capteur du compteur. Si le relevé était réel, augmentez la hausse maximale dans les options."
     }
   }
 }

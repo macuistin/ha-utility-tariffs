@@ -11,6 +11,7 @@ from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.number import SERVICE_SET_VALUE
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from utility_tariffs_lib.tariffstore import (
@@ -275,3 +276,108 @@ async def test_tomorrow_available_follows_what_the_feed_has_published(
     state = hass.states.get("binary_sensor.utility_tariff_tomorrow_s_prices_available")
     assert state is not None
     assert state.state == ("on" if published else "off")
+
+
+async def test_a_two_band_tariff_gives_a_handful_of_rate_rows_in_the_evcc_shape(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: object
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass)
+
+    rows = attributes(hass, "price_forecast")["import_rates"]
+
+    assert rows == [
+        {"start": "2026-11-14T00:00:00+00:00", "end": "2026-11-14T08:00:00+00:00", "value": 0.15},
+        {"start": "2026-11-14T08:00:00+00:00", "end": "2026-11-14T23:00:00+00:00", "value": 0.3},
+        {"start": "2026-11-14T23:00:00+00:00", "end": "2026-11-15T08:00:00+00:00", "value": 0.15},
+        {"start": "2026-11-15T08:00:00+00:00", "end": "2026-11-15T23:00:00+00:00", "value": 0.3},
+        {"start": "2026-11-15T23:00:00+00:00", "end": "2026-11-16T00:00:00+00:00", "value": 0.15},
+    ]
+
+
+async def test_the_export_rates_follow_the_export_price(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, FLAT)
+
+    [row] = attributes(hass, "price_forecast")["export_rates"]
+
+    assert (row["start"], row["end"]) == ("2026-11-14T00:00:00+00:00", "2026-11-16T00:00:00+00:00")
+    assert row["value"] == 0.0
+
+
+async def test_a_feed_tariff_stays_far_below_the_recorder_limit(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 15))
+    freezer.move_to(EVENING)
+    await _setup(hass, FEED)
+
+    forecast = attributes(hass, "price_forecast")
+
+    assert len(forecast["import_rates"]) > 4  # a price per band change, not per half hour
+    assert len(json.dumps(forecast)) < 16384
+    assert forecast["slots"][0]["export_price"] == 0.0
+
+
+async def test_tomorrows_figures_are_unknown_until_tomorrow_is_priced(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 14))  # tomorrow is not published yet
+    freezer.move_to(EVENING)
+    entry = await _setup(hass, FEED)
+    registry = er.async_get(hass)
+    registry.async_update_entity("sensor.utility_tariff_lowest_import_price_tomorrow", disabled_by=None)
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert _state(hass, "lowest_import_price_tomorrow") == "unknown"
+
+    feed.publish(date(2026, 11, 15), date(2026, 11, 15))
+    freezer.move_to("2026-11-14 18:02:30+00:00")
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    assert _state(hass, "lowest_import_price_tomorrow") == "0.1"
+
+
+def _publish_with_negative_evening(feed: Feed) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 14))
+    prices_today = day_prices(date(2026, 11, 14))
+    prices_today[35] = "-0.05"  # the half hour from 17:30
+    feed.days[prices.day_path("IE", "octopus-agile", "all", date(2026, 11, 14))] = (
+        prices.dumps_day({
+            "schema": 1, "feed": "octopus-agile", "area": "all", "date": "2026-11-14",
+            "timezone": "Europe/Dublin", "interval_minutes": 30, "prices": prices_today,
+        }).encode()
+    )
+
+
+async def test_the_negative_price_sensor_is_on_while_the_price_is_below_zero(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    _publish_with_negative_evening(feed)
+    freezer.move_to(EVENING)
+    await _setup(hass, FEED)
+
+    assert float(_state(hass, "import_price")) < 0
+    state = hass.states.get("binary_sensor.utility_tariff_negative_price")
+    assert state is not None
+    assert state.state == "on"
+
+    freezer.move_to("2026-11-14 18:00:30+00:00")
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("binary_sensor.utility_tariff_negative_price")
+    assert state is not None
+    assert state.state == "off"
+
+
+async def test_a_fixed_tariff_has_no_negative_price_sensor(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, FLAT)
+
+    assert hass.states.get("binary_sensor.utility_tariff_negative_price") is None

@@ -17,6 +17,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from functools import cached_property
 from typing import TYPE_CHECKING, Literal
 
 from homeassistant.core import callback
@@ -25,6 +26,7 @@ from homeassistant.helpers.event import async_track_time_change, async_track_utc
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import (
+    MarginalPrices,
     PriceSeries,
     PriceSlot,
     PriceStats,
@@ -32,6 +34,7 @@ from utility_tariffs_lib.tariff import (
     TariffDefinition,
     feed_of,
     known_until,
+    marginal_prices,
     no_holidays,
     price_stats,
     price_timeline,
@@ -128,6 +131,11 @@ class TariffData:
             ):
                 return slot
         return None
+
+    @cached_property
+    def marginal(self) -> MarginalPrices:
+        """What one more kWh costs or earns in each band, worked out once per read."""
+        return marginal_prices(self.definition)
 
     def day_stats(self, moment: datetime, flow: Literal["import", "export"]) -> PriceStats | None:
         """The prices over the local day holding *moment*, in the tariff's time zone."""

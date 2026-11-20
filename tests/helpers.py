@@ -16,3 +16,8 @@ def async_reader(read: Callable[[str], bytes]) -> Callable[[str], Awaitable[byte
         return read(path)
 
     return read_async
+
+
+def without_bands(ids: dict[str, str]) -> dict[str, str]:
+    """The entities of a followed plan except its band price sensors, which follow its bands."""
+    return {uid: entity for uid, entity in ids.items() if "_band_price_" not in uid}

@@ -233,6 +233,30 @@
           "mid": "Middel",
           "high": "Høj"
         }
+      },
+      "import_band_price": {
+        "name": "Importpris: {band}"
+      },
+      "export_band_price": {
+        "name": "Eksportpris: {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "Laveste importpris i morgen"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "Højeste importpris i morgen"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Gennemsnitlig importpris i morgen"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "Laveste eksportpris i morgen"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "Højeste eksportpris i morgen"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Gennemsnitlig eksportpris i morgen"
       }
     },
     "binary_sensor": {
@@ -247,6 +271,12 @@
       },
       "dearest_window_active": {
         "name": "Dyreste tidsrum er aktivt"
+      },
+      "off_peak": {
+        "name": "Lavpris"
+      },
+      "negative_price": {
+        "name": "Negativ pris"
       }
     },
     "number": {
@@ -277,7 +307,8 @@
           "bill_start_month": "En måned, hvor en regning starter",
           "refresh_now": "Læs tarifdatabasen igen nu",
           "clear_cache": "Slet først de gemte tarifilfiler",
-          "connected_load_kw": "Tilsluttet belastning (kW)"
+          "connected_load_kw": "Tilsluttet belastning (kW)",
+          "max_meter_kw": "Største stigning en måler kan vise (kW)"
         },
         "data_description": {
           "refresh_now": "Læser lagerets indeks og din plan igen, når du gemmer, i stedet for at vente til i aften. Brug det, efter at lageret har udgivet en ændring.",
@@ -292,7 +323,8 @@
           "bill_start_day": "1 til 28. Lad den stå tom for at følge tariffen.",
           "bill_months": "1, 2, 3, 4, 6 eller 12. Lad den stå tom for at følge tariffen.",
           "bill_start_month": "Kun for regninger på mere end en måned, så de passer til din leverandørs. Fx 2 for en regning på to måneder, der starter i februar.",
-          "connected_load_kw": "Kun for en tarif, der opkræver pr. kW tilsluttet (godkendt) belastning. Find den på din regning eller aftale. Uden den viser tariffen ingen regning."
+          "connected_load_kw": "Kun for en tarif, der opkræver pr. kW tilsluttet (godkendt) belastning. Find den på din regning eller aftale. Uden den viser tariffen ingen regning.",
+          "max_meter_kw": "Valgfrit. Den største effekt dit hjem kan trække. En målerværdi, der stiger hurtigere, udelades af regningen. Lad feltet stå tomt for 100 kW."
         }
       }
     },
@@ -413,6 +445,10 @@
     "prices_not_published": {
       "title": "Morgendagens priser er ikke offentliggjort endnu",
       "description": "{tariff} læser halvtimespriser, og morgendagens mangler stadig sent på aftenen. De priser, der allerede er gemt, virker stadig. Næste aflæsning er i aften hver halve time eller efter midnat. Hvis det fortsætter, kan prisfeedet være nede."
+    },
+    "meter_readings_left_out": {
+      "title": "Målerværdier blev udeladt af regningen",
+      "description": "{meter} gav en værdi, der ikke kunne tælles med ({reason}, kl. {when}). Den blev udeladt af regningen, så forbrug, du ikke har haft, ikke bliver afregnet. Tjek målersensoren. Var værdien reel, så hæv den største stigning i indstillingerne."
     }
   }
 }

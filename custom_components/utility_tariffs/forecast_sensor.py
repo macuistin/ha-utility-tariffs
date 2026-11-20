@@ -26,6 +26,7 @@ from .forecast import (
     next_cheap,
     next_dear,
     points_row,
+    rate_rows,
     revision_rows,
     slot_rows,
     window_points,
@@ -53,7 +54,8 @@ class PriceForecastSensor(PercentSensor):
     # A day of half-hourly prices is long and changes every refresh, so it is not kept in the
     # history. The sensor's own state is the only part that is recorded.
     _unrecorded_attributes = frozenset({
-        "slots", "changes", "window_percentiles", "history_percentiles",
+        "slots", "import_rates", "export_rates", "changes", "window_percentiles",
+        "history_percentiles",
     })
 
     def __init__(self, coordinator: TariffCoordinator) -> None:
@@ -72,6 +74,8 @@ class PriceForecastSensor(PercentSensor):
             "unit": f"{data.definition.currency}/kWh",
             "complete": known is not None and known >= (data.horizon_end or known),
             "slots": slot_rows(data, now),
+            "import_rates": rate_rows(data, now, "import"),
+            "export_rates": rate_rows(data, now, "export"),
             "changes": revision_rows(data, now),
             "window_percentiles": points_row(window_points(data, now, percents)),
             "history_percentiles": None if history is None else {

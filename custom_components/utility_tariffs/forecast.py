@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from utility_tariffs_lib.tariff import (
     HistoryPercentiles,
@@ -24,6 +24,7 @@ from utility_tariffs_lib.tariff import (
 )
 
 from .coordinator import TariffData
+from .windows import end_of_tomorrow
 
 FORECAST_HOURS = 48  # how much of the forecast is written into the sensor's attributes
 
@@ -132,6 +133,7 @@ def slot_rows(data: TariffData, now: datetime, hours: int = FORECAST_HOURS) -> l
             "start": max(slot.start, now).isoformat(),
             "end": min(slot.end, limit).isoformat(),
             "price": _price(slot.import_price),
+            "export_price": _price(slot.export_price),
             "band": slot.import_band,
             "source": slot.source,
         }
@@ -146,6 +148,32 @@ def band_prices(definition: TariffDefinition) -> dict[str, float | None]:
         band: _price(price)
         for band, price in marginal_prices(definition).import_prices.items()
     }
+
+
+def rate_rows(
+    data: TariffData, now: datetime, flow: Literal["import", "export"]
+) -> list[dict[str, Any]]:
+    """Today's and tomorrow's prices as `start`, `end` and `value` rows, the shape evcc reads.
+
+    Slots that meet at the same price are joined, so a two-band tariff is a handful of rows and
+    the attribute stays small however long the prices are held. The rows start at local midnight,
+    so a chart can draw the whole of today.
+    """
+    zone = data.definition.timezone
+    first = datetime.combine(now.astimezone(zone).date(), datetime.min.time(), zone)
+    last = end_of_tomorrow(data, now)
+    rows: list[dict[str, Any]] = []
+    for slot in sorted(data.slots, key=lambda item: item.start):
+        if slot.end <= first or slot.start >= last:
+            continue
+        price = slot.import_price if flow == "import" else slot.export_price
+        start, end = max(slot.start, first), min(slot.end, last)
+        if rows and rows[-1]["value"] == _price(price) and rows[-1]["end"] == start.isoformat():
+            rows[-1]["end"] = end.isoformat()
+        else:
+            row = {"start": start.isoformat(), "end": end.isoformat(), "value": _price(price)}
+            rows.append(row)
+    return rows
 
 
 def revision_rows(data: TariffData, now: datetime) -> list[dict[str, Any]]:
