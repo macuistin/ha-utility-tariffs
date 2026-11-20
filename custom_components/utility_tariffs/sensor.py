@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING, Literal
 
@@ -91,6 +91,20 @@ def _day(
     return read
 
 
+def _tomorrow(
+    flow: Literal["import", "export"], field: str
+) -> Callable[[TariffData, datetime, int], float | None]:
+    """A figure of tomorrow's prices. Unknown until the whole day is priced, never a guess."""
+
+    def read(data: TariffData, now: datetime, _minutes: int) -> float | None:
+        stats = data.day_stats(now + timedelta(days=1), flow)
+        if stats is None or not stats.complete:
+            return None
+        return _price(getattr(stats, field))
+
+    return read
+
+
 def _rating(data: TariffData, now: datetime, _minutes: int) -> str | None:
     slot = data.slot_at(now)
     stats = data.day_stats(now, "import")
@@ -158,6 +172,22 @@ SENSORS = (
             per_kwh=True,
             entity_registry_enabled_default=flow == "import",
             value=_day(flow, field),
+        )
+        for flow in ("import", "export")
+        for prefix, field in (
+            ("lowest", "lowest"),
+            ("highest", "highest"),
+            ("average", "average"),
+        )
+    ),
+    *(
+        TariffSensorDescription(
+            key=f"{prefix}_{flow}_price_tomorrow",
+            translation_key=f"{prefix}_{flow}_price_tomorrow",
+            suggested_display_precision=4,
+            per_kwh=True,
+            entity_registry_enabled_default=False,
+            value=_tomorrow(flow, field),
         )
         for flow in ("import", "export")
         for prefix, field in (

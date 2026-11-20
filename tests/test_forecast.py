@@ -11,6 +11,7 @@ from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.number import SERVICE_SET_VALUE
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from utility_tariffs_lib.tariffstore import (
@@ -318,3 +319,23 @@ async def test_a_feed_tariff_stays_far_below_the_recorder_limit(
     assert len(forecast["import_rates"]) > 4  # a price per band change, not per half hour
     assert len(json.dumps(forecast)) < 16384
     assert forecast["slots"][0]["export_price"] == 0.0
+
+
+async def test_tomorrows_figures_are_unknown_until_tomorrow_is_priced(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 14))  # tomorrow is not published yet
+    freezer.move_to(EVENING)
+    entry = await _setup(hass, FEED)
+    registry = er.async_get(hass)
+    registry.async_update_entity("sensor.utility_tariff_lowest_import_price_tomorrow", disabled_by=None)
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert _state(hass, "lowest_import_price_tomorrow") == "unknown"
+
+    feed.publish(date(2026, 11, 15), date(2026, 11, 15))
+    freezer.move_to("2026-11-14 18:02:30+00:00")
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    assert _state(hass, "lowest_import_price_tomorrow") == "0.1"

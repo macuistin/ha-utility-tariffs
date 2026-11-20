@@ -239,6 +239,24 @@
       },
       "export_band_price": {
         "name": "Eksportpris: {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "Laveste importpris i morgen"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "Højeste importpris i morgen"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Gennemsnitlig importpris i morgen"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "Laveste eksportpris i morgen"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "Højeste eksportpris i morgen"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Gennemsnitlig eksportpris i morgen"
       }
     },
     "binary_sensor": {

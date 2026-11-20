@@ -239,6 +239,24 @@
       },
       "export_band_price": {
         "name": "Preço de exportação: {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "Preço de importação mais baixo amanhã"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "Preço de importação mais alto amanhã"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Preço de importação médio amanhã"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "Preço de exportação mais baixo amanhã"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "Preço de exportação mais alto amanhã"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Preço de exportação médio amanhã"
       }
     },
     "binary_sensor": {

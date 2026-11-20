@@ -239,6 +239,24 @@
       },
       "export_band_price": {
         "name": "Export price: {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "Lowest import price tomorrow"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "Highest import price tomorrow"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Average import price tomorrow"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "Lowest export price tomorrow"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "Highest export price tomorrow"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Average export price tomorrow"
       }
     },
     "binary_sensor": {

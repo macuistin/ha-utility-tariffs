@@ -239,6 +239,24 @@
       },
       "export_band_price": {
         "name": "Praghas easpórtála: {band}"
+      },
+      "lowest_import_price_tomorrow": {
+        "name": "An praghas allmhairithe is ísle amárach"
+      },
+      "highest_import_price_tomorrow": {
+        "name": "An praghas allmhairithe is airde amárach"
+      },
+      "average_import_price_tomorrow": {
+        "name": "Meánphraghas allmhairithe amárach"
+      },
+      "lowest_export_price_tomorrow": {
+        "name": "An praghas easpórtála is ísle amárach"
+      },
+      "highest_export_price_tomorrow": {
+        "name": "An praghas easpórtála is airde amárach"
+      },
+      "average_export_price_tomorrow": {
+        "name": "Meánphraghas easpórtála amárach"
       }
     },
     "binary_sensor": {

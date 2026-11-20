@@ -15,6 +15,8 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- Lowest, highest and average import and export price tomorrow, off until you enable them. They
+  are unknown until tomorrow's prices are all held, never a guess.
 - A price sensor for each rate band, such as **Import price: Night**, so an automation can read
   a band's price at any time of day and not only the band in force now. They follow the tariff:
   a new revision that adds a band adds its sensor, and one that drops a band removes it. A tariff

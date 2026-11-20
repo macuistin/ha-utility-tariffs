@@ -145,3 +145,38 @@ async def test_get_prices_refuses_an_end_before_the_start(
 
     with pytest.raises(ServiceValidationError):
         await _prices(hass, entry.entry_id, start="2026-11-14 12:00:00", end="2026-11-14 11:00:00")
+
+
+def _enable(hass: HomeAssistant, keys: list[str]) -> None:
+    registry = er.async_get(hass)
+    for key in keys:
+        registry.async_update_entity(f"sensor.utility_tariff_{key}", disabled_by=None)
+
+
+async def test_tomorrows_figures_are_off_until_asked_for(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass)
+
+    registry = er.async_get(hass)
+    for flow in ("import", "export"):
+        for key in ("lowest", "highest", "average"):
+            entity = registry.async_get(f"sensor.utility_tariff_{key}_{flow}_price_tomorrow")
+            assert entity is not None
+            assert entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+
+
+async def test_tomorrows_figures_are_the_prices_of_the_whole_day(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    entry = await _setup(hass)
+    _enable(hass, ["lowest_import_price_tomorrow", "highest_import_price_tomorrow",
+                   "average_import_price_tomorrow"])
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert _state(hass, "lowest_import_price_tomorrow") == "0.15"
+    assert _state(hass, "highest_import_price_tomorrow") == "0.3"
+    assert float(_state(hass, "average_import_price_tomorrow")) == pytest.approx(0.24375)

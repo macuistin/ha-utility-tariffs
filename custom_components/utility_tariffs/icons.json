@@ -57,6 +57,24 @@
           "mid": "mdi:gauge",
           "high": "mdi:gauge-full"
         }
+      },
+      "lowest_import_price_tomorrow": {
+        "default": "mdi:arrow-collapse-down"
+      },
+      "highest_import_price_tomorrow": {
+        "default": "mdi:arrow-collapse-up"
+      },
+      "average_import_price_tomorrow": {
+        "default": "mdi:approximately-equal"
+      },
+      "lowest_export_price_tomorrow": {
+        "default": "mdi:arrow-collapse-down"
+      },
+      "highest_export_price_tomorrow": {
+        "default": "mdi:arrow-collapse-up"
+      },
+      "average_export_price_tomorrow": {
+        "default": "mdi:approximately-equal"
       }
     },
     "binary_sensor": {
