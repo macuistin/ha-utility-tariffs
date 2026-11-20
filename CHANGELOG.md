@@ -12,6 +12,11 @@ Each release has a section here. The release workflow publishes the section for 
   last 30 days (off until you enable it). A tariff with one price all day shows 0. They are
   unavailable for a tariff that follows a price feed.
 
+## 1.4.0b1
+
+A beta. It adds filling the bill from your meters' history, which reads your recorder, so tell
+us if a bill period looks wrong.
+
 **Fixed**
 
 - A negative reading from an energy meter is no longer used as the starting point for the next
