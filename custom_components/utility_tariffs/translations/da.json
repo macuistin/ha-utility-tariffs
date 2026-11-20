@@ -308,7 +308,8 @@
           "refresh_now": "Læs tarifdatabasen igen nu",
           "clear_cache": "Slet først de gemte tarifilfiler",
           "connected_load_kw": "Tilsluttet belastning (kW)",
-          "max_meter_kw": "Største stigning en måler kan vise (kW)"
+          "max_meter_kw": "Største stigning en måler kan vise (kW)",
+          "history_start": "Start på historik"
         },
         "data_description": {
           "refresh_now": "Læser lagerets indeks og din plan igen, når du gemmer, i stedet for at vente til i aften. Brug det, efter at lageret har udgivet en ændring.",
@@ -324,7 +325,8 @@
           "bill_months": "1, 2, 3, 4, 6 eller 12. Lad den stå tom for at følge tariffen.",
           "bill_start_month": "Kun for regninger på mere end en måned, så de passer til din leverandørs. Fx 2 for en regning på to måneder, der starter i februar.",
           "connected_load_kw": "Kun for en tarif, der opkræver pr. kW tilsluttet (godkendt) belastning. Find den på din regning eller aftale. Uden den viser tariffen ingen regning.",
-          "max_meter_kw": "Valgfrit. Den største effekt dit hjem kan trække. En målerværdi, der stiger hurtigere, udelades af regningen. Lad feltet stå tomt for 100 kW."
+          "max_meter_kw": "Valgfrit. Den største effekt dit hjem kan trække. En målerværdi, der stiger hurtigere, udelades af regningen. Lad feltet stå tomt for 100 kW.",
+          "history_start": "Valgfrit. Den første dag der udfyldes fra dine måleres statistik, når planen starter. Lad feltet stå tomt for det seneste år."
         }
       }
     },
@@ -394,6 +396,20 @@
           "description": "Den tarif, hvis regning der skal vises."
         }
       }
+    },
+    "backfill": {
+      "name": "Udfyld historik",
+      "description": "Udfylder de halve timer, der ikke er registreret, fra dine måleres timestatistik. Halve timer registreret direkte bevares. Kør den igen, når du skifter måler.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Tariffen, hvis historik skal udfyldes."
+        },
+        "start": {
+          "name": "Første dag",
+          "description": "Valgfrit. Den første dag der udfyldes fra. Lad feltet stå tomt for at bruge starten på historikken fra indstillingerne."
+        }
+      }
     }
   },
   "selector": {
@@ -427,6 +443,9 @@
     },
     "no_load": {
       "message": "Denne tarif opkræver pr. kW tilsluttet belastning. Angiv først din tilsluttede belastning i indstillingerne."
+    },
+    "no_meter_history": {
+      "message": "Angiv først en måler for energiimport i indstillingerne. Historikken udfyldes ud fra den."
     }
   },
   "issues": {

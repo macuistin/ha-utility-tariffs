@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+from datetime import date
 from typing import TYPE_CHECKING
 
 from homeassistant.const import Platform
@@ -10,6 +12,7 @@ from homeassistant.util import dt as dt_util
 from .accountant import EnergyAccountant, MeterSetup
 from .const import (
     CONF_BATTERY_SOC,
+    CONF_HISTORY_START,
     CONF_IMPORT_ENERGY,
     CONF_MAX_METER_KW,
     DEFAULT_MAX_METER_KW,
@@ -24,6 +27,7 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.typing import ConfigType
 
+_LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SENSOR]
 
 
@@ -60,7 +64,11 @@ async def _async_start_accounting(
     accountant = EnergyAccountant(
         hass,
         store,
-        MeterSetup(meters, float(entry.options.get(CONF_MAX_METER_KW, DEFAULT_MAX_METER_KW))),
+        MeterSetup(
+            meters,
+            float(entry.options.get(CONF_MAX_METER_KW, DEFAULT_MAX_METER_KW)),
+            _history_start(entry),
+        ),
         coordinator.async_update_listeners,
     )
     entry.async_on_unload(await accountant.async_start())
@@ -69,6 +77,28 @@ async def _async_start_accounting(
     coordinator.accountant = accountant
     coordinator.ranker = PlanRanker(coordinator)
     coordinator.ranker.async_start()
+    entry.async_create_background_task(
+        hass, _async_backfill(coordinator, accountant), "utility_tariffs backfill"
+    )
+
+
+def _history_start(entry: TariffConfigEntry) -> date | None:
+    """The first day to fill from the meters' statistics, if the user chose one."""
+    try:
+        return date.fromisoformat(str(entry.options[CONF_HISTORY_START]))
+    except (KeyError, ValueError):
+        return None
+
+
+async def _async_backfill(coordinator: TariffCoordinator, accountant: EnergyAccountant) -> None:
+    """Fill the history from the statistics, then price the plans again over what it now holds."""
+    try:
+        result = await accountant.async_backfill()
+        if result.slots and coordinator.ranker is not None:
+            await coordinator.ranker.async_refresh(dt_util.now().date())
+    except (OSError, ValueError, KeyError, TypeError) as err:
+        _LOGGER.warning("The meter history could not be filled: %s", err)
+    coordinator.async_update_listeners()
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: TariffConfigEntry) -> None:

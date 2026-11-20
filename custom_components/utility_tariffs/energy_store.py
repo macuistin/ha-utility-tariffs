@@ -8,7 +8,7 @@ has been read, so a start-up never replaces it with an empty one.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, tzinfo
+from datetime import date, datetime, tzinfo
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.helpers.storage import Store
@@ -38,6 +38,8 @@ class EnergyStore:
         self._store: Store[dict[str, Any]] = Store(hass, _VERSION, storage_key(entry_id))
         self._tz = tz
         self.history = SlotHistory(tz)
+        # Half hours filled from statistics: a later fill may replace these, never a live one.
+        self.backfilled: dict[date, set[int]] = {}
         self._loaded = False
         self._saved_slot: tuple[object, int] | None = None
 
@@ -47,11 +49,13 @@ class EnergyStore:
             data = await self._store.async_load()
             if data is not None:
                 self.history.restore(list(data.get("days", [])))
+                self.backfilled = _marks_from(data.get("backfilled"))
                 if self.history.skipped:
                     _LOGGER.warning("Skipped %d unreadable energy days", self.history.skipped)
         except (OSError, ValueError, TypeError, AttributeError) as err:
             _LOGGER.warning("Could not restore the energy history, starting fresh: %s", err)
             self.history = SlotHistory(self._tz)
+            self.backfilled = {}
         finally:
             self._loaded = True
 
@@ -87,4 +91,22 @@ class EnergyStore:
         return moment.astimezone(self._tz).date(), int(since // SLOT_SECONDS)
 
     def _payload(self) -> dict[str, Any]:
-        return {"version": _VERSION, "days": list(self.history.to_storage())}
+        marks = {
+            day.isoformat(): sorted(slots)
+            for day, slots in self.backfilled.items()
+            if slots and self.history.get(day) is not None
+        }
+        return {"version": _VERSION, "days": list(self.history.to_storage()), "backfilled": marks}
+
+
+def _marks_from(stored: Any) -> dict[date, set[int]]:
+    """The saved half hours filled from statistics. Anything unreadable is dropped."""
+    marks: dict[date, set[int]] = {}
+    if not isinstance(stored, dict):
+        return marks
+    for key, slots in stored.items():
+        try:
+            marks[date.fromisoformat(key)] = {int(i) for i in slots}
+        except (ValueError, TypeError):
+            continue
+    return marks

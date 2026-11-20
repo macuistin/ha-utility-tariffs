@@ -17,6 +17,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     CountrySelector,
     CountrySelectorConfig,
+    DateSelector,
     EntitySelector,
     EntitySelectorConfig,
     NumberSelector,
@@ -47,6 +48,7 @@ from .const import (
     CONF_COUNTRY,
     CONF_ENTITY_KEY,
     CONF_EXPORT_ENERGY,
+    CONF_HISTORY_START,
     CONF_HOUSE_ENERGY,
     CONF_IMPORT_ENERGY,
     CONF_MANUAL,
@@ -485,6 +487,11 @@ def _meter_fields(options: Any) -> dict[Any, Any]:
     }
     fields[
         vol.Optional(
+            CONF_HISTORY_START, description={"suggested_value": options.get(CONF_HISTORY_START)}
+        )
+    ] = DateSelector()
+    fields[
+        vol.Optional(
             CONF_BATTERY_SOC, description={"suggested_value": options.get(CONF_BATTERY_SOC)}
         )
     ] = charge
@@ -525,7 +532,9 @@ def _saved(user_input: dict[str, Any]) -> dict[str, Any]:
 def _saved_setup(user_input: dict[str, Any]) -> dict[str, Any]:
     """The meters, battery charge and bill dates that were filled in."""
     data: dict[str, Any] = {}
-    data.update({k: user_input[k] for k in (*_METERS, CONF_BATTERY_SOC) if user_input.get(k)})
+    data.update(
+        {k: user_input[k] for k in (*_METERS, CONF_BATTERY_SOC, CONF_HISTORY_START) if user_input.get(k)}
+    )
     data.update(
         {k: int(user_input[k]) for k in (CONF_BILL_START_DAY, CONF_BILL_MONTHS, CONF_BILL_START_MONTH)
          if user_input.get(k)}

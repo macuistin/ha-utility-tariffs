@@ -308,7 +308,8 @@
           "refresh_now": "Relire la base de tarifs maintenant",
           "clear_cache": "Supprimer d'abord les fichiers de tarifs enregistrés",
           "connected_load_kw": "Puissance raccordée (kW)",
-          "max_meter_kw": "Hausse maximale d'un compteur (kW)"
+          "max_meter_kw": "Hausse maximale d'un compteur (kW)",
+          "history_start": "Début de l'historique"
         },
         "data_description": {
           "refresh_now": "Relit l'index de la base et votre offre à l'enregistrement, au lieu d'attendre ce soir. À utiliser après qu'un changement a été publié dans la base.",
@@ -324,7 +325,8 @@
           "bill_months": "1, 2, 3, 4, 6 ou 12. Laissez vide pour suivre le tarif.",
           "bill_start_month": "Uniquement pour les factures de plus d'un mois, afin qu'elles coïncident avec celles de votre fournisseur. Par exemple 2 pour une facture de deux mois commençant en février.",
           "connected_load_kw": "Uniquement pour un tarif facturé par kW de puissance raccordée (autorisée). Elle figure sur votre facture ou votre contrat. Sans elle, ce tarif n'affiche aucune facture.",
-          "max_meter_kw": "Facultatif. La puissance maximale que votre logement peut appeler. Une valeur de compteur qui augmente plus vite est écartée de la facture. Laissez vide pour 100 kW."
+          "max_meter_kw": "Facultatif. La puissance maximale que votre logement peut appeler. Une valeur de compteur qui augmente plus vite est écartée de la facture. Laissez vide pour 100 kW.",
+          "history_start": "Facultatif. Premier jour à remplir depuis les statistiques de vos compteurs au démarrage du forfait. Laissez vide pour la dernière année."
         }
       }
     },
@@ -394,6 +396,20 @@
           "description": "Le tarif dont afficher la facture."
         }
       }
+    },
+    "backfill": {
+      "name": "Remplir l'historique",
+      "description": "Remplit les demi-heures sans donnée à partir des statistiques horaires de vos compteurs. Les demi-heures relevées en direct sont conservées. Relancez l'action après avoir changé de compteur.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tarif",
+          "description": "Le tarif dont il faut remplir l'historique."
+        },
+        "start": {
+          "name": "Premier jour",
+          "description": "Facultatif. Premier jour à remplir. Laissez vide pour utiliser le début de l'historique des options."
+        }
+      }
     }
   },
   "selector": {
@@ -427,6 +443,9 @@
     },
     "no_load": {
       "message": "Ce tarif facture par kW de puissance raccordée. Définissez d'abord votre puissance raccordée dans les options."
+    },
+    "no_meter_history": {
+      "message": "Définissez d'abord un compteur d'énergie importée dans les options. L'historique est rempli à partir de celui-ci."
     }
   },
   "issues": {

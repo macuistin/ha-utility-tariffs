@@ -308,7 +308,8 @@
           "bill_start_month": "A month a bill starts in",
           "refresh_now": "Read the tariff store again now",
           "clear_cache": "Delete the saved tariff files first",
-          "max_meter_kw": "Largest rise a meter can show (kW)"
+          "max_meter_kw": "Largest rise a meter can show (kW)",
+          "history_start": "Start of history"
         },
         "data_description": {
           "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
@@ -324,7 +325,8 @@
           "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
-          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW."
+          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW.",
+          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year."
         }
       }
     },
@@ -394,6 +396,20 @@
           "description": "The tariff whose bill to show."
         }
       }
+    },
+    "backfill": {
+      "name": "Fill history",
+      "description": "Fills the half hours nothing was booked for from your meters' hourly statistics. Half hours booked live are kept. Run it again after you change a meter.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Tariff",
+          "description": "The tariff whose history to fill."
+        },
+        "start": {
+          "name": "First day",
+          "description": "Optional. The first day to fill from. Leave empty to use the start of history in the options."
+        }
+      }
     }
   },
   "selector": {
@@ -427,6 +443,9 @@
     },
     "store_unreadable": {
       "message": "The tariff store could not be read: {error}"
+    },
+    "no_meter_history": {
+      "message": "Set an energy import meter in the options first. The history is filled from it."
     }
   },
   "issues": {

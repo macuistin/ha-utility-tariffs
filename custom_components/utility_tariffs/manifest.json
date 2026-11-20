@@ -2,7 +2,8 @@
   "domain": "utility_tariffs",
   "name": "Utility Tariffs",
   "after_dependencies": [
-    "energy"
+    "energy",
+    "recorder"
   ],
   "codeowners": [
     "@macuistin"

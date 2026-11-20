@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 SERVICE_FIND_WINDOW = "find_window"
 SERVICE_GET_PRICES = "get_prices"
 SERVICE_BILL_SUMMARY = "bill_summary"
+SERVICE_BACKFILL = "backfill"
 ATTR_ENTRY = "config_entry_id"
 FLOWS = ("import", "export")
 
@@ -51,6 +52,10 @@ GET_PRICES_SCHEMA: Any = vol.Schema(
 
 
 BILL_SUMMARY_SCHEMA: Any = vol.Schema({vol.Required(ATTR_ENTRY): cv.string})
+
+BACKFILL_SCHEMA: Any = vol.Schema(
+    {vol.Required(ATTR_ENTRY): cv.string, vol.Optional("start"): cv.date}
+)
 
 
 def _entry(hass: HomeAssistant, entry_id: str) -> TariffConfigEntry:
@@ -153,6 +158,22 @@ async def _bill_summary(call: ServiceCall) -> ServiceResponse:
     }
 
 
+async def _backfill(call: ServiceCall) -> ServiceResponse:
+    """Fill the half hours nothing was booked for from the meters' hourly statistics."""
+    entry = _entry(call.hass, call.data[ATTR_ENTRY])
+    accountant = entry.runtime_data.accountant
+    if accountant is None:
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_meter_history")
+    result = await accountant.async_backfill(call.data.get("start"))
+    if result.slots:
+        entry.runtime_data.async_update_listeners()
+    return {
+        "half_hours_filled": result.slots,
+        "first_day": None if result.first is None else result.first.isoformat(),
+        "last_day": None if result.last is None else result.last.isoformat(),
+    }
+
+
 def async_register_services(hass: HomeAssistant) -> None:
     hass.services.async_register(
         DOMAIN,
@@ -173,5 +194,12 @@ def async_register_services(hass: HomeAssistant) -> None:
         SERVICE_BILL_SUMMARY,
         _bill_summary,
         schema=BILL_SUMMARY_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_BACKFILL,
+        _backfill,
+        schema=BACKFILL_SCHEMA,
         supports_response=SupportsResponse.ONLY,
     )

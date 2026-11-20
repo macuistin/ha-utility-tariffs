@@ -15,6 +15,14 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- When you choose an energy import meter, the bill is now filled from the meters' hourly
+  long-term statistics, back to a year ago or to the **Start of history** date in the options.
+  The bill so far then covers the whole period, and the cheapest-plan search has history to work
+  on at once. It also runs when Home Assistant starts, so the time it was off is filled in. Each
+  hour is spread evenly over its two half hours, so the result is exact only for a price that does
+  not change within the hour. A half hour that was counted live is never changed.
+- A `utility_tariffs.backfill` action fills the history again, from a start date if you give one.
+  Run it after you add or change a meter. It answers with the number of half hours filled.
 - A **Negative price** binary sensor for a tariff on a price feed. It is on while the import
   price is below zero.
 - Lowest, highest and average import and export price tomorrow, off until you enable them. They
