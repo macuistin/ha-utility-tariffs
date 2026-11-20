@@ -233,6 +233,12 @@
           "mid": "Meánach",
           "high": "Ard"
         }
+      },
+      "import_band_price": {
+        "name": "Praghas iompórtála: {band}"
+      },
+      "export_band_price": {
+        "name": "Praghas easpórtála: {band}"
       }
     },
     "binary_sensor": {

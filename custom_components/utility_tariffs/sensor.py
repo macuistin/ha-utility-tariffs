@@ -18,6 +18,7 @@ from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import price_rating
 from utility_tariffs_lib.tariff.price_stats import RATINGS
 
+from .band_sensor import async_setup_band_sensors
 from .bill_sensor import BILL_SENSORS, BillSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
@@ -206,6 +207,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
     async_add_entities(info_sensors(coordinator))
+    async_setup_band_sensors(entry, async_add_entities)
     async_add_entities([
         PriceForecastSensor(coordinator),
         NextTariffChangeSensor(coordinator),

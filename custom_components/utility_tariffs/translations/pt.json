@@ -233,6 +233,12 @@
           "mid": "Médio",
           "high": "Alto"
         }
+      },
+      "import_band_price": {
+        "name": "Preço de importação: {band}"
+      },
+      "export_band_price": {
+        "name": "Preço de exportação: {band}"
       }
     },
     "binary_sensor": {

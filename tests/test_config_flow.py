@@ -14,6 +14,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from utility_tariffs_lib.tariffstore import folder_reader
 
 from custom_components.utility_tariffs.const import DOMAIN
+from tests.helpers import without_bands
 from tests.support.building import build_store
 from tests.support.fixtures import flat, tariff, write_store
 
@@ -327,7 +328,7 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
         e.unique_id: e.entity_id
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
     }
-    assert after == before
+    assert without_bands(after) == without_bands(before)
 
 
 async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
@@ -364,7 +365,7 @@ async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
     after = {
         e.unique_id: e.entity_id for e in er.async_entries_for_config_entry(registry, old.entry_id)
     }
-    assert after == before
+    assert without_bands(after) == without_bands(before)
 
 
 async def test_changing_to_a_plan_already_followed_is_refused(

@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.utility_tariffs.const import DOMAIN
+from tests.helpers import without_bands
 
 BASE = {
     "name": "My plan",
@@ -149,5 +150,5 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
         e.unique_id: e.entity_id
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
     }
-    assert after == before
+    assert without_bands(after) == without_bands(before)
     assert hass.states.get("sensor.utility_tariff_import_price").state == "0.327"

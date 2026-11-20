@@ -15,6 +15,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- A price sensor for each rate band, such as **Import price: Night**, so an automation can read
+  a band's price at any time of day and not only the band in force now. They follow the tariff:
+  a new revision that adds a band adds its sensor, and one that drops a band removes it. A tariff
+  with more than three bands has them off until you enable them.
 - The price forecast sensor has `import_rates` and `export_rates` attributes: today's and
   tomorrow's prices as `start`, `end` and `value` rows, with half hours at the same price joined.
   A chart card can read them without a template, and `docs/entities.md` has an apexcharts-card
