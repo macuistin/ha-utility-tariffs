@@ -35,6 +35,8 @@ from utility_tariffs_lib.tariffstore import StoreError
 
 from .const import (
     BILL_MONTHS,
+    CHEAP_BAND,
+    CHEAP_RULES,
     CONF_AREA,
     CONF_BATTERY_CAPACITY,
     CONF_BATTERY_DISCHARGE_ENERGY,
@@ -43,6 +45,7 @@ from .const import (
     CONF_BILL_MONTHS,
     CONF_BILL_START_DAY,
     CONF_BILL_START_MONTH,
+    CONF_CHEAP_RULE,
     CONF_CLEAR_CACHE,
     CONF_CONNECTED_LOAD,
     CONF_COUNTRY,
@@ -494,6 +497,11 @@ class TariffOptionsFlow(OptionsFlowWithReload):
                 )
             )
         }
+        fields[vol.Required(CONF_CHEAP_RULE, default=options.get(CONF_CHEAP_RULE, CHEAP_BAND))] = (
+            SelectSelector(
+                SelectSelectorConfig(options=list(CHEAP_RULES), translation_key="cheap_rule")
+            )
+        )
         fields.update(_meter_fields(options))
         fields.update(_bill_fields(options))
         for key, unit in _NUMBERS.items():
@@ -558,6 +566,8 @@ def _bill_fields(options: Any) -> dict[Any, Any]:
 def _saved(user_input: dict[str, Any]) -> dict[str, Any]:
     """The options to keep: the window, and every meter and battery setting that was filled in."""
     data: dict[str, Any] = {CONF_WINDOW_MINUTES: int(user_input[CONF_WINDOW_MINUTES])}
+    if user_input.get(CONF_CHEAP_RULE, CHEAP_BAND) != CHEAP_BAND:
+        data[CONF_CHEAP_RULE] = user_input[CONF_CHEAP_RULE]  # the default is not stored
     data.update(_saved_setup(user_input))
     data.update({k: float(user_input[k]) for k in _NUMBERS if user_input.get(k) is not None})
     return data

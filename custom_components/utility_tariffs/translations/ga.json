@@ -279,6 +279,15 @@
       "cheap_share_30_days": {
         "name": "Leictreachas saor a úsáideadh, 30 lá seo caite"
       },
+      "cheap_use_rating": {
+        "name": "Rátáil leictreachais shaoir inniu",
+        "state": {
+          "very_good": "An-mhaith",
+          "good": "Maith",
+          "average": "Meánach",
+          "poor": "Bocht"
+        }
+      },
       "savings_share_this_period": {
         "name": "Sciar an tsábhála sa tréimhse bhille"
       }
@@ -333,7 +342,8 @@
           "clear_cache": "Scrios na comhaid taraife shábháilte ar dtús",
           "connected_load_kw": "Ualach ceangailte (kW)",
           "max_meter_kw": "An t-ardú is mó a thaispeánfaidh méadar (kW)",
-          "history_start": "Tús na staire"
+          "history_start": "Tús na staire",
+          "cheap_rule": "Cé na leathuaireanta a chomhaireamh mar shaor"
         },
         "data_description": {
           "refresh_now": "Léann sé innéacs an stóir agus do phlean arís nuair a shábháileann tú, in ionad fanacht go dtí anocht. Úsáid é tar éis don stór athrú a fhoilsiú.",
@@ -456,6 +466,12 @@
         "cheap_midday": "Meán lae saor (11:00 go 15:00)",
         "cheap_overnight": "Thar oíche saor (02:00 go 06:00)",
         "blank": "Tosaigh ó rud ar bith"
+      }
+    },
+    "cheap_rule": {
+      "options": {
+        "cheapest_band": "An banda is saoire amháin",
+        "at_or_below_average": "Banda ar bith ag meánphraghas an lae nó faoina bhun"
       }
     }
   },

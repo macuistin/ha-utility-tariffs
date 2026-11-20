@@ -279,6 +279,15 @@
       "cheap_share_30_days": {
         "name": "Eletricidade barata usada, últimos 30 dias"
       },
+      "cheap_use_rating": {
+        "name": "Classificação da eletricidade barata hoje",
+        "state": {
+          "very_good": "Muito boa",
+          "good": "Boa",
+          "average": "Média",
+          "poor": "Fraca"
+        }
+      },
       "savings_share_this_period": {
         "name": "Parte poupada no período de faturação"
       }
@@ -333,7 +342,8 @@
           "clear_cache": "Eliminar primeiro os ficheiros de tarifários guardados",
           "connected_load_kw": "Potência ligada (kW)",
           "max_meter_kw": "Maior subida que um contador pode mostrar (kW)",
-          "history_start": "Início do histórico"
+          "history_start": "Início do histórico",
+          "cheap_rule": "Que meias horas contam como baratas"
         },
         "data_description": {
           "refresh_now": "Lê de novo o índice do repositório e o seu plano ao guardar, em vez de esperar pela noite. Use depois de o repositório publicar uma alteração.",
@@ -456,6 +466,12 @@
         "cheap_midday": "Meio-dia barato (11:00 às 15:00)",
         "cheap_overnight": "Madrugada barata (02:00 às 06:00)",
         "blank": "Começar do zero"
+      }
+    },
+    "cheap_rule": {
+      "options": {
+        "cheapest_band": "Apenas o escalão mais barato",
+        "at_or_below_average": "Qualquer escalão no preço médio do dia ou abaixo"
       }
     }
   },

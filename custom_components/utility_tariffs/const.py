@@ -43,6 +43,10 @@ WINDOW_STEP_MINUTES = 30
 
 # What counts as a low and a high price: a price at or below the low percentile of the prices
 # known, or at or above the high one. Changed live from number entities, no reload.
+CONF_CHEAP_RULE = "cheap_rule"  # which half hours count as cheap in the cheap share sensors
+CHEAP_BAND = "cheapest_band"
+CHEAP_BELOW_AVERAGE = "at_or_below_average"
+CHEAP_RULES = (CHEAP_BAND, CHEAP_BELOW_AVERAGE)
 CONF_LOW_PERCENTILE = "low_percentile"
 CONF_HIGH_PERCENTILE = "high_percentile"
 DEFAULT_LOW_PERCENTILE = 10

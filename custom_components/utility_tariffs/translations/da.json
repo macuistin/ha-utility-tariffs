@@ -279,6 +279,15 @@
       "cheap_share_30_days": {
         "name": "Billig strøm brugt, seneste 30 dage"
       },
+      "cheap_use_rating": {
+        "name": "Vurdering af billig strøm i dag",
+        "state": {
+          "very_good": "Meget god",
+          "good": "God",
+          "average": "Middel",
+          "poor": "Dårlig"
+        }
+      },
       "savings_share_this_period": {
         "name": "Andel sparet i afregningsperioden"
       }
@@ -333,7 +342,8 @@
           "clear_cache": "Slet først de gemte tarifilfiler",
           "connected_load_kw": "Tilsluttet belastning (kW)",
           "max_meter_kw": "Største stigning en måler kan vise (kW)",
-          "history_start": "Start på historik"
+          "history_start": "Start på historik",
+          "cheap_rule": "Hvilke halve timer der tæller som billige"
         },
         "data_description": {
           "refresh_now": "Læser lagerets indeks og din plan igen, når du gemmer, i stedet for at vente til i aften. Brug det, efter at lageret har udgivet en ændring.",
@@ -456,6 +466,12 @@
         "cheap_midday": "Billig middag (11:00 til 15:00)",
         "cheap_overnight": "Billig nat (02:00 til 06:00)",
         "blank": "Start fra bunden"
+      }
+    },
+    "cheap_rule": {
+      "options": {
+        "cheapest_band": "Kun det billigste tidsrum",
+        "at_or_below_average": "Alle tidsrum på dagens gennemsnitspris eller derunder"
       }
     }
   },

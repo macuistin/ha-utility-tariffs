@@ -12,8 +12,12 @@ from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
 from utility_tariffs_lib.tariff import SlotEnergy
 
-from custom_components.utility_tariffs.cheap_share import CheapShare, cheap_bands
-from custom_components.utility_tariffs.const import CONF_IMPORT_ENERGY
+from custom_components.utility_tariffs.cheap_share import CheapShare, cheap_bands, share_rating
+from custom_components.utility_tariffs.const import (
+    CHEAP_BELOW_AVERAGE,
+    CONF_CHEAP_RULE,
+    CONF_IMPORT_ENERGY,
+)
 from tests.test_sensor import DATA, NOON, _setup
 
 METER = "sensor.meter_in"
@@ -38,6 +42,26 @@ def test_a_tariff_with_one_price_has_no_cheap_band() -> None:
 
 def test_nothing_imported_is_a_share_of_zero() -> None:
     assert CheapShare(0.0, 0.0).percent == 0.0
+
+
+def test_the_average_rule_counts_every_band_at_or_below_the_average() -> None:
+    prices = {"Day": Decimal("0.30"), "Shoulder": Decimal("0.20"), "Night": Decimal("0.10")}
+
+    assert cheap_bands(prices, Decimal("0.22")) == {"Shoulder", "Night"}
+    assert cheap_bands(prices) == {"Night"}
+
+
+def test_the_average_rule_finds_nothing_cheap_when_every_band_costs_the_same() -> None:
+    assert cheap_bands({"A": Decimal("0.2"), "B": Decimal("0.2")}, Decimal("0.2")) == frozenset()
+
+
+@pytest.mark.parametrize(
+    ("percent", "label"),
+    [(100.0, "very_good"), (75.0, "very_good"), (74.9, "good"), (50.0, "good"),
+     (25.0, "average"), (24.9, "poor"), (0.0, "poor")],
+)
+def test_the_rating_steps(percent: float, label: str) -> None:
+    assert share_rating(percent) == label
 
 
 async def _meter_setup(hass: HomeAssistant, freezer: FrozenDateTimeFactory, plan: str = "plan"):
@@ -132,3 +156,51 @@ async def test_the_band_edges_follow_the_tariff(
 
     assert state is not None
     assert float(state.state) == 100.0  # 07:00 and 23:00 are both in the night band
+
+
+RATING = "sensor.utility_tariff_cheap_electricity_rating_today"
+
+
+async def test_the_rating_labels_todays_share_and_is_unknown_on_an_empty_day(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    entry, accountant = await _meter_setup(hass, freezer)
+    state = hass.states.get(RATING)
+    assert state is not None and state.state == "unknown"
+
+    _book(accountant, 1.0, 2)  # night
+    _book(accountant, 3.0, 10)  # day: a quarter was cheap
+    entry.runtime_data.async_update_listeners()
+    await hass.async_block_till_done()
+
+    state = hass.states.get(RATING)
+    assert state is not None
+    assert state.state == "average"
+    assert state.attributes["cheap_share"] == 25.0
+
+
+async def test_a_flat_tariff_has_the_lowest_rating(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    entry, accountant = await _meter_setup(hass, freezer, plan="flat")
+    _book(accountant, 2.0, 10)
+    entry.runtime_data.async_update_listeners()
+    await hass.async_block_till_done()
+
+    state = hass.states.get(RATING)
+    assert state is not None and state.state == "poor"
+
+
+async def test_the_options_flow_saves_the_cheap_rule_only_when_changed(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    entry, _ = await _meter_setup(hass, freezer)
+    flow = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        flow["flow_id"],
+        user_input={"window_minutes": 120, CONF_CHEAP_RULE: CHEAP_BELOW_AVERAGE},
+    )
+
+    await hass.async_block_till_done()
+
+    assert result["data"][CONF_CHEAP_RULE] == CHEAP_BELOW_AVERAGE
