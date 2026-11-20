@@ -281,6 +281,24 @@
       },
       "savings_share_this_period": {
         "name": "Savings share this bill period"
+      },
+      "lowest_price_time_today": {
+        "name": "Lowest import price time today"
+      },
+      "lowest_price_time_tomorrow": {
+        "name": "Lowest import price time tomorrow"
+      },
+      "highest_price_time_today": {
+        "name": "Highest import price time today"
+      },
+      "highest_price_time_tomorrow": {
+        "name": "Highest import price time tomorrow"
+      },
+      "import_price_percent_of_highest": {
+        "name": "Import price as a share of today's highest"
+      },
+      "cheaper_periods_today": {
+        "name": "Cheaper periods today"
       }
     },
     "binary_sensor": {

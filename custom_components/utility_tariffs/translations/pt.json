@@ -281,6 +281,24 @@
       },
       "savings_share_this_period": {
         "name": "Parte poupada no período de faturação"
+      },
+      "lowest_price_time_today": {
+        "name": "Hora do preço de importação mais baixo hoje"
+      },
+      "lowest_price_time_tomorrow": {
+        "name": "Hora do preço de importação mais baixo amanhã"
+      },
+      "highest_price_time_today": {
+        "name": "Hora do preço de importação mais alto hoje"
+      },
+      "highest_price_time_tomorrow": {
+        "name": "Hora do preço de importação mais alto amanhã"
+      },
+      "import_price_percent_of_highest": {
+        "name": "Preço de importação como parte do mais alto de hoje"
+      },
+      "cheaper_periods_today": {
+        "name": "Períodos mais baratos hoje"
       }
     },
     "binary_sensor": {
