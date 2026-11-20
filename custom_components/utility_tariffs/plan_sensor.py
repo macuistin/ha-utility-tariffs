@@ -56,4 +56,11 @@ class CheapestPlanSavingSensor(TariffEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any] | None:
         ranker = self.coordinator.ranker
         ranking = None if ranker is None else ranker.ranking
-        return None if ranking is None else {"cheapest_plan": ranking.cheapest or None}
+        if ranking is None:
+            return None
+        return {
+            "cheapest_plan": ranking.cheapest or None,
+            "period_start": ranking.first_day.isoformat(),
+            "period_end": ranking.last_day.isoformat(),
+            "days_recorded": ranking.days_recorded,
+        }

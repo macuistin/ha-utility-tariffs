@@ -72,7 +72,14 @@ async def test_a_cheaper_plan_is_ranked_first_and_suggested(
     assert attributes["plans_compared"] == 2
     assert attributes["top_plans"][0]["plan"] == "P Energy Flat"
     assert attributes["top_plans"][1]["yours"] is True
-    assert ir.async_get(hass).async_get_issue(DOMAIN, "cheaper_plan") is not None
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, "cheaper_plan")
+    assert issue is not None
+    saving = hass.states.get("sensor.utility_tariff_cheapest_plan_saving").attributes
+    ranking = coordinator.ranker.ranking
+    assert saving["days_recorded"] == ranking.days_recorded > 0
+    assert saving["period_start"] == ranking.first_day.isoformat()
+    assert issue.translation_placeholders["days"] == str(ranking.days_recorded)
+    assert issue.translation_placeholders["last"] == ranking.last_day.isoformat()
 
 
 async def test_the_cheapest_plan_raises_no_suggestion(

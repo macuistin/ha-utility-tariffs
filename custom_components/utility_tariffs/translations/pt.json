@@ -527,7 +527,7 @@
     },
     "cheaper_plan": {
       "title": "Está disponível um plano mais barato",
-      "description": "Calculado sobre a sua última fatura completa, o plano {plan} teria custado menos {saving} do que o seu. É uma comparação do consumo passado, não uma previsão. Verifique as condições atuais do plano junto do fornecedor antes de mudar e depois use Reconfigurar para o seguir."
+      "description": "Calculado sobre a sua última fatura completa ({first} a {last}, {days} dias de consumo registado), o plano {plan} teria custado menos {saving} do que o seu. É uma comparação do consumo passado, não uma previsão. Verifique as condições atuais do plano junto do fornecedor antes de mudar e depois use Reconfigurar para o seguir."
     },
     "prices_not_published": {
       "title": "Os preços de amanhã ainda não foram publicados",

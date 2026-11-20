@@ -527,7 +527,7 @@
     },
     "cheaper_plan": {
       "title": "Tá plean níos saoire ar fáil",
-      "description": "Praghsáilte thar do bhille iomlán is déanaí, chosnódh {plan} {saving} níos lú ná do phlean. Is comparáid ar úsáid roimhe seo é seo, ní réamhaisnéis. Seiceáil téarmaí reatha an phlean leis an soláthraí sula n-athraíonn tú, ansin úsáid Athchumraigh chun é a leanúint."
+      "description": "Praghsáilte thar do bhille iomlán is déanaí ({first} go {last}, {days} lá d'úsáid taifeadta), chosnódh {plan} {saving} níos lú ná do phlean. Is comparáid ar úsáid roimhe seo é seo, ní réamhaisnéis. Seiceáil téarmaí reatha an phlean leis an soláthraí sula n-athraíonn tú, ansin úsáid Athchumraigh chun é a leanúint."
     },
     "prices_not_published": {
       "title": "Níl praghsanna an lae amárach foilsithe fós",
