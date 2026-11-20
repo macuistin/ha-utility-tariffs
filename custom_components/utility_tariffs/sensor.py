@@ -21,7 +21,7 @@ from utility_tariffs_lib.tariff.price_stats import RATINGS
 
 from .band_sensor import async_setup_band_sensors
 from .bill_sensor import BILL_SENSORS, BillSensor
-from .cheap_sensor import CHEAP_SHARE_SENSORS, CheapShareSensor
+from .cheap_sensor import CHEAP_SHARE_SENSORS, CheapRatingSensor, CheapShareSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
@@ -299,6 +299,7 @@ async def async_setup_entry(
         async_add_entities(
             CheapShareSensor(coordinator, description) for description in CHEAP_SHARE_SENSORS
         )
+        async_add_entities([CheapRatingSensor(coordinator)])
         if entry.options.get(CONF_HOUSE_ENERGY):
             async_add_entities([SavingsSensor(coordinator), SavingsShareSensor(coordinator)])
 

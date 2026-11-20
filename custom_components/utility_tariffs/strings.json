@@ -279,6 +279,15 @@
       "cheap_share_30_days": {
         "name": "Cheap electricity used, last 30 days"
       },
+      "cheap_use_rating": {
+        "name": "Cheap electricity rating today",
+        "state": {
+          "very_good": "Very good",
+          "good": "Good",
+          "average": "Average",
+          "poor": "Poor"
+        }
+      },
       "savings_share_this_period": {
         "name": "Savings share this bill period"
       },
@@ -351,7 +360,8 @@
           "refresh_now": "Read the tariff store again now",
           "clear_cache": "Delete the saved tariff files first",
           "max_meter_kw": "Largest rise a meter can show (kW)",
-          "history_start": "Start of history"
+          "history_start": "Start of history",
+          "cheap_rule": "Which half hours count as cheap"
         },
         "data_description": {
           "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
@@ -474,6 +484,12 @@
         "cheap_midday": "Cheap midday (11:00 to 15:00)",
         "cheap_overnight": "Cheap overnight (02:00 to 06:00)",
         "blank": "Start from nothing"
+      }
+    },
+    "cheap_rule": {
+      "options": {
+        "cheapest_band": "Only the cheapest band",
+        "at_or_below_average": "Any band at or below today's average price"
       }
     }
   },
