@@ -215,3 +215,22 @@ async def test_a_template_price_that_cannot_be_used_keeps_the_form(
 
     assert result["step_id"] == "manual"
     assert result["errors"] == {"base": "invalid_tariff"}
+
+
+async def test_the_form_starts_from_the_countrys_currency_and_vat(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    hass.config.currency = "GBP"  # the home's own setting differs from the store's
+    result = await _to_base_form(hass)
+
+    assert result["step_id"] == "manual"
+    defaults = {str(key): key.default() for key in result["data_schema"].schema}
+    assert defaults["country"] == "IE"
+    assert defaults["currency"] == "EUR"
+    assert defaults["vat_rate"] == 9.0
+    unit = next(
+        selector.config["unit_of_measurement"]
+        for key, selector in result["data_schema"].schema.items()
+        if str(key) == "base_rate"
+    )
+    assert unit == "EUR/kWh"

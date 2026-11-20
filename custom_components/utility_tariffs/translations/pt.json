@@ -69,7 +69,7 @@
           "standing_charge": "O encargo fixo por dia, sem IVA, a menos que indique que os preços o incluem.",
           "levy": "Um encargo fixo por mês, como uma taxa de serviço público. Deixe 0 se não houver.",
           "discount_rate": "Uma percentagem deduzida ao custo da energia, como um desconto por pagamento pontual.",
-          "vat_rate": "A taxa de IVA em percentagem. Deixe 0 se os seus preços já a incluírem.",
+          "vat_rate": "A taxa de IVA em percentagem. Começa na taxa em vigor hoje no país, a partir do repositório de tarifas, e pode alterá-la. Ative \"Preços com IVA incluído\" se os preços acima já o contiverem.",
           "vat_included": "Ative quando os preços acima são os que paga, com IVA incluído.",
           "bill_start_day": "O dia do mês em que começa o período de faturação do seu fornecedor, de 1 a 28.",
           "timed_rate": "O preço de um kWh na tarifa horária do modelo escolhido, como aparece na sua fatura. Por exemplo 0,15."

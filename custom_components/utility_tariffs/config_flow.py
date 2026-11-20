@@ -68,7 +68,7 @@ from .const import (
 from .country_reason import reason_for
 from .energy_suggest import energy_dashboard_meters
 from .helper.store_access import TariffStoreAccess
-from .manual import problem_with
+from .manual import CountryDefaults, problem_with
 from .manual_templates import BLANK, TEMPLATES, Template, timed_periods
 from .store import store_access
 
@@ -136,6 +136,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._names: dict[str, str] = {}
         self._manual: dict[str, Any] = {}
         self._template: Template = TEMPLATES[BLANK]
+        self._defaults = CountryDefaults("GB", "GBP")
         self._pending: tuple[str, str, dict[str, Any]] = ("", "", {})
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -267,12 +268,26 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         """The shape of a tariff that is not in the store. It only fills the next form."""
         if user_input is not None:
             self._template = TEMPLATES[user_input["template"]]
+            self._defaults = await self._country_defaults()
             return await self.async_step_manual()
         return self.async_show_form(
             step_id="manual_template",
             data_schema=_schema({vol.Required("template", default=BLANK): _template_choice()}),
             last_step=False,
         )
+
+    async def _country_defaults(self) -> CountryDefaults:
+        """The chosen country with its currency and VAT from the store, or the home's own
+        settings when the store has nothing for it or cannot be reached."""
+        country = self._chosen.get(CONF_COUNTRY) or self.hass.config.country or "GB"
+        currency, vat = self.hass.config.currency, None
+        try:
+            currency, vat = await store_access(self.hass).async_country_values(
+                country, dt_util.now().date()
+            )
+        except STORE_ERRORS:
+            pass  # the form still works from the home's settings
+        return CountryDefaults(country, currency, float(vat) if vat else 0.0)
 
     async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """The base rates of a tariff that is not in the store."""
@@ -289,7 +304,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             errors["base"] = "invalid_tariff"
         return self.async_show_form(
             step_id="manual",
-            data_schema=_manual_schema(self.hass, user_input, self._template),
+            data_schema=_manual_schema(user_input, self._template, self._defaults),
             errors=errors,
             last_step=False,
         )
@@ -391,14 +406,20 @@ def _template_choice() -> Any:
     )
 
 
-def _manual_schema(hass: Any, previous: dict[str, Any] | None, template: Template) -> Any:
-    """The base rates. Currency and country start from the home's settings."""
+def _manual_schema(
+    previous: dict[str, Any] | None, template: Template, defaults: CountryDefaults
+) -> Any:
+    """The base rates. Country, currency and VAT start from the country's values in the store,
+    and each price says which currency it is in."""
     given = previous or {}
+    currency = given.get("currency", defaults.currency)
 
     def field(key: str, default: Any) -> Any:
         return vol.Required(key, default=given.get(key, default))
 
     def amount(unit: str | None = None, maximum: float | None = None) -> Any:
+        if unit and not unit.startswith("%"):
+            unit = f"{currency}/{unit.removeprefix('per ')}"
         config = NumberSelectorConfig(min=0, step="any", mode=NumberSelectorMode.BOX)
         if unit:
             config["unit_of_measurement"] = unit
@@ -409,8 +430,8 @@ def _manual_schema(hass: Any, previous: dict[str, Any] | None, template: Templat
     return _schema(
         {
             field(CONF_NAME, "My tariff"): str,
-            field("country", hass.config.country or "GB"): CountrySelector(),
-            field("currency", hass.config.currency): str,
+            field("country", defaults.country): CountrySelector(),
+            field("currency", defaults.currency): str,
             field("base_rate_name", template.base_name): str,
             field("base_rate", 0.0): amount("per kWh"),
             **_timed_field(template, amount),
@@ -418,7 +439,7 @@ def _manual_schema(hass: Any, previous: dict[str, Any] | None, template: Templat
             field("standing_charge", 0.0): amount("per day"),
             field("levy", 0.0): amount("per month"),
             field("discount_rate", 0.0): amount("%", 100),
-            field("vat_rate", 0.0): amount("%", 100),
+            field("vat_rate", defaults.vat_percent): amount("%", 100),
             field("vat_included", False): bool,
             field("bill_start_day", 1): NumberSelector(
                 NumberSelectorConfig(min=1, max=28, step=1, mode=NumberSelectorMode.BOX)
