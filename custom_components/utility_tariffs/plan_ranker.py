@@ -96,7 +96,13 @@ class PlanRanker:
             is_fixable=False,
             severity=ir.IssueSeverity.WARNING,
             translation_key=ISSUE_ID,
-            translation_placeholders={"plan": ranking.cheapest, "saving": f"{ranking.saving:.2f}"},
+            translation_placeholders={
+                "plan": ranking.cheapest,
+                "saving": f"{ranking.saving:.2f}",
+                "days": str(ranking.days_recorded),
+                "first": ranking.first_day.isoformat(),
+                "last": ranking.last_day.isoformat(),
+            },
         )
 
     @callback

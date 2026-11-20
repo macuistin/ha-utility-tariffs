@@ -493,7 +493,7 @@
     },
     "cheaper_plan": {
       "title": "A cheaper plan is available",
-      "description": "Priced over your last whole bill, {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
+      "description": "Priced over your last whole bill ({first} to {last}, {days} days of recorded use), {plan} would have cost {saving} less than your plan. This is a comparison of past use, not a forecast. Check the plan's current terms with the supplier before switching, then use Reconfigure to follow it."
     },
     "prices_not_published": {
       "title": "Tomorrow's prices are not published yet",

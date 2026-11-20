@@ -493,7 +493,7 @@
     },
     "cheaper_plan": {
       "title": "Une offre moins chère est disponible",
-      "description": "Calculée sur votre dernière facture complète, l'offre {plan} aurait coûté {saving} de moins que la vôtre. C'est une comparaison de la consommation passée, pas une prévision. Vérifiez les conditions actuelles de l'offre auprès du fournisseur avant de changer, puis utilisez Reconfigurer pour la suivre."
+      "description": "Calculée sur votre dernière facture complète ({first} au {last}, {days} jours de consommation enregistrée), l'offre {plan} aurait coûté {saving} de moins que la vôtre. C'est une comparaison de la consommation passée, pas une prévision. Vérifiez les conditions actuelles de l'offre auprès du fournisseur avant de changer, puis utilisez Reconfigurer pour la suivre."
     },
     "prices_not_published": {
       "title": "Les prix de demain ne sont pas encore publiés",

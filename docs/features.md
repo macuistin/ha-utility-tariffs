@@ -70,6 +70,9 @@ rank** is where your plan stands (1 is the cheapest), with the cheapest few plan
 in its attributes. **Cheapest plan saving** is what the cheapest plan would have saved, and is 0
 when yours is cheapest. When the saving is at least 5% of your bill, a repair notice names the
 plan.
+Both sensors and the notice say how much history the comparison rests on: the bill's first and
+last day (`period_start`, `period_end`) and how many of its days have recorded use
+(`days_recorded`). A bill with few recorded days is a weak basis for switching.
 
 This re-prices what you used. It is not a forecast, it never switches your plan, and it does not
 know exit fees, contract terms or whether a plan is open to you. A plan that lists no export price

@@ -493,7 +493,7 @@
     },
     "cheaper_plan": {
       "title": "En billigere plan er tilgængelig",
-      "description": "Beregnet over din seneste hele regning ville {plan} have kostet {saving} mindre end din plan. Det er en sammenligning af tidligere forbrug, ikke en prognose. Tjek planens aktuelle vilkår hos leverandøren, før du skifter, og brug derefter Omkonfigurer til at følge den."
+      "description": "Beregnet over din seneste hele regning ({first} til {last}, {days} dage med registreret forbrug) ville {plan} have kostet {saving} mindre end din plan. Det er en sammenligning af tidligere forbrug, ikke en prognose. Tjek planens aktuelle vilkår hos leverandøren, før du skifter, og brug derefter Omkonfigurer til at følge den."
     },
     "prices_not_published": {
       "title": "Morgendagens priser er ikke offentliggjort endnu",
