@@ -269,6 +269,15 @@
       },
       "average_export_price_tomorrow": {
         "name": "Preço de exportação médio amanhã"
+      },
+      "cheap_share_today": {
+        "name": "Eletricidade barata usada hoje"
+      },
+      "cheap_share_period": {
+        "name": "Eletricidade barata usada no período de faturação"
+      },
+      "cheap_share_30_days": {
+        "name": "Eletricidade barata usada, últimos 30 dias"
       }
     },
     "binary_sensor": {
