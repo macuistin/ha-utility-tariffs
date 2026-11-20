@@ -7,7 +7,7 @@ bill reads it as it would any other tariff. Nothing typed here is ever sent to t
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import date, time
 from typing import Any
 
@@ -19,6 +19,16 @@ from utility_tariffs_lib.tariff import (
     TariffDefinition,
     definition_from_config,
 )
+
+
+@dataclass(frozen=True)
+class CountryDefaults:
+    """What the form starts from: the country, its currency and the VAT rate in force there."""
+
+    country: str
+    currency: str
+    vat_percent: float = 0.0
+
 
 OPEN_SINCE = date(2000, 1, 1)  # a typed tariff has no start date, so it has always applied
 

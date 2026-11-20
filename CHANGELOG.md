@@ -20,6 +20,9 @@ Each release has a section here. The release workflow publishes the section for 
 - Typing in your own rates now starts with a choice of shape: a flat rate, day and night, peak and
   off-peak, a cheap midday, a cheap overnight window, or nothing. The shape fills in the rate names
   and hours, and you type the prices. You can still add more timed rates afterwards.
+- The form for your own rates now starts from the country you chose: its currency and the VAT rate
+  in force there today come from the tariff store, and each price shows its unit, such as `EUR/kWh`.
+  You can still change them.
 - Six price sensors, all off until you enable them: the time of the lowest and highest import price
   today and tomorrow, the import price as a share of today's highest, and how many half hours of
   today are cheaper than now. Tomorrow's times are unknown until the whole day is priced.

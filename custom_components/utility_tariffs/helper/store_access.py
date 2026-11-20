@@ -35,6 +35,7 @@ from utility_tariffs_lib.tariffstore import (
     StoreError,
     session_reader,
 )
+from utility_tariffs_lib.tariffstore.schema import vat_on
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -116,6 +117,11 @@ class TariffStoreAccess:
 
     async def async_countries(self) -> dict[str, dict[str, Any]]:
         return await self._run(self._store.countries)
+
+    async def async_country_values(self, country: str, on: date) -> tuple[str, str | None]:
+        """The currency of a country and its VAT rate in percent on *on*, None when none applies."""
+        block = await self._run(lambda: self._store.country(country))
+        return str(block["currency"]), vat_on(block, on.isoformat())
 
     async def async_providers(self, country: str) -> dict[str, str]:
         return await self._run(lambda: self._store.providers(country))

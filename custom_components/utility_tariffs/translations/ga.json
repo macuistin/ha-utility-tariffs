@@ -69,7 +69,7 @@
           "standing_charge": "An muirear seasta in aghaidh an lae, roimh CBL mura sonraíonn tú go bhfuil sé sna praghsanna.",
           "levy": "Muirear seasta in aghaidh na míosa, mar ioncam seirbhíse poiblí. Fág ag 0 mura bhfuil ceann ann.",
           "discount_rate": "Céatadán a bhaintear den mhuirear fuinnimh, mar lascaine as íoc go pras.",
-          "vat_rate": "An ráta CBL i gcéatadán. Fág ag 0 má tá sé sna praghsanna cheana.",
+          "vat_rate": "Ráta CBL i bpéresentóirí. Tosaíonn sé ag an ráta atá i bhfeidhm sa tír inniu, ón stór taraifí, agus is féidir leat é a athrú. Cas air \"Tá CBL san áireamh sna praghsanna cheana\" má tá sé sna praghsanna thuas cheana.",
           "vat_included": "Cuir air nuair is iad na rátaí thuas na praghsanna a íocann tú, CBL san áireamh.",
           "bill_start_day": "Lá den mhí a thosaíonn tréimhse billeála do sholáthraí, 1 go 28.",
           "timed_rate": "Praghas kWh amháin sa ráta ama den phatrún a roghnaigh tú, mar a fheictear ar do bhille é. Mar shampla 0.15."

@@ -69,7 +69,7 @@
           "standing_charge": "Le montant fixe par jour, hors TVA sauf si vous indiquez que les prix la comprennent.",
           "levy": "Un montant fixe par mois, comme une taxe de service public. Laissez 0 s'il n'y en a pas.",
           "discount_rate": "Un pourcentage retiré du coût de l'énergie, comme une remise pour paiement rapide.",
-          "vat_rate": "Le taux de TVA en pourcentage. Laissez 0 si vos prix la comprennent déjà.",
+          "vat_rate": "Le taux de TVA en pourcentage. Il part du taux en vigueur aujourd'hui dans le pays, d'après le dépôt de tarifs, et vous pouvez le changer. Activez « Prix TTC » si les prix ci-dessus la contiennent déjà.",
           "vat_included": "Activez-le quand les tarifs ci-dessus sont les prix que vous payez, TVA comprise.",
           "bill_start_day": "Le jour du mois où commence la période de facturation de votre fournisseur, de 1 à 28.",
           "timed_rate": "Le prix d'un kWh au tarif horaire du modèle choisi, tel qu'il figure sur votre facture. Par exemple 0,15."

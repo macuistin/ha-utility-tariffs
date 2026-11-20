@@ -69,7 +69,7 @@
           "standing_charge": "Det faste gebyr pr. dag, før moms, medmindre du angiver, at priserne er inkl. moms.",
           "levy": "Et fast gebyr pr. måned, fx en afgift til offentlig service. Lad den stå på 0, hvis der ikke er nogen.",
           "discount_rate": "En procentdel, der trækkes fra energiomkostningen, fx en rabat for hurtig betaling.",
-          "vat_rate": "Momssatsen i procent. Lad den stå på 0, hvis dine priser allerede er inkl. moms.",
+          "vat_rate": "Momssatsen i procent. Den starter ved den sats, der gælder i landet i dag, fra tarifdepotet, og du kan ændre den. Slå \"Priserne er inkl. moms\" til, hvis priserne ovenfor allerede indeholder den.",
           "vat_included": "Slå til, når priserne ovenfor er dem, du betaler, inklusive moms.",
           "bill_start_day": "Den dag i måneden, hvor din leverandørs regningsperiode starter, 1 til 28.",
           "timed_rate": "Prisen for en kWh i den tidsstyrede takst i den valgte skabelon, som den står på din regning. For eksempel 0,15."
