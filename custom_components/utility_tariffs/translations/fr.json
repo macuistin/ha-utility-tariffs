@@ -274,6 +274,9 @@
       },
       "off_peak": {
         "name": "Heures creuses"
+      },
+      "negative_price": {
+        "name": "Prix négatif"
       }
     },
     "number": {

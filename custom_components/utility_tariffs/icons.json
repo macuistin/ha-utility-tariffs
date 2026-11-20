@@ -95,6 +95,12 @@
         "state": {
           "on": "mdi:weather-night"
         }
+      },
+      "negative_price": {
+        "default": "mdi:cash-plus",
+        "state": {
+          "on": "mdi:cash-check"
+        }
       }
     },
     "number": {

@@ -15,6 +15,8 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- A **Negative price** binary sensor for a tariff on a price feed. It is on while the import
+  price is below zero.
 - Lowest, highest and average import and export price tomorrow, off until you enable them. They
   are unknown until tomorrow's prices are all held, never a guess.
 - A price sensor for each rate band, such as **Import price: Night**, so an automation can read

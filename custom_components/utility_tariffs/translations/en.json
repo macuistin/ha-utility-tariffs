@@ -274,6 +274,9 @@
       },
       "off_peak": {
         "name": "Off-peak"
+      },
+      "negative_price": {
+        "name": "Negative price"
       }
     },
     "number": {

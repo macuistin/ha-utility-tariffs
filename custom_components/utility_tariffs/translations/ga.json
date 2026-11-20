@@ -274,6 +274,9 @@
       },
       "off_peak": {
         "name": "Lasmuigh den uaireanta buaice"
+      },
+      "negative_price": {
+        "name": "Praghas diúltach"
       }
     },
     "number": {

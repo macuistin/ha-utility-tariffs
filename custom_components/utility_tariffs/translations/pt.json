@@ -274,6 +274,9 @@
       },
       "off_peak": {
         "name": "Vazio"
+      },
+      "negative_price": {
+        "name": "Preço negativo"
       }
     },
     "number": {

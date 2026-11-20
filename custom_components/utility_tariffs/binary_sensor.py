@@ -36,6 +36,8 @@ async def async_setup_entry(
         ]
     )
     async_add_entities(info_binary_sensors(data))
+    if data.data.on_a_feed:  # only a published price can fall below zero
+        async_add_entities([NegativePrice(data, "negative_price")])
 
 
 class _WindowActive(TariffEntity, BinarySensorEntity):
@@ -105,3 +107,21 @@ class OffPeak(TariffEntity, BinarySensorEntity):
             key: moment.isoformat() if moment else None
             for key, moment in zip(keys, self._around(), strict=True)
         }
+
+
+class NegativePrice(TariffEntity, BinarySensorEntity):
+    """On while the import price in force is below zero, so a load can be run to be paid for it.
+
+    Unavailable when no price is held for now, never off by guess.
+    """
+
+    _attr_translation_key = "negative_price"
+
+    @property
+    def available(self) -> bool:
+        return super().available and self.coordinator.data.slot_at(dt_util.now()) is not None
+
+    @property
+    def is_on(self) -> bool | None:
+        slot = self.coordinator.data.slot_at(dt_util.now())
+        return None if slot is None else slot.import_price < 0

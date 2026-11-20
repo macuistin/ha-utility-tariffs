@@ -339,3 +339,45 @@ async def test_tomorrows_figures_are_unknown_until_tomorrow_is_priced(
     await hass.async_block_till_done()
 
     assert _state(hass, "lowest_import_price_tomorrow") == "0.1"
+
+
+def _publish_with_negative_evening(feed: Feed) -> None:
+    feed.publish(FIRST_DAY, date(2026, 11, 14))
+    prices_today = day_prices(date(2026, 11, 14))
+    prices_today[35] = "-0.05"  # the half hour from 17:30
+    feed.days[prices.day_path("IE", "octopus-agile", "all", date(2026, 11, 14))] = (
+        prices.dumps_day({
+            "schema": 1, "feed": "octopus-agile", "area": "all", "date": "2026-11-14",
+            "timezone": "Europe/Dublin", "interval_minutes": 30, "prices": prices_today,
+        }).encode()
+    )
+
+
+async def test_the_negative_price_sensor_is_on_while_the_price_is_below_zero(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    _publish_with_negative_evening(feed)
+    freezer.move_to(EVENING)
+    await _setup(hass, FEED)
+
+    assert float(_state(hass, "import_price")) < 0
+    state = hass.states.get("binary_sensor.utility_tariff_negative_price")
+    assert state is not None
+    assert state.state == "on"
+
+    freezer.move_to("2026-11-14 18:00:30+00:00")
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("binary_sensor.utility_tariff_negative_price")
+    assert state is not None
+    assert state.state == "off"
+
+
+async def test_a_fixed_tariff_has_no_negative_price_sensor(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, feed: Feed
+) -> None:
+    freezer.move_to(NOON)
+    await _setup(hass, FLAT)
+
+    assert hass.states.get("binary_sensor.utility_tariff_negative_price") is None
