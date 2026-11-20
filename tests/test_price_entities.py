@@ -180,3 +180,37 @@ async def test_tomorrows_figures_are_the_prices_of_the_whole_day(
     assert _state(hass, "lowest_import_price_tomorrow") == "0.15"
     assert _state(hass, "highest_import_price_tomorrow") == "0.3"
     assert float(_state(hass, "average_import_price_tomorrow")) == pytest.approx(0.24375)
+
+
+PRICE_FIGURES = (
+    "lowest_import_price_time_today",
+    "highest_import_price_time_today",
+    "lowest_import_price_time_tomorrow",
+    "import_price_as_a_share_of_today_s_highest",
+    "cheaper_periods_today",
+)
+
+
+async def _setup_with_price_figures(hass: HomeAssistant) -> None:
+    """Set up, enable the figures that are off by default, and reload so they exist."""
+    await _setup(hass)
+    registry = er.async_get(hass)
+    for key in PRICE_FIGURES:
+        entity = registry.async_get(f"sensor.utility_tariff_{key}")
+        assert entity is not None and entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+        registry.async_update_entity(entity.entity_id, disabled_by=None)
+    await hass.config_entries.async_reload(hass.config_entries.async_entries(DOMAIN)[0].entry_id)
+    await hass.async_block_till_done()
+
+
+async def test_the_price_figures_report_the_day_from_the_held_slots(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    await _setup_with_price_figures(hass)
+
+    assert _state(hass, "lowest_import_price_time_today") == "2026-11-14T00:00:00+00:00"
+    assert _state(hass, "highest_import_price_time_today") == "2026-11-14T08:00:00+00:00"
+    assert _state(hass, "lowest_import_price_time_tomorrow") == "2026-11-15T00:00:00+00:00"
+    assert _state(hass, "import_price_as_a_share_of_today_s_highest") == "100.0"
+    assert _state(hass, "cheaper_periods_today") == "18"

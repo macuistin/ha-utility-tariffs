@@ -281,6 +281,24 @@
       },
       "savings_share_this_period": {
         "name": "Part d'économie sur la période de facturation"
+      },
+      "lowest_price_time_today": {
+        "name": "Heure du prix d'import le plus bas aujourd'hui"
+      },
+      "lowest_price_time_tomorrow": {
+        "name": "Heure du prix d'import le plus bas demain"
+      },
+      "highest_price_time_today": {
+        "name": "Heure du prix d'import le plus haut aujourd'hui"
+      },
+      "highest_price_time_tomorrow": {
+        "name": "Heure du prix d'import le plus haut demain"
+      },
+      "import_price_percent_of_highest": {
+        "name": "Prix d'import en part du plus haut d'aujourd'hui"
+      },
+      "cheaper_periods_today": {
+        "name": "Périodes moins chères aujourd'hui"
       }
     },
     "binary_sensor": {
