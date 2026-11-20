@@ -257,6 +257,15 @@
       },
       "average_export_price_tomorrow": {
         "name": "Gennemsnitlig eksportpris i morgen"
+      },
+      "cheap_share_today": {
+        "name": "Billig strøm brugt i dag"
+      },
+      "cheap_share_period": {
+        "name": "Billig strøm brugt i afregningsperioden"
+      },
+      "cheap_share_30_days": {
+        "name": "Billig strøm brugt, seneste 30 dage"
       }
     },
     "binary_sensor": {

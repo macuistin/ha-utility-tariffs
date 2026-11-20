@@ -5,6 +5,13 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- Three **Cheap electricity used** sensors with an import meter set: the share of the electricity
+  imported that was used in the tariff's cheapest band, for today, the bill period so far and the
+  last 30 days (off until you enable it). A tariff with one price all day shows 0. They are
+  unavailable for a tariff that follows a price feed.
+
 ## 1.4.0b1
 
 A beta. It adds filling the bill from your meters' history, which reads your recorder, so tell

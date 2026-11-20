@@ -32,6 +32,21 @@ the current bill period. You get the bill so far, the energy imported this perio
 the period the history covers. A meter that updates only every half hour or day books each step in
 the minute it appears, so the bill by rate band can differ slightly from your supplier's.
 
+## Cheap electricity used
+
+With an import meter set, three sensors give the share of the electricity you imported that was
+used at cheap times: today, this bill period (both on) and the last 30 days (off until enabled).
+Each is a percentage, with `cheap_kwh` and `imported_kwh` as attributes. Today's figure works as a
+rating for the day.
+
+- A half hour is cheap when it falls in the tariff's cheapest import band. The band comes from the
+  tariff and the price of a band from the engine.
+- A tariff with a single price all day has nothing cheap to use, so the share is 0 and cannot
+  improve. The sensor is not unavailable.
+- A tariff that follows a price feed has no bands, and the prices of past days are not held, so
+  the sensors are unavailable for it.
+- They read the half-hourly history, so a new plan shows them from the filled history.
+
 ## Savings
 
 Add a sensor for the energy the whole home uses and you also get "Savings this bill period": what
