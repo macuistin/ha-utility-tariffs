@@ -69,6 +69,7 @@ from .country_reason import reason_for
 from .energy_suggest import energy_dashboard_meters
 from .helper.store_access import TariffStoreAccess
 from .manual import problem_with
+from .manual_templates import BLANK, TEMPLATES, Template, timed_periods
 from .store import store_access
 
 OWN_RATES = "own_rates"  # the key of the first choice label in the translations
@@ -134,6 +135,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._chosen: dict[str, str] = {}
         self._names: dict[str, str] = {}
         self._manual: dict[str, Any] = {}
+        self._template: Template = TEMPLATES[BLANK]
         self._pending: tuple[str, str, dict[str, Any]] = ("", "", {})
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -203,7 +205,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _take(self, plan: _Plan | None) -> ConfigFlowResult:
         """Go on with the chosen plan, or to the own-rates form when none was chosen."""
         if plan is None:
-            return await self.async_step_manual()
+            return await self.async_step_manual_template()
         self._chosen[CONF_PROVIDER], self._chosen[CONF_TARIFF] = plan.provider, plan.tariff
         self._names["provider"], self._names["tariff"] = plan.provider_name, plan.tariff_name
         return await self.async_step_area()
@@ -259,11 +261,27 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         suffix = "" if len(areas) == 1 else f" ({areas[user_input[CONF_AREA]]})"
         return await self._create(f"{self._names['provider']} {self._names['tariff']}{suffix}")
 
+    async def async_step_manual_template(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """The shape of a tariff that is not in the store. It only fills the next form."""
+        if user_input is not None:
+            self._template = TEMPLATES[user_input["template"]]
+            return await self.async_step_manual()
+        return self.async_show_form(
+            step_id="manual_template",
+            data_schema=_schema({vol.Required("template", default=BLANK): _template_choice()}),
+            last_step=False,
+        )
+
     async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """The base rates of a tariff that is not in the store."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            rates = {**user_input, "timezone": self.hass.config.time_zone, "periods": []}
+            typed = dict(user_input)
+            timed = typed.pop("timed_rate", None)
+            periods = timed_periods(self._template, timed)
+            rates = {**typed, "timezone": self.hass.config.time_zone, "periods": periods}
             reason = problem_with(rates, user_input[CONF_NAME])
             if reason is None:
                 self._manual = rates
@@ -271,7 +289,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             errors["base"] = "invalid_tariff"
         return self.async_show_form(
             step_id="manual",
-            data_schema=_manual_schema(self.hass, user_input),
+            data_schema=_manual_schema(self.hass, user_input, self._template),
             errors=errors,
             last_step=False,
         )
@@ -365,7 +383,15 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-def _manual_schema(hass: Any, previous: dict[str, Any] | None) -> Any:
+def _template_choice() -> Any:
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=list(TEMPLATES), translation_key="manual_template", mode=SelectSelectorMode.LIST
+        )
+    )
+
+
+def _manual_schema(hass: Any, previous: dict[str, Any] | None, template: Template) -> Any:
     """The base rates. Currency and country start from the home's settings."""
     given = previous or {}
 
@@ -385,8 +411,9 @@ def _manual_schema(hass: Any, previous: dict[str, Any] | None) -> Any:
             field(CONF_NAME, "My tariff"): str,
             field("country", hass.config.country or "GB"): CountrySelector(),
             field("currency", hass.config.currency): str,
-            field("base_rate_name", "Day"): str,
+            field("base_rate_name", template.base_name): str,
             field("base_rate", 0.0): amount("per kWh"),
+            **_timed_field(template, amount),
             field("export_rate", 0.0): amount("per kWh"),
             field("standing_charge", 0.0): amount("per day"),
             field("levy", 0.0): amount("per month"),
@@ -398,6 +425,13 @@ def _manual_schema(hass: Any, previous: dict[str, Any] | None) -> Any:
             ),
         }
     )
+
+
+def _timed_field(template: Template, amount: Any) -> dict[Any, Any]:
+    """The price of the template's timed rate, when it has one."""
+    if template.timed is None:
+        return {}
+    return {vol.Required("timed_rate", default=0.0): amount("per kWh")}
 
 
 def _period_schema(previous: dict[str, Any] | None) -> Any:

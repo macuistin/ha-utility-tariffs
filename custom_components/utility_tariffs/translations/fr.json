@@ -31,6 +31,16 @@
           "area": "Choisissez la zone de votre alimentation. Elle figure généralement dans le nom de votre réseau de distribution ou sur votre facture."
         }
       },
+      "manual_template": {
+        "title": "Vos propres tarifs : partir d'un modèle",
+        "description": "Choisissez le modèle le plus proche de votre tarif. Il remplit les noms et les heures des tarifs sur la page suivante, et vous saisissez les prix. Choisissez la dernière option pour partir de zéro.",
+        "data": {
+          "template": "Modèle de tarif"
+        },
+        "data_description": {
+          "template": "Seuls les noms et les heures sont remplis. Vous pourrez ajouter d'autres tarifs horaires ensuite."
+        }
+      },
       "manual": {
         "title": "Vos propres tarifs",
         "description": "Les prix tels qu'ils figurent sur votre facture. Les tarifs horaires, comme un tarif de nuit, sont ajoutés ensuite.",
@@ -46,7 +56,8 @@
           "discount_rate": "Remise sur l'énergie",
           "vat_rate": "TVA",
           "vat_included": "Prix TTC",
-          "bill_start_day": "Jour du mois où commence une facture"
+          "bill_start_day": "Jour du mois où commence une facture",
+          "timed_rate": "Prix du tarif horaire"
         },
         "data_description": {
           "name": "Un nom pour le tarif, affiché comme titre de l'intégration.",
@@ -60,7 +71,8 @@
           "discount_rate": "Un pourcentage retiré du coût de l'énergie, comme une remise pour paiement rapide.",
           "vat_rate": "Le taux de TVA en pourcentage. Laissez 0 si vos prix la comprennent déjà.",
           "vat_included": "Activez-le quand les tarifs ci-dessus sont les prix que vous payez, TVA comprise.",
-          "bill_start_day": "Le jour du mois où commence la période de facturation de votre fournisseur, de 1 à 28."
+          "bill_start_day": "Le jour du mois où commence la période de facturation de votre fournisseur, de 1 à 28.",
+          "timed_rate": "Le prix d'un kWh au tarif horaire du modèle choisi, tel qu'il figure sur votre facture. Par exemple 0,15."
         }
       },
       "manual_more": {
@@ -434,6 +446,16 @@
     "plan_choice": {
       "options": {
         "own_rates": "Saisir mes propres tarifs"
+      }
+    },
+    "manual_template": {
+      "options": {
+        "flat": "Tarif unique, un prix toute la journée",
+        "day_night": "Jour et nuit (nuit de 23 h à 8 h)",
+        "peak_offpeak": "Pointe et creux (pointe de 17 h à 19 h)",
+        "cheap_midday": "Midi bon marché (11 h à 15 h)",
+        "cheap_overnight": "Nuit bon marché (2 h à 6 h)",
+        "blank": "Partir de zéro"
       }
     }
   },

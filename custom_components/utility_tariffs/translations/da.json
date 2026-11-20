@@ -31,6 +31,16 @@
           "area": "Vælg dit forsyningsområde. Det står som regel i navnet på dit netselskab eller på din regning."
         }
       },
+      "manual_template": {
+        "title": "Dine egne priser: start fra en skabelon",
+        "description": "Vælg den skabelon, der ligner din tarif mest. Den udfylder navne og tidspunkter på næste side, og du indtaster priserne. Vælg den sidste mulighed for at starte fra bunden.",
+        "data": {
+          "template": "Tarifens form"
+        },
+        "data_description": {
+          "template": "Kun navne og tidspunkter udfyldes. Du kan tilføje flere tidsstyrede takster bagefter."
+        }
+      },
       "manual": {
         "title": "Dine egne priser",
         "description": "Priser, som de står på din regning. Tidsstyrede priser, fx en natpris, tilføjes bagefter.",
@@ -46,7 +56,8 @@
           "discount_rate": "Rabat på energi",
           "vat_rate": "Moms",
           "vat_included": "Priserne er inkl. moms",
-          "bill_start_day": "Dag i måneden, hvor en regning starter"
+          "bill_start_day": "Dag i måneden, hvor en regning starter",
+          "timed_rate": "Pris for den tidsstyrede takst"
         },
         "data_description": {
           "name": "Et navn til tariffen, som vises som integrationens titel.",
@@ -60,7 +71,8 @@
           "discount_rate": "En procentdel, der trækkes fra energiomkostningen, fx en rabat for hurtig betaling.",
           "vat_rate": "Momssatsen i procent. Lad den stå på 0, hvis dine priser allerede er inkl. moms.",
           "vat_included": "Slå til, når priserne ovenfor er dem, du betaler, inklusive moms.",
-          "bill_start_day": "Den dag i måneden, hvor din leverandørs regningsperiode starter, 1 til 28."
+          "bill_start_day": "Den dag i måneden, hvor din leverandørs regningsperiode starter, 1 til 28.",
+          "timed_rate": "Prisen for en kWh i den tidsstyrede takst i den valgte skabelon, som den står på din regning. For eksempel 0,15."
         }
       },
       "manual_more": {
@@ -434,6 +446,16 @@
     "plan_choice": {
       "options": {
         "own_rates": "Indtast mine egne priser"
+      }
+    },
+    "manual_template": {
+      "options": {
+        "flat": "Fast pris hele dagen",
+        "day_night": "Dag og nat (nat 23:00 til 08:00)",
+        "peak_offpeak": "Spids og lavlast (spids 17:00 til 19:00)",
+        "cheap_midday": "Billig middag (11:00 til 15:00)",
+        "cheap_overnight": "Billig nat (02:00 til 06:00)",
+        "blank": "Start fra bunden"
       }
     }
   },
