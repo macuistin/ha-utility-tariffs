@@ -39,13 +39,20 @@ used at cheap times: today, this bill period (both on) and the last 30 days (off
 Each is a percentage, with `cheap_kwh` and `imported_kwh` as attributes. Today's figure works as a
 rating for the day.
 
-- A half hour is cheap when it falls in the tariff's cheapest import band. The band comes from the
-  tariff and the price of a band from the engine.
+- By default a half hour is cheap when it falls in the tariff's cheapest import band. The band
+  comes from the tariff and the price of a band from the engine. In the options, **Which half
+  hours count as cheap** can instead count every band priced at or below today's average price,
+  which suits a tariff with three or more bands.
 - A tariff with a single price all day has nothing cheap to use, so the share is 0 and cannot
   improve. The sensor is not unavailable.
 - A tariff that follows a price feed has no bands, and the prices of past days are not held, so
   the sensors are unavailable for it.
 - They read the half-hourly history, so a new plan shows them from the filled history.
+
+A fourth sensor, **Cheap electricity rating today**, labels today's share: `very_good` from 75%,
+`good` from 50%, `average` from 25%, otherwise `poor`. Use it in automations and cards. A flat
+tariff always rates `poor`. It is unknown until something has been imported today, so an empty day
+is not rated `poor`.
 
 ## Savings
 
