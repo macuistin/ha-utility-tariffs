@@ -134,6 +134,25 @@ class TariffStoreAccess:
     ) -> dict[str, str]:
         return await self._run(lambda: self._store.areas(country, provider, tariff, on))
 
+    async def async_tariff_state(
+        self, country: str, provider: str, tariff: str, on: date
+    ) -> str:
+        """Where a tariff stands in the store's index on a day.
+
+        "current" when a revision is in force, "ended" when the store lists it but no revision is
+        in force (it was withdrawn or ran out), "withdrawn" when the store no longer lists it.
+        """
+        try:
+            listed = await self._run(
+                lambda: self._store.tariffs(country, provider, on=None)
+            )
+        except StoreError:  # the provider itself is gone
+            return "withdrawn"
+        if tariff not in listed:
+            return "withdrawn"
+        in_force = await self._run(lambda: self._store.tariffs(country, provider, on=on))
+        return "current" if tariff in in_force else "ended"
+
     async def async_is_holiday(
         self, country: str, region: str | None = None
     ) -> Callable[[date], bool]:

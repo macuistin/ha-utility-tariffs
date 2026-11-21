@@ -308,6 +308,15 @@
       },
       "cheaper_periods_today": {
         "name": "Períodos mais baratos hoje"
+      },
+      "tariff_status": {
+        "name": "Estado do tarifário",
+        "state": {
+          "current": "Atual",
+          "ending": "A terminar em breve",
+          "ended": "Já não disponível",
+          "withdrawn": "Retirado"
+        }
       }
     },
     "binary_sensor": {
@@ -514,6 +523,12 @@
     },
     "no_meter_history": {
       "message": "Defina primeiro um contador de energia importada nas opções. O histórico é preenchido a partir dele."
+    },
+    "plan_ended": {
+      "message": "O repositório de tarifários já não define preços para {tariff}. Use Reconfigurar para seguir um plano disponível."
+    },
+    "plan_withdrawn": {
+      "message": "O repositório de tarifários já não lista {tariff}. Use Reconfigurar para seguir um plano disponível."
     }
   },
   "issues": {
@@ -536,6 +551,14 @@
     "meter_readings_left_out": {
       "title": "Leituras do contador foram deixadas de fora da fatura",
       "description": "{meter} deu uma leitura que não pôde ser contada ({reason}, às {when}). Foi deixada de fora da fatura para não cobrar consumo que não existiu. Verifique o sensor do contador. Se a leitura era real, aumente a maior subida nas opções."
+    },
+    "plan_ended": {
+      "title": "O seu plano já não está disponível",
+      "description": "O repositório de tarifários não tem preços em vigor hoje para {tariff}: os últimos preços terminaram. Os preços já guardados nesta instalação continuam a ser usados e podem estar desatualizados. Confirme o plano com o seu fornecedor e use Reconfigurar para seguir um plano disponível."
+    },
+    "plan_withdrawn": {
+      "title": "O seu plano foi retirado",
+      "description": "O repositório de tarifários já não lista {tariff}. Os preços já guardados nesta instalação continuam a ser usados e podem estar desatualizados. Confirme o plano com o seu fornecedor e use Reconfigurar para seguir um plano disponível."
     }
   }
 }

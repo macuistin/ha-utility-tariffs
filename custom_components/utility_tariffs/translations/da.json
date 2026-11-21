@@ -308,6 +308,15 @@
       },
       "cheaper_periods_today": {
         "name": "Billigere perioder i dag"
+      },
+      "tariff_status": {
+        "name": "Tarifstatus",
+        "state": {
+          "current": "Gældende",
+          "ending": "Udløber snart",
+          "ended": "Tilbydes ikke længere",
+          "withdrawn": "Trukket tilbage"
+        }
       }
     },
     "binary_sensor": {
@@ -514,6 +523,12 @@
     },
     "no_meter_history": {
       "message": "Angiv først en måler for energiimport i indstillingerne. Historikken udfyldes ud fra den."
+    },
+    "plan_ended": {
+      "message": "Tarifdatabasen angiver ikke længere priser for {tariff}. Brug Omkonfigurer for at følge en plan, der tilbydes."
+    },
+    "plan_withdrawn": {
+      "message": "Tarifdatabasen fører ikke længere {tariff}. Brug Omkonfigurer for at følge en plan, der tilbydes."
     }
   },
   "issues": {
@@ -536,6 +551,14 @@
     "meter_readings_left_out": {
       "title": "Målerværdier blev udeladt af regningen",
       "description": "{meter} gav en værdi, der ikke kunne tælles med ({reason}, kl. {when}). Den blev udeladt af regningen, så forbrug, du ikke har haft, ikke bliver afregnet. Tjek målersensoren. Var værdien reel, så hæv den største stigning i indstillingerne."
+    },
+    "plan_ended": {
+      "title": "Din plan tilbydes ikke længere",
+      "description": "Tarifdatabasen har ingen priser, der gælder i dag for {tariff}: de sidste priser er udløbet. De priser, der allerede er gemt på denne installation, bruges stadig og kan være forældede. Tjek planen hos din leverandør, og brug derefter Omkonfigurer for at følge en plan, der tilbydes."
+    },
+    "plan_withdrawn": {
+      "title": "Din plan er trukket tilbage",
+      "description": "Tarifdatabasen fører ikke længere {tariff}. De priser, der allerede er gemt på denne installation, bruges stadig og kan være forældede. Tjek planen hos din leverandør, og brug derefter Omkonfigurer for at følge en plan, der tilbydes."
     }
   }
 }
