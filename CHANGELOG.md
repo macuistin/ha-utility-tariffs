@@ -3,7 +3,9 @@
 Each release has a section here. The release workflow publishes the section for the version in
 `manifest.json` as the release notes, so write it before you run the workflow.
 
-## Unreleased
+## 1.4.0b2
+
+A beta. It adds more price sensors and reads the tariff data from its new repository.
 
 **Added**
 
@@ -28,6 +30,16 @@ Each release has a section here. The release workflow publishes the section for 
 - Six price sensors, all off until you enable them: the time of the lowest and highest import price
   today and tomorrow, the import price as a share of today's highest, and how many half hours of
   today are cheaper than now. Tomorrow's times are unknown until the whole day is priced.
+
+**Changed**
+
+- Tariffs and half-hourly prices are now read from the `utility-tariff-data` repository instead of
+  `utility-tariffs`. The folder layout and the plans are the same, so nothing changes in your
+  tariff, bill or entities.
+
+**Upgrading**
+
+- Home Assistant installs `utility-tariffs-lib` 0.4.0 when it restarts. Nothing else to do.
 
 ## 1.4.0b1
 
