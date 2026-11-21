@@ -23,8 +23,7 @@ tomorrow's prices are held. Energy meters are read every minute, and only when y
 
 ## How the tariffs are kept current
 
-The integration never contacts a supplier. It reads only the open store at
-the open tariff store, which is
+The integration never contacts a supplier. It reads only the open tariff store, which is
 updated from the published sources on a schedule:
 
 - **Plans and rates:** a weekly run reads every supplier or regulator source. The US sources run
