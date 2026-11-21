@@ -1,14 +1,15 @@
 # The tariff store
 
 The integration reads its prices from the open store at
-[macuistin/utility-tariffs](https://github.com/macuistin/utility-tariffs). All tariff, price,
-window, ranking, savings and billing code is written and tested there and installed as one pinned
-package (`utility-tariffs-lib`, listed in `manifest.json`). This integration is the Home Assistant
+[macuistin/utility-tariff-data](https://github.com/macuistin/utility-tariff-data). All tariff, price,
+window, ranking, savings and billing code is written and tested in the `utility-tariffs-lib`
+package on [PyPI](https://pypi.org/project/utility-tariffs-lib/), listed in `manifest.json` and
+installed as one pinned release. This integration is the Home Assistant
 glue around it: the cache, timers, repairs, storage and entities.
 
 ```mermaid
 flowchart LR
-    S[Supplier and regulator<br/>sources] -->|weekly sync, reviewed<br/>pull request| ST[(Open tariff store<br/>utility-tariffs)]
+    S[Supplier and regulator<br/>sources] -->|weekly sync, reviewed<br/>pull request| ST[(Open tariff store<br/>utility-tariff-data)]
     P[Half-hourly price feeds] -->|three times a day| ST
     ST -->|nightly read, and half-hourly<br/>from 16:00 for price feeds| C[(Saved copy<br/>in Home Assistant)]
     C --> E[Prices, bands, windows,<br/>bill and savings]
@@ -24,8 +25,8 @@ tomorrow's prices are held. Energy meters are read every minute, and only when y
 ## How the tariffs are kept current
 
 The integration never contacts a supplier. It reads only the open store at
-[macuistin/utility-tariffs](https://github.com/macuistin/utility-tariffs), which checks the
-published sources on a schedule:
+[macuistin/utility-tariff-data](https://github.com/macuistin/utility-tariff-data), which is
+updated from the published sources on a schedule:
 
 - **Plans and rates:** a weekly run reads every supplier or regulator source. The US sources run
   monthly. A run opens one pull request when a price changed, and a person reviews it before it
@@ -70,6 +71,5 @@ A tariff is a JSON file with no code and no formulas. There are three kinds of f
 | `tariffs/electricity/<cc>/<provider>/<tariff>/<n>.json` | One revision of one tariff |
 
 Each file is checked against the checksum in the level above before it is used. A price change is
-always a new numbered revision. The full field list is in the store's
-[format](https://github.com/macuistin/utility-tariffs/blob/main/docs/format.md) and
-[diagrams](https://github.com/macuistin/utility-tariffs/blob/main/docs/diagrams.md) pages.
+always a new numbered revision. The store's
+[README](https://github.com/macuistin/utility-tariff-data#readme) describes the layout.
