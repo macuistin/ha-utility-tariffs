@@ -22,7 +22,7 @@
 > **No manually entered tariffs in the store.** A tariff typed in by hand goes out of date without
 > notice, so the store holds only tariffs that a source reads from a published page, file or feed.
 > That is why this integration lets you type in your own rates for your own use. To ask for a
-> supplier or to give feedback, [suggest a source](https://github.com/macuistin/utility-tariffs/issues/new?template=suggestion.md).
+> supplier or to give feedback, [suggest a source](https://github.com/macuistin/ha-utility-tariffs/issues/new?template=tariff-source.md).
 
 A Home Assistant integration that knows your tariff. It prices every half hour from the open
 tariff store, and works out the cheapest and dearest windows, the bill so far and, with your own
@@ -85,8 +85,8 @@ Home Assistant needs internet access to read the tariff store. Only one tariff i
 ## How it is built
 
 All tariff, price, window, ranking, savings and billing code lives in
-[utility-tariffs](https://github.com/macuistin/utility-tariffs) and is installed as one pinned
-package. This repository is the Home Assistant glue around it. Electricity only to start.
+the [`utility-tariffs-lib`](https://pypi.org/project/utility-tariffs-lib/) package, installed as one
+pinned release. This repository is the Home Assistant glue around it. Electricity only to start.
 
 ## Licence
 
