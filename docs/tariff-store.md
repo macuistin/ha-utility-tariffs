@@ -1,7 +1,6 @@
 # The tariff store
 
-The integration reads its prices from the open store at
-[macuistin/utility-tariff-data](https://github.com/macuistin/utility-tariff-data). All tariff, price,
+The integration reads its prices from an open tariff store. All tariff, price,
 window, ranking, savings and billing code is written and tested in the `utility-tariffs-lib`
 package on [PyPI](https://pypi.org/project/utility-tariffs-lib/), listed in `manifest.json` and
 installed as one pinned release. This integration is the Home Assistant
@@ -9,7 +8,7 @@ glue around it: the cache, timers, repairs, storage and entities.
 
 ```mermaid
 flowchart LR
-    S[Supplier and regulator<br/>sources] -->|weekly sync, reviewed<br/>pull request| ST[(Open tariff store<br/>utility-tariff-data)]
+    S[Supplier and regulator<br/>sources] -->|weekly sync, reviewed<br/>pull request| ST[(Open tariff store)]
     P[Half-hourly price feeds] -->|three times a day| ST
     ST -->|nightly read, and half-hourly<br/>from 16:00 for price feeds| C[(Saved copy<br/>in Home Assistant)]
     C --> E[Prices, bands, windows,<br/>bill and savings]
@@ -25,7 +24,7 @@ tomorrow's prices are held. Energy meters are read every minute, and only when y
 ## How the tariffs are kept current
 
 The integration never contacts a supplier. It reads only the open store at
-[macuistin/utility-tariff-data](https://github.com/macuistin/utility-tariff-data), which is
+the open tariff store, which is
 updated from the published sources on a schedule:
 
 - **Plans and rates:** a weekly run reads every supplier or regulator source. The US sources run
@@ -71,5 +70,4 @@ A tariff is a JSON file with no code and no formulas. There are three kinds of f
 | `tariffs/electricity/<cc>/<provider>/<tariff>/<n>.json` | One revision of one tariff |
 
 Each file is checked against the checksum in the level above before it is used. A price change is
-always a new numbered revision. The store's
-[README](https://github.com/macuistin/utility-tariff-data#readme) describes the layout.
+always a new numbered revision. The layout is the one in the table above.

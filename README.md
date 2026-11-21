@@ -86,9 +86,7 @@ Home Assistant needs internet access to read the tariff store. Only one tariff i
 
 All tariff, price, window, ranking, savings and billing code lives in
 the [`utility-tariffs-lib`](https://pypi.org/project/utility-tariffs-lib/) package, installed as one
-pinned release. The tariff data itself is in
-[utility-tariff-data](https://github.com/macuistin/utility-tariff-data). This repository is the
-Home Assistant glue around it. Electricity only to start.
+pinned release. This repository is the Home Assistant glue around it. Electricity only to start.
 
 ## Licence
 
