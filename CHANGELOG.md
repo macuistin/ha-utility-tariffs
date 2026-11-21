@@ -3,9 +3,17 @@
 Each release has a section here. The release workflow publishes the section for the version in
 `manifest.json` as the release notes, so write it before you run the workflow.
 
-## 1.4.0b2
+## 1.4.0
 
-A beta. It adds more price sensors and reads the tariff data from its new repository.
+This release fills the bill from your meters' history, adds more price sensors and reads the tariff data from its new repository. It reads your recorder to fill the bill, so tell us if a bill period looks wrong.
+
+**Fixed**
+
+- A negative reading from an energy meter is no longer used as the starting point for the next
+  step. It used to book a large false rise as use once the meter read normally again.
+- A meter reading that rises faster than your home could draw is left out of the bill, as before,
+  and now raises a repair issue that names the meter and the time. The issue clears a day after the
+  last reading that was left out. The diagnostics list each reading left out and why.
 
 **Added**
 
@@ -30,32 +38,6 @@ A beta. It adds more price sensors and reads the tariff data from its new reposi
 - Six price sensors, all off until you enable them: the time of the lowest and highest import price
   today and tomorrow, the import price as a share of today's highest, and how many half hours of
   today are cheaper than now. Tomorrow's times are unknown until the whole day is priced.
-
-**Changed**
-
-- Tariffs and half-hourly prices are now read from the `utility-tariff-data` repository instead of
-  `utility-tariffs`. The folder layout and the plans are the same, so nothing changes in your
-  tariff, bill or entities.
-
-**Upgrading**
-
-- Home Assistant installs `utility-tariffs-lib` 0.4.0 when it restarts. Nothing else to do.
-
-## 1.4.0b1
-
-A beta. It adds filling the bill from your meters' history, which reads your recorder, so tell
-us if a bill period looks wrong.
-
-**Fixed**
-
-- A negative reading from an energy meter is no longer used as the starting point for the next
-  step. It used to book a large false rise as use once the meter read normally again.
-- A meter reading that rises faster than your home could draw is left out of the bill, as before,
-  and now raises a repair issue that names the meter and the time. The issue clears a day after the
-  last reading that was left out. The diagnostics list each reading left out and why.
-
-**Added**
-
 - When you choose an energy import meter, the bill is now filled from the meters' hourly
   long-term statistics, back to a year ago or to the **Start of history** date in the options.
   The bill so far then covers the whole period, and the cheapest-plan search has history to work
@@ -81,6 +63,16 @@ us if a bill period looks wrong.
   all day, or one that follows a price feed, has no off-peak, so the sensor is unavailable.
 - A **Largest rise a meter can show (kW)** option. A rise faster than this is left out of the bill.
   Leave it empty for 100 kW.
+
+**Changed**
+
+- Tariffs and half-hourly prices are now read from the `utility-tariff-data` repository instead of
+  `utility-tariffs`. The folder layout and the plans are the same, so nothing changes in your
+  tariff, bill or entities.
+
+**Upgrading**
+
+- Home Assistant installs `utility-tariffs-lib` 0.4.0 when it restarts. Nothing else to do.
 
 ## 1.3.1
 
