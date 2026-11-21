@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Tariff data repository
+    url: https://github.com/macuistin/utility-tariff-data
+    about: The open tariff data the integration reads. See its README for the layout.
