@@ -26,3 +26,21 @@ def days_unreached(data: TariffData, now: datetime) -> int | None:
         return None
     days = (now - data.read_at).days
     return days if days >= UNREACHED_DAYS else None
+
+
+STATUS_CURRENT = "current"
+STATUS_ENDING = "ending"
+STATUS_ENDED = "ended"
+STATUS_WITHDRAWN = "withdrawn"
+STATUSES = [STATUS_CURRENT, STATUS_ENDING, STATUS_ENDED, STATUS_WITHDRAWN]
+
+
+def plan_status(data: TariffData, today: date, gone: str | None) -> str:
+    """Whether the followed plan is on offer, from the store's own dates and index.
+
+    *gone* is what the store answered when the plan could no longer be read: "ended" or
+    "withdrawn". With none, the plan is ending when its end date is near and nothing follows it.
+    """
+    if gone in (STATUS_ENDED, STATUS_WITHDRAWN):
+        return gone
+    return STATUS_ENDING if plan_ending(data, today) is not None else STATUS_CURRENT

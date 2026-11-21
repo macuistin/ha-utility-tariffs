@@ -308,6 +308,15 @@
       },
       "cheaper_periods_today": {
         "name": "Périodes moins chères aujourd'hui"
+      },
+      "tariff_status": {
+        "name": "Statut du tarif",
+        "state": {
+          "current": "Actuel",
+          "ending": "Bientôt terminé",
+          "ended": "Plus proposé",
+          "withdrawn": "Retiré"
+        }
       }
     },
     "binary_sensor": {
@@ -514,6 +523,12 @@
     },
     "no_meter_history": {
       "message": "Définissez d'abord un compteur d'énergie importée dans les options. L'historique est rempli à partir de celui-ci."
+    },
+    "plan_ended": {
+      "message": "La base de tarifs ne fixe plus de prix pour {tariff}. Utilisez Reconfigurer pour suivre une offre proposée."
+    },
+    "plan_withdrawn": {
+      "message": "La base de tarifs ne propose plus {tariff}. Utilisez Reconfigurer pour suivre une offre proposée."
     }
   },
   "issues": {
@@ -536,6 +551,14 @@
     "meter_readings_left_out": {
       "title": "Des relevés de compteur ont été écartés de la facture",
       "description": "{meter} a donné un relevé impossible à compter ({reason}, à {when}). Il a été écarté de la facture pour ne pas facturer une consommation inexistante. Vérifiez le capteur du compteur. Si le relevé était réel, augmentez la hausse maximale dans les options."
+    },
+    "plan_ended": {
+      "title": "Votre offre n'est plus proposée",
+      "description": "La base de tarifs n'a aucun prix en vigueur aujourd'hui pour {tariff} : ses derniers prix ont pris fin. Les prix déjà conservés sur cette installation restent utilisés et peuvent être périmés. Vérifiez l'offre auprès de votre fournisseur, puis utilisez Reconfigurer pour suivre une offre proposée."
+    },
+    "plan_withdrawn": {
+      "title": "Votre offre a été retirée",
+      "description": "La base de tarifs ne propose plus {tariff}. Les prix déjà conservés sur cette installation restent utilisés et peuvent être périmés. Vérifiez l'offre auprès de votre fournisseur, puis utilisez Reconfigurer pour suivre une offre proposée."
     }
   }
 }

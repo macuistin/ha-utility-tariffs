@@ -3,6 +3,17 @@
 Each release has a section here. The release workflow publishes the section for the version in
 `manifest.json` as the release notes, so write it before you run the workflow.
 
+## Unreleased
+
+**Added**
+
+- A **Tariff status** sensor that says whether your plan is still on offer: current, ending soon,
+  no longer offered or withdrawn. It is worked out from the store's end dates and index.
+- A repair issue, "Your plan is no longer offered" or "Your plan has been withdrawn", when the
+  store no longer prices or lists the plan you follow. It says to use Reconfigure to follow a plan
+  that is on offer, and clears itself when the plan is back or you change plan. The prices already
+  held keep working meanwhile.
+
 ## 1.4.0
 
 This release fills the bill from your meters' history, adds more price sensors and reads the tariff data from its new repository. It reads your recorder to fill the bill, so tell us if a bill period looks wrong.

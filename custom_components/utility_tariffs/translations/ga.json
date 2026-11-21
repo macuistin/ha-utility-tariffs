@@ -308,6 +308,15 @@
       },
       "cheaper_periods_today": {
         "name": "Tréimhsí níos saoire inniu"
+      },
+      "tariff_status": {
+        "name": "Stádas an taraife",
+        "state": {
+          "current": "Reatha",
+          "ending": "Ag teacht chun deiridh go luath",
+          "ended": "Gan a bheith ar fáil a thuilleadh",
+          "withdrawn": "Tarraingthe siar"
+        }
       }
     },
     "binary_sensor": {
@@ -514,6 +523,12 @@
     },
     "no_meter_history": {
       "message": "Socraigh méadar allmhairithe fuinnimh sna roghanna ar dtús. Líontar an stair uaidh."
+    },
+    "plan_ended": {
+      "message": "Ní shocraíonn an stór taraifí praghsanna do {tariff} a thuilleadh. Úsáid Athchumraigh chun plean atá ar fáil a leanúint."
+    },
+    "plan_withdrawn": {
+      "message": "Ní liostálann an stór taraifí {tariff} a thuilleadh. Úsáid Athchumraigh chun plean atá ar fáil a leanúint."
     }
   },
   "issues": {
@@ -536,6 +551,14 @@
     "meter_readings_left_out": {
       "title": "Fágadh léamha méadair as an mbille",
       "description": "Thug {meter} léamh nach raibh sé indéanta a chomhaireamh ({reason}, ag {when}). Fágadh as an mbille é ionas nach muirear úsáid nár tharraing tú. Seiceáil braiteoir an mhéadair. Má bhí an léamh fíor, ardaigh an t-ardú is mó sna roghanna."
+    },
+    "plan_ended": {
+      "title": "Níl do phlean ar fáil a thuilleadh",
+      "description": "Níl aon phraghsanna i bhfeidhm inniu ag an stór taraifí do {tariff}: tá a phraghsanna deiridh imithe in éag. Úsáidtear na praghsanna atá stóráilte cheana ar an suiteáil seo i gcónaí agus d'fhéadfadh siad a bheith as dáta. Seiceáil an plean le do sholáthraí, ansin úsáid Athchumraigh chun plean atá ar fáil a leanúint."
+    },
+    "plan_withdrawn": {
+      "title": "Tarraingíodh do phlean siar",
+      "description": "Ní liostálann an stór taraifí {tariff} a thuilleadh. Úsáidtear na praghsanna atá stóráilte cheana ar an suiteáil seo i gcónaí agus d'fhéadfadh siad a bheith as dáta. Seiceáil an plean le do sholáthraí, ansin úsáid Athchumraigh chun plean atá ar fáil a leanúint."
     }
   }
 }

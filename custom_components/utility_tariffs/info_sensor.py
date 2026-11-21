@@ -19,6 +19,7 @@ from .const import CONF_MANUAL
 from .coordinator import TariffCoordinator
 from .entity import TariffEntity
 from .forecast import band_prices
+from .freshness import STATUS_CURRENT, STATUS_ENDED, STATUS_WITHDRAWN, STATUSES
 
 
 class _Diagnostic(TariffEntity):
@@ -53,6 +54,38 @@ class ValidToSensor(_Diagnostic, SensorEntity):
     @property
     def native_value(self) -> date | None:
         return self.coordinator.data.definition.effective_to
+
+
+class TariffStatusSensor(_Diagnostic, SensorEntity):
+    """Whether the plan is still on offer: current, ending, ended or withdrawn.
+
+    Worked out from the store's own end date and index, never typed. "Ending" is a plan with an
+    end date close and nothing after it. "Ended" is a plan the store lists but no longer prices.
+    "Withdrawn" is a plan the store no longer lists. The prices held stay in use until the plan
+    is changed, so a gone plan still has a price.
+    """
+
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = STATUSES
+
+    def __init__(self, coordinator: TariffCoordinator) -> None:
+        super().__init__(coordinator, "tariff_status")
+
+    @property
+    def native_value(self) -> str:
+        return self.coordinator.plan_status(dt_util.now().date())
+
+    @property
+    def icon(self) -> str | None:
+        return None if self.native_value == STATUS_CURRENT else "mdi:alert-circle-outline"
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any]:
+        end = self.coordinator.data.definition.effective_to
+        return {
+            "needs_attention": self.native_value in (STATUS_ENDED, STATUS_WITHDRAWN),
+            "valid_to": None if end is None else end.isoformat(),
+        }
 
 
 class PricesLastReadSensor(_Diagnostic, SensorEntity):
@@ -133,7 +166,11 @@ def info_sensors(coordinator: TariffCoordinator) -> list[SensorEntity]:
         PricesLastReadSensor(coordinator), TariffSummarySensor(coordinator)
     ]
     if CONF_MANUAL not in coordinator.config_entry.data:
-        entities += [ValidFromSensor(coordinator), ValidToSensor(coordinator)]
+        entities += [
+            ValidFromSensor(coordinator),
+            ValidToSensor(coordinator),
+            TariffStatusSensor(coordinator),
+        ]
     return entities
 
 

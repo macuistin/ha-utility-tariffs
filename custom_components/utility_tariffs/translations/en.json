@@ -308,6 +308,15 @@
       },
       "cheaper_periods_today": {
         "name": "Cheaper periods today"
+      },
+      "tariff_status": {
+        "name": "Tariff status",
+        "state": {
+          "current": "Current",
+          "ending": "Ending soon",
+          "ended": "No longer offered",
+          "withdrawn": "Withdrawn"
+        }
       }
     },
     "binary_sensor": {
@@ -514,6 +523,12 @@
     },
     "no_meter_history": {
       "message": "Set an energy import meter in the options first. The history is filled from it."
+    },
+    "plan_ended": {
+      "message": "The store no longer prices {tariff}. Use Reconfigure to follow a plan that is on offer."
+    },
+    "plan_withdrawn": {
+      "message": "The store no longer lists {tariff}. Use Reconfigure to follow a plan that is on offer."
     }
   },
   "issues": {
@@ -536,6 +551,14 @@
     "meter_readings_left_out": {
       "title": "Meter readings were left out of the bill",
       "description": "{meter} gave a reading that could not be counted ({reason}, at {when}). It was left out of the bill so that use you did not draw is not charged. Check the meter sensor. If the reading was real, raise the largest rise in the options."
+    },
+    "plan_ended": {
+      "title": "Your plan is no longer offered",
+      "description": "The store holds no prices in force today for {tariff}: its last prices have ended. The prices already held on this install are still in use and may be out of date. Check the plan with your supplier, then use Reconfigure to follow a plan that is on offer."
+    },
+    "plan_withdrawn": {
+      "title": "Your plan has been withdrawn",
+      "description": "The store no longer lists {tariff}. The prices already held on this install are still in use and may be out of date. Check the plan with your supplier, then use Reconfigure to follow a plan that is on offer."
     }
   }
 }

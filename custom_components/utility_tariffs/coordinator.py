@@ -53,7 +53,7 @@ from .const import (
     DOMAIN,
 )
 from .country_reason import reason_for
-from .freshness import days_unreached, plan_ending
+from .freshness import STATUS_CURRENT, days_unreached, plan_ending, plan_status
 from .manual import definition_from
 from .store import price_access, store_access
 
@@ -76,6 +76,8 @@ PRICES_LATE_HOUR = 22  # and a repair is raised when they are still missing at n
 ISSUE_PRICES_LATE = "prices_not_published"
 ISSUE_PLAN_ENDING = "plan_ending"
 ISSUE_STORE_UNREACHED = "store_unreached"
+ISSUE_PLAN_ENDED = "plan_ended"
+ISSUE_PLAN_WITHDRAWN = "plan_withdrawn"
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
 type TariffConfigEntry = ConfigEntry[TariffCoordinator]
 
@@ -165,10 +167,18 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         self.accountant: EnergyAccountant | None = None
         # Set with the accountant: the ranking of every store plan over the last whole bill.
         self.ranker: PlanRanker | None = None
+        # "ended" or "withdrawn" while the store can no longer give this plan's prices.
+        self._gone: str | None = None
 
     @property
     def access(self) -> TariffStoreAccess:
         return self._access
+
+    def plan_status(self, today: date) -> str:
+        """The plan's status, from the data held and what the store last said about it."""
+        if self.data is None:
+            return self._gone or STATUS_CURRENT
+        return plan_status(self.data, today, self._gone)
 
     async def async_refresh_store(self, *, clear: bool = False) -> None:
         """Read the store again now. With *clear*, the saved files are deleted first."""
@@ -235,6 +245,14 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         try:
             data = await self._read(today)
         except STORE_ERRORS as err:
+            self._gone = await self._gone_state(today)
+            self._set_gone_issues()
+            if self._gone is not None and self.data is None:
+                raise UpdateFailed(
+                    translation_domain=DOMAIN,
+                    translation_key=f"plan_{self._gone}",
+                    translation_placeholders={"tariff": self.config_entry.title},
+                ) from err
             if self.data is not None:
                 _LOGGER.warning("The tariff store could not be read, keeping saved prices: %s", err)
                 self._check_freshness(self.data)
@@ -244,8 +262,30 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
                 translation_key="store_unreadable",
                 translation_placeholders={"error": str(err)},
             ) from err
+        self._gone = None
+        self._set_gone_issues()
         self._check_freshness(data)
         return data
+
+    async def _gone_state(self, today: date) -> str | None:
+        """"ended" or "withdrawn" when the store says the plan is no longer offered, else None.
+        A store that cannot be reached says nothing, so the plan is not called ended then."""
+        entry = self.config_entry.data
+        if CONF_MANUAL in entry:
+            return None
+        try:
+            state = await self._access.async_tariff_state(
+                entry[CONF_COUNTRY], entry[CONF_PROVIDER], entry[CONF_TARIFF], today
+            )
+        except STORE_ERRORS:
+            return None
+        return None if state == STATUS_CURRENT else state
+
+    def _set_gone_issues(self) -> None:
+        """Raise the repair for an ended or withdrawn plan. Clear the one that no longer holds."""
+        title = {"tariff": self.config_entry.title}
+        self._set_issue(ISSUE_PLAN_ENDED, title if self._gone == "ended" else None)
+        self._set_issue(ISSUE_PLAN_WITHDRAWN, title if self._gone == "withdrawn" else None)
 
     def _check_freshness(self, data: TariffData) -> None:
         """Raise a repair when the plan is about to end or the store has not been reached for days.
