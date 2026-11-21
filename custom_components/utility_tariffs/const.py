@@ -9,11 +9,11 @@ DEVICE_NAME = "Utility Tariff"
 
 # Where the open tariff store is read from: the raw files of its main branch, over https.
 DEFAULT_STORE_URL = (
-    "https://raw.githubusercontent.com/macuistin/utility-tariffs/main/tariffs/electricity"
+    "https://raw.githubusercontent.com/macuistin/utility-tariff-data/main/tariffs/electricity"
 )
 CACHE_FOLDER = f"{DOMAIN}_store"
 # The half-hourly prices of a dynamic tariff, from the store's `prices` branch.
-PRICE_STORE_URL = "https://raw.githubusercontent.com/macuistin/utility-tariffs/prices"
+PRICE_STORE_URL = "https://raw.githubusercontent.com/macuistin/utility-tariff-data/prices"
 PRICE_CACHE_FOLDER = f"{DOMAIN}_prices"
 
 CONF_COUNTRY = "country"
