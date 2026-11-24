@@ -53,9 +53,10 @@ async def test_a_gas_entry_reads_the_gas_store_on_its_own_device(
     state = hass.states.get("sensor.gas_tariff_import_price")
     assert state is not None
     assert state.state == "0.07"
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, "gas/IE/p/flat/all")})
-    assert device is not None
-    assert device.name == "Gas Tariff"
+    devices = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
+    assert [(d.identifiers, d.name) for d in devices] == [
+        ({(DOMAIN, "gas/IE/p/flat/all")}, "Gas Tariff")
+    ]
     assert entry.data["service"] == "gas"
 
 
