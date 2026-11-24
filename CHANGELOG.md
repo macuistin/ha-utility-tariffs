@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.0b3
+
+This is a beta. It makes a gas entry say gas: its sensor names and its setup and options pages. Tell us if a gas entry still shows electricity wording or fields.
+
 **Changed**
 
 - A gas entry now says gas. Its sensors are named "Gas price", "Next gas price", "Gas used this bill
