@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.0b1
+
+This is a beta. It adds gas tariffs and a tariff status sensor. Tell us if setup or the new sensors misbehave.
+
 **Added**
 
 - **Gas.** Setup now starts by asking which service to follow, electricity or gas. Gas is read from
