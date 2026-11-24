@@ -49,8 +49,10 @@ from .const import (
     CONF_MANUAL,
     CONF_NAME,
     CONF_PROVIDER,
+    CONF_SERVICE,
     CONF_TARIFF,
     DOMAIN,
+    SERVICE_ELECTRICITY,
 )
 from .country_reason import reason_for
 from .freshness import STATUS_CURRENT, days_unreached, plan_ending, plan_status
@@ -161,7 +163,9 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         super().__init__(
             hass, _LOGGER, config_entry=entry, name=DOMAIN, update_interval=None
         )
-        self._access = access if access is not None else store_access(hass)
+        self._access = (
+            access if access is not None else store_access(hass, self.service_of(entry))
+        )
         self._prices = prices if prices is not None else price_access(hass)
         # Set at start-up when the user has chosen an energy meter. None means no bill is kept.
         self.accountant: EnergyAccountant | None = None
@@ -169,6 +173,15 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         self.ranker: PlanRanker | None = None
         # "ended" or "withdrawn" while the store can no longer give this plan's prices.
         self._gone: str | None = None
+
+    @staticmethod
+    def service_of(entry: TariffConfigEntry) -> str:
+        """The service the entry follows. An entry made before gas was added is electricity."""
+        return str(entry.data.get(CONF_SERVICE, SERVICE_ELECTRICITY))
+
+    @property
+    def service(self) -> str:
+        return self.service_of(self.config_entry)
 
     @property
     def access(self) -> TariffStoreAccess:

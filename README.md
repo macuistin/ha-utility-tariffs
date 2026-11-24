@@ -61,7 +61,7 @@ flowchart LR
 2. Open Settings, Devices & services, Add integration, and choose **Utility Tariffs**.
 3. Pick your country, supplier, plan and area, or type in your own rates.
 
-Home Assistant needs internet access to read the tariff store. Only one tariff is followed.
+Home Assistant needs internet access to read the tariff store. One electricity tariff and one gas tariff can be followed.
 
 ## Examples
 

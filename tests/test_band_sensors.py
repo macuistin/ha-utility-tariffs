@@ -44,8 +44,8 @@ def store(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     access = TariffStoreAccess(
         hass, AsyncStore(async_reader(folder_reader(folder)), AsyncMemoryCache())
     )
-    monkeypatch.setattr(config_flow, "store_access", lambda _hass: access)
-    monkeypatch.setattr(coordinator, "store_access", lambda _hass: access)
+    monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
+    monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
 
 
 def _data(tariff_id: str) -> dict[str, str]:

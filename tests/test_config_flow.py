@@ -20,15 +20,19 @@ from tests.support.fixtures import flat, tariff, write_store
 
 
 async def _start(hass: HomeAssistant):
-    """Open the flow at its first page, the country."""
-    return await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    """Open the flow at its first page, the country, choosing electricity on the service page."""
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    assert result["step_id"] == "user"
+    return await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"service": "electricity"}
+    )
 
 
 async def test_a_plan_with_areas_is_chosen_in_three_pages(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
     result = await _start(hass)
-    assert result["step_id"] == "user"
+    assert result["step_id"] == "country"
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     assert result["step_id"] == "plan"
     result = await hass.config_entries.flow.async_configure(
@@ -56,11 +60,11 @@ async def test_the_pages_say_where_the_person_is_and_what_comes_next(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
     result = await _start(hass)
-    assert result["description_placeholders"] == {"step": "1"}
+    assert result["description_placeholders"] == {"step": "2"}
     assert result["last_step"] is False
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
     assert result["step_id"] == "plan"
-    assert result["description_placeholders"]["step"] == "2"
+    assert result["description_placeholders"]["step"] == "3"
     assert result["description_placeholders"]["country_note"] == ""
     options = result["data_schema"].schema["tariff"].config["options"]
     assert options[1:] == [
@@ -167,7 +171,7 @@ async def test_the_area_page_names_the_plan(
     result = await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Plan"))
 
     assert result["step_id"] == "area"
-    assert result["description_placeholders"] == {"step": "3", "plan": "P Energy Plan"}
+    assert result["description_placeholders"] == {"step": "4", "plan": "P Energy Plan"}
 
 
 async def test_a_plan_with_one_price_skips_the_area_step(
@@ -187,10 +191,30 @@ async def test_only_one_tariff_can_be_followed(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
     MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
-    result = await _start(hass)
+    MockConfigEntry(domain=DOMAIN, unique_id="gas/IE/p/flat/all", data={"service": "gas"}).add_to_hass(hass)
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "single_instance_allowed"
+
+
+async def test_the_second_service_can_be_added_beside_the_first(
+    hass: HomeAssistant, use_store: Callable[..., Path]
+) -> None:
+    MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    assert result["step_id"] == "user"
+    assert result["data_schema"].schema["service"].config["options"] == ["gas"]
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"service": "gas"})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"tariff": "P Energy \u2013 Flat"}
+    )
+    result = await _skip_options(hass, result)
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["service"] == "gas"
+    assert result["result"].unique_id == "gas/IE/p/flat/all"
 
 
 async def test_only_countries_the_store_holds_are_offered(

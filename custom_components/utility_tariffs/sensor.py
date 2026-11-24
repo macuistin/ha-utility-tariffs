@@ -22,7 +22,7 @@ from utility_tariffs_lib.tariff.price_stats import RATINGS
 from .band_sensor import async_setup_band_sensors
 from .bill_sensor import BILL_SENSORS, BillSensor
 from .cheap_sensor import CHEAP_SHARE_SENSORS, CheapRatingSensor, CheapShareSensor
-from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
+from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES, SERVICE_GAS
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
 from .entity import TariffEntity
 from .forecast_sensor import (
@@ -276,13 +276,22 @@ SENSORS = (
 )
 
 
+def _is_export(key: str) -> bool:
+    """Whether a sensor prices what is sold to the grid, which gas never is."""
+    return key.startswith("export") or "_export_" in key
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: TariffConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     coordinator = entry.runtime_data
-    async_add_entities(TariffSensor(coordinator, description) for description in SENSORS)
+    async_add_entities(
+        TariffSensor(coordinator, description)
+        for description in SENSORS
+        if coordinator.service != SERVICE_GAS or not _is_export(description.key)
+    )
     async_add_entities(info_sensors(coordinator))
     async_setup_band_sensors(entry, async_add_entities)
     async_add_entities([

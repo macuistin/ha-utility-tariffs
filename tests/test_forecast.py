@@ -66,7 +66,7 @@ class Feed:
                 raise OSError("404") from None
 
         access = PriceStoreAccess(hass, AsyncPriceStore(async_reader(read), AsyncMemoryCache()))
-        monkeypatch.setattr(coordinator, "price_access", lambda _hass: access)
+        monkeypatch.setattr(coordinator, "price_access", lambda _hass, _service="electricity": access)
 
     def publish(self, first: date, last: date) -> None:
         day = first
@@ -85,10 +85,10 @@ def feed(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
     from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 
     access = TariffStoreAccess(hass, store)
-    monkeypatch.setattr(coordinator, "store_access", lambda _hass: access)
+    monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
     from custom_components.utility_tariffs import config_flow
 
-    monkeypatch.setattr(config_flow, "store_access", lambda _hass: access)
+    monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
     return Feed(hass, monkeypatch)
 
 

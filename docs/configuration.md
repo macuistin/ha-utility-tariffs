@@ -51,6 +51,7 @@ Public holidays are not applied. Changing the rates means reconfiguring again.
 Open the integration, choose the three dots, then **Reconfigure**, and pick another country,
 supplier, plan or area. The sensors keep their entity IDs, history and place in the Energy
 dashboard and your automations, and the saved energy history is priced again under the new plan.
-Only one tariff is followed. The device is always called Utility Tariff and the plan is its model,
-so sensors read `sensor.utility_tariff_import_price` whatever the plan. Entries made before this
+One tariff of each service is followed. The electricity device is always called Utility Tariff and the gas device Gas Tariff, and the plan
+is its model, so sensors read `sensor.utility_tariff_import_price` or `sensor.gas_tariff_import_price`
+whatever the plan. Entries made before this
 rule keep their existing entity IDs.

@@ -34,8 +34,8 @@ def use_store(
             async_reader(reader or folder_reader(folder)), AsyncFolderCache(tmp_path / "cache")
         )
         access = TariffStoreAccess(hass, store, tmp_path / "cache")
-        monkeypatch.setattr(config_flow, "store_access", lambda _hass: access)
-        monkeypatch.setattr(coordinator, "store_access", lambda _hass: access)
+        monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
+        monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
         return folder
 
     use()

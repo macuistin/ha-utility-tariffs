@@ -13,7 +13,7 @@
 
 ## Known limitations
 
-- Electricity only. One tariff per Home Assistant.
+- Electricity and gas. One tariff of each per Home Assistant. Water and heating oil are not supported yet.
 - Prices are only as current as the open store. A plan the store does not hold can be typed in as
   your own rates, but public holidays are not applied to those.
 - The bill is an estimate from the meters you choose and can differ from your supplier's by small

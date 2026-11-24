@@ -2,6 +2,16 @@
   "config": {
     "step": {
       "user": {
+        "title": "Choose a service",
+        "description": "Step 1. Each service is followed on its own, so you can add the second one afterwards.",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The kind of tariff to follow."
+        }
+      },
+      "country": {
         "title": "Vælg et land",
         "description": "Trin {step}. Kun lande, hvis tariffer det åbne lager rummer, vises.",
         "data": {
@@ -499,6 +509,12 @@
       "options": {
         "cheapest_band": "Kun det billigste tidsrum",
         "at_or_below_average": "Alle tidsrum på dagens gennemsnitspris eller derunder"
+      }
+    },
+    "service": {
+      "options": {
+        "electricity": "Electricity",
+        "gas": "Gas"
       }
     }
   },
