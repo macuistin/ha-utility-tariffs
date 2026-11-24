@@ -5,6 +5,26 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Changed**
+
+- Electricity and gas are now two tariffs inside one integration entry, not two entries. The
+  integration page shows one **Utility Tariffs** hub, and under it an Electricity tariff and a Gas
+  tariff, each with its own device. Configure is one flow for both tariffs: change either plan,
+  bill dates, windows or meters from the same menu. Adding gas or electricity from Configure adds
+  a tariff to the entry and reloads it.
+- The service actions (`find_window`, `get_prices`, `bill_summary`, `backfill`) take an optional
+  `service` field, `electricity` by default or `gas`, to pick the tariff.
+- The diagnostics report lists each followed tariff under `fuels`, with its settings and what it
+  holds, instead of one `entry` and one `coordinator`.
+
+**Upgrading**
+
+- Existing installs move over on the first start. Each existing entry becomes a tariff inside the
+  one entry. Entity IDs, history, dashboards, the Energy dashboard and the saved energy history are
+  kept. The gas entry's own entry ID goes, so an automation or script that calls an action with it
+  should use the one entry's ID and `service: gas`. Repair issues are raised again where they
+  still apply.
+
 ## 1.5.0b4
 
 This is a beta. It rebuilds Configure as a list of pages and lets you change a plan, add a fuel and fill the history from there. Tell us if a page, a save or the fill misbehaves, or if an existing entry changed.

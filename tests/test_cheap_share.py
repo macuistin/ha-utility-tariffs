@@ -19,7 +19,7 @@ from custom_components.utility_tariffs.const import (
     CONF_IMPORT_ENERGY,
 )
 from tests.options_support import configure
-from tests.test_sensor import DATA, NOON, _setup
+from tests.test_sensor import DATA, NOON, _coordinator, _options, _setup
 
 METER = "sensor.meter_in"
 DAY = "sensor.utility_tariff_cheap_electricity_used_today"
@@ -70,7 +70,7 @@ async def _meter_setup(hass: HomeAssistant, freezer: FrozenDateTimeFactory, plan
     hass.states.async_set(METER, "100", {"unit_of_measurement": "kWh"})
     data = DATA if plan == "plan" else {**DATA, "tariff": "flat", "area": "all"}
     entry = await _setup(hass, data, options={CONF_IMPORT_ENERGY: METER})
-    accountant = entry.runtime_data.accountant
+    accountant = _coordinator(entry).accountant
     assert accountant is not None
     return entry, accountant
 
@@ -88,7 +88,7 @@ async def test_the_share_is_the_energy_in_the_cheapest_band(
     entry, accountant = await _meter_setup(hass, freezer)
     _book(accountant, 1.0, 2)  # night, 0.15
     _book(accountant, 3.0, 10)  # day, 0.30
-    entry.runtime_data.async_update_listeners()
+    _coordinator(entry).async_update_listeners()
     await hass.async_block_till_done()
 
     state = hass.states.get(DAY)
@@ -106,7 +106,7 @@ async def test_the_bill_period_counts_earlier_days_and_today_does_not(
     entry, accountant = await _meter_setup(hass, freezer)
     _book(accountant, 2.0, 10)  # today, day rate
     _book(accountant, 2.0, 2, day=12)  # two days back, night rate
-    entry.runtime_data.async_update_listeners()
+    _coordinator(entry).async_update_listeners()
     await hass.async_block_till_done()
 
     assert float(hass.states.get(DAY).state) == 0.0  # type: ignore[union-attr]
@@ -118,7 +118,7 @@ async def test_a_flat_tariff_shows_zero_and_is_not_unavailable(
 ) -> None:
     entry, accountant = await _meter_setup(hass, freezer, plan="flat")
     _book(accountant, 2.0, 10)
-    entry.runtime_data.async_update_listeners()
+    _coordinator(entry).async_update_listeners()
     await hass.async_block_till_done()
 
     state = hass.states.get(DAY)
@@ -150,7 +150,7 @@ async def test_the_band_edges_follow_the_tariff(
 ) -> None:
     entry, accountant = await _meter_setup(hass, freezer)
     _book(accountant, 1.0, hour, day=13 if hour == 23 else 14)
-    entry.runtime_data.async_update_listeners()
+    _coordinator(entry).async_update_listeners()
     await hass.async_block_till_done()
 
     state = hass.states.get(PERIOD)
@@ -171,7 +171,7 @@ async def test_the_rating_labels_todays_share_and_is_unknown_on_an_empty_day(
 
     _book(accountant, 1.0, 2)  # night
     _book(accountant, 3.0, 10)  # day: a quarter was cheap
-    entry.runtime_data.async_update_listeners()
+    _coordinator(entry).async_update_listeners()
     await hass.async_block_till_done()
 
     state = hass.states.get(RATING)
@@ -185,7 +185,7 @@ async def test_a_flat_tariff_has_the_lowest_rating(
 ) -> None:
     entry, accountant = await _meter_setup(hass, freezer, plan="flat")
     _book(accountant, 2.0, 10)
-    entry.runtime_data.async_update_listeners()
+    _coordinator(entry).async_update_listeners()
     await hass.async_block_till_done()
 
     state = hass.states.get(RATING)
@@ -204,4 +204,5 @@ async def test_the_options_flow_saves_the_cheap_rule_only_when_changed(
 
     await hass.async_block_till_done()
 
-    assert result["data"][CONF_CHEAP_RULE] == CHEAP_BELOW_AVERAGE
+    assert result["type"] == "create_entry"
+    assert _options(entry)[CONF_CHEAP_RULE] == CHEAP_BELOW_AVERAGE

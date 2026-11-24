@@ -128,7 +128,7 @@ class TariffSummarySensor(_Diagnostic, SensorEntity):
             else definition.effective_to.isoformat(),
             "source_url": definition.source_url,
             "complete": definition.complete,
-            "own_rates": CONF_MANUAL in self.coordinator.config_entry.data,
+            "own_rates": CONF_MANUAL in self.coordinator.fuel.data,
             "price_feeds": list(data.feeds),
             "import_prices": band_prices(definition),
             "prices_last_read": None if data.read_at is None else data.read_at.isoformat(),
@@ -165,7 +165,7 @@ def info_sensors(coordinator: TariffCoordinator) -> list[SensorEntity]:
     entities: list[SensorEntity] = [
         PricesLastReadSensor(coordinator), TariffSummarySensor(coordinator)
     ]
-    if CONF_MANUAL not in coordinator.config_entry.data:
+    if CONF_MANUAL not in coordinator.fuel.data:
         entities += [
             ValidFromSensor(coordinator),
             ValidToSensor(coordinator),

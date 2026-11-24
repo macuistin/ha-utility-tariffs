@@ -15,7 +15,7 @@ from utility_tariffs_lib.tariffstore import folder_reader
 from custom_components.utility_tariffs.const import DOMAIN
 from tests.support.building import build_store
 from tests.support.fixtures import flat, tariff, write_store
-from tests.test_sensor import DATA, NOON, _setup
+from tests.test_sensor import DATA, NOON, _coordinator, _setup, _sub_id
 
 STATUS = "sensor.utility_tariff_tariff_status"
 
@@ -37,7 +37,7 @@ def _store(root: Path, name: str, files: dict[str, dict]) -> Path:
 
 
 def _issue(hass: HomeAssistant, key: str, entry: MockConfigEntry) -> ir.IssueEntry | None:
-    return ir.async_get(hass).async_get_issue(DOMAIN, f"{key}_{entry.entry_id}")
+    return ir.async_get(hass).async_get_issue(DOMAIN, f"{key}_{_sub_id(entry)}")
 
 
 async def test_a_plan_on_offer_is_current(
@@ -82,7 +82,7 @@ async def test_a_plan_whose_prices_have_ended_is_marked_and_a_repair_is_raised(
 
     swap.folder = ended
     freezer.move_to("2026-11-17 12:00:00+00:00")
-    await entry.runtime_data.async_refresh_store()
+    await _coordinator(entry).async_refresh_store()
     await hass.async_block_till_done()
 
     state = hass.states.get(STATUS)
@@ -107,14 +107,14 @@ async def test_a_plan_the_store_no_longer_lists_is_withdrawn_and_the_repair_clea
     entry = await _setup(hass)
 
     swap.folder = gone
-    await entry.runtime_data.async_refresh_store()
+    await _coordinator(entry).async_refresh_store()
     await hass.async_block_till_done()
     assert hass.states.get(STATUS).state == "withdrawn"  # type: ignore[union-attr]
     assert _issue(hass, "plan_withdrawn", entry) is not None
     assert _issue(hass, "plan_ended", entry) is None
 
     swap.folder = kept
-    await entry.runtime_data.async_refresh_store()
+    await _coordinator(entry).async_refresh_store()
     await hass.async_block_till_done()
     assert hass.states.get(STATUS).state == "current"  # type: ignore[union-attr]
     assert _issue(hass, "plan_withdrawn", entry) is None
@@ -132,7 +132,7 @@ async def test_a_store_that_cannot_be_reached_does_not_call_the_plan_gone(
     entry = await _setup(hass)
 
     reader.down = True
-    await entry.runtime_data.async_refresh_store(clear=False)
+    await _coordinator(entry).async_refresh_store(clear=False)
     await hass.async_block_till_done()
 
     assert hass.states.get(STATUS).state == "current"  # type: ignore[union-attr]

@@ -13,6 +13,7 @@ from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.utility_tariffs.const import DOMAIN
 from tests.helpers import without_bands
+from tests.test_sensor import _sub
 
 BASE = {
     "name": "My plan",
@@ -65,9 +66,9 @@ async def test_own_rates_make_an_entry_that_prices_the_day(
     result = await _make(hass)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "My plan"
-    assert result["data"]["manual"]["periods"][0]["name"] == "Night"
-    assert result["data"]["entity_key"] == "manual"
+    assert _sub(result["result"]).title == "My plan"
+    assert _sub(result["result"]).data["manual"]["periods"][0]["name"] == "Night"
+    assert _sub(result["result"]).data["entity_key"] == "manual"
     assert hass.states.get("sensor.utility_tariff_import_price").state == "0.327"
     assert hass.states.get("sensor.utility_tariff_export_price").state == "0.19"
     assert hass.states.get("sensor.utility_tariff_import_rate_band").state == "Day"
@@ -150,7 +151,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     await hass.async_block_till_done()
 
     assert result["reason"] == "reconfigure_successful"
-    assert "manual" in entry.data and "tariff" not in entry.data
+    assert "manual" in _sub(entry).data and "tariff" not in _sub(entry).data
     after = {
         e.unique_id: e.entity_id
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
@@ -194,7 +195,7 @@ async def test_each_template_fills_the_form_and_makes_a_valid_tariff(
     assert result["step_id"] == "manual_more"
     result = await _step(hass, result, {"next_step_id": "manual_done"})
     result = await _step(hass, result, {})
-    saved = result["data"]["manual"]
+    saved = _sub(result["result"]).data["manual"]
     assert problem_with(saved, "My plan") is None
     expected = []
     if timed is not None:

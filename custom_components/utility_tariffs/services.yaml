@@ -5,6 +5,14 @@ find_window:
       selector:
         config_entry:
           integration: utility_tariffs
+    service:
+      default: electricity
+      selector:
+        select:
+          options:
+            - electricity
+            - gas
+          translation_key: service
     duration:
       required: true
       example: "02:00:00"
@@ -44,6 +52,14 @@ get_prices:
       selector:
         config_entry:
           integration: utility_tariffs
+    service:
+      default: electricity
+      selector:
+        select:
+          options:
+            - electricity
+            - gas
+          translation_key: service
     start:
       selector:
         datetime:
@@ -58,6 +74,14 @@ bill_summary:
       selector:
         config_entry:
           integration: utility_tariffs
+    service:
+      default: electricity
+      selector:
+        select:
+          options:
+            - electricity
+            - gas
+          translation_key: service
 
 backfill:
   fields:
@@ -66,6 +90,14 @@ backfill:
       selector:
         config_entry:
           integration: utility_tariffs
+    service:
+      default: electricity
+      selector:
+        select:
+          options:
+            - electricity
+            - gas
+          translation_key: service
     start:
       selector:
         date:

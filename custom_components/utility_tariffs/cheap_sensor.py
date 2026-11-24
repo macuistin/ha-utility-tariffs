@@ -49,7 +49,7 @@ def _bill_period(coordinator: TariffCoordinator, today: date) -> date | None:
     bill = bill_so_far(
         accountant.store.history,
         coordinator.data,
-        coordinator.config_entry.options,
+        coordinator.fuel.options,
         dt_util.now(),
     )
     return None if bill is None else bill.first_day
@@ -83,7 +83,7 @@ def share_between(coordinator: TariffCoordinator, first: date, last: date) -> Ch
         return None  # a feed has no bands, and its past prices are not held
     days = accountant.store.history.between(first, last)
     average = None
-    if coordinator.config_entry.options.get(CONF_CHEAP_RULE, CHEAP_BAND) == CHEAP_BELOW_AVERAGE:
+    if coordinator.fuel.options.get(CONF_CHEAP_RULE, CHEAP_BAND) == CHEAP_BELOW_AVERAGE:
         stats = data.day_stats(dt_util.now(), "import")
         if stats is None:
             return None

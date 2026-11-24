@@ -10,7 +10,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
 from .coordinator import TariffConfigEntry
-from .entity import TariffEntity
+from .entity import TariffEntity, per_fuel
 from .info_sensor import info_binary_sensors
 from .off_peak import around, off_peak_stretches
 from .windows import current_window
@@ -27,17 +27,17 @@ async def async_setup_entry(
     entry: TariffConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    data = entry.runtime_data
-    async_add_entities(
-        [
-            CheapestWindowActive(data, "cheapest_window_active"),
-            DearestWindowActive(data, "dearest_window_active"),
-            OffPeak(data, "off_peak"),
-        ]
-    )
-    async_add_entities(info_binary_sensors(data))
-    if data.data.on_a_feed:  # only a published price can fall below zero
-        async_add_entities([NegativePrice(data, "negative_price")])
+    for data, add in per_fuel(entry, async_add_entities):
+        add(
+            [
+                CheapestWindowActive(data, "cheapest_window_active"),
+                DearestWindowActive(data, "dearest_window_active"),
+                OffPeak(data, "off_peak"),
+            ]
+        )
+        add(info_binary_sensors(data))
+        if data.data.on_a_feed:  # only a published price can fall below zero
+            add([NegativePrice(data, "negative_price")])
 
 
 class _WindowActive(TariffEntity, BinarySensorEntity):
@@ -47,7 +47,7 @@ class _WindowActive(TariffEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool | None:
-        minutes = self.coordinator.config_entry.options.get(
+        minutes = self.coordinator.fuel.options.get(
             CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
         )
         now = dt_util.now()

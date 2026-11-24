@@ -11,7 +11,7 @@ from .const import CONF_AREA, CONF_BATTERY_SOC, CONF_MANUAL, METER_TARGETS
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
-    from .coordinator import TariffConfigEntry
+    from .coordinator import TariffConfigEntry, TariffCoordinator
 
 # The area is a coarse place, and the energy sensors are named by the household.
 TO_REDACT = {CONF_AREA, CONF_BATTERY_SOC, *METER_TARGETS}
@@ -20,39 +20,44 @@ TO_REDACT = {CONF_AREA, CONF_BATTERY_SOC, *METER_TARGETS}
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: TariffConfigEntry
 ) -> dict[str, Any]:
-    """The entry with the household's own details removed, and what the coordinator holds."""
-    coordinator = entry.runtime_data
+    """Each followed fuel with the household's own details removed, and what it holds."""
+    return {
+        "fuels": {
+            coordinator.service: {
+                "settings": async_redact_data(dict(coordinator.fuel.data), TO_REDACT),
+                "coordinator": _held(coordinator),
+            }
+            for coordinator in entry.runtime_data.values()
+        }
+    }
+
+
+def _held(coordinator: TariffCoordinator) -> dict[str, Any]:
     data = coordinator.data
     held: dict[str, Any] = {"last_update_success": coordinator.last_update_success}
-    if data is not None:
-        definition = data.definition
-        held |= {
-            "tariff": definition.id,
-            "revision": definition.revision,
-            "provider": definition.provider.name,
-            "currency": definition.currency,
-            "timezone": definition.timezone_name,
-            "own_rates": CONF_MANUAL in entry.data,
-            "slots": len(data.slots),
-            "first_slot": data.slots[0].start.isoformat() if data.slots else None,
-            "last_slot": data.slots[-1].end.isoformat() if data.slots else None,
-            "horizon_end": data.horizon_end.isoformat() if data.horizon_end else None,
-            "price_feeds": list(data.feeds),
-            "holidays_known": data.holidays_known,
-            "revisions": len(data.revisions),
-            "store_offline": coordinator.access.offline,
-            "bill_kept": coordinator.accountant is not None,
-            "backfilled_half_hours": (
-                coordinator.accountant.last_backfill.slots if coordinator.accountant else 0
-            ),
-            "meter_readings_left_out": (
-                coordinator.accountant.excluded() if coordinator.accountant else []
-            ),
-        }
-    return {
-        "entry": {
-            "data": async_redact_data(dict(entry.data), TO_REDACT),
-            "options": async_redact_data(dict(entry.options), TO_REDACT),
-        },
-        "coordinator": held,
+    if data is None:
+        return held
+    definition = data.definition
+    return held | {
+        "tariff": definition.id,
+        "revision": definition.revision,
+        "provider": definition.provider.name,
+        "currency": definition.currency,
+        "timezone": definition.timezone_name,
+        "own_rates": CONF_MANUAL in coordinator.fuel.data,
+        "slots": len(data.slots),
+        "first_slot": data.slots[0].start.isoformat() if data.slots else None,
+        "last_slot": data.slots[-1].end.isoformat() if data.slots else None,
+        "horizon_end": data.horizon_end.isoformat() if data.horizon_end else None,
+        "price_feeds": list(data.feeds),
+        "holidays_known": data.holidays_known,
+        "revisions": len(data.revisions),
+        "store_offline": coordinator.access.offline,
+        "bill_kept": coordinator.accountant is not None,
+        "backfilled_half_hours": (
+            coordinator.accountant.last_backfill.slots if coordinator.accountant else 0
+        ),
+        "meter_readings_left_out": (
+            coordinator.accountant.excluded() if coordinator.accountant else []
+        ),
     }

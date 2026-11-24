@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Choose a service",
-        "description": "Step 1. Each service is followed on its own, so you can add the second one afterwards.",
+        "description": "Step 1. Choose the first service to follow. You can add the other one afterwards, from Configure.",
         "data": {
           "service": "Service"
         },
@@ -151,14 +151,25 @@
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
+      },
+      "reconfigure": {
+        "title": "Choose a tariff",
+        "description": "Which tariff should follow a different plan?",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The tariff to change."
+        }
       }
     },
     "abort": {
       "cannot_connect": "The tariff store could not be read. Check the connection and try again.",
       "no_tariffs": "This supplier has no plan with prices in force today.",
-      "single_instance_allowed": "Only one tariff can be followed. Use Reconfigure to change plan.",
+      "single_instance_allowed": "Utility Tariffs is already set up. Open Configure to add gas or electricity, or change a plan.",
       "already_configured": "This plan is already set up.",
-      "reconfigure_successful": "The plan was changed. The sensors keep their names and history."
+      "reconfigure_successful": "The plan was changed. The sensors keep their names and history.",
+      "no_tariff": "No tariff is followed yet."
     },
     "error": {
       "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
@@ -462,7 +473,7 @@
           "tariff_electricity": "{electricity_summary}",
           "tariff_gas": "{gas_summary}",
           "meters": "{meters_summary}",
-          "meters_gas": "{meters_summary}",
+          "meters_gas": "{meters_gas_summary}",
           "battery": "{battery_summary}",
           "store": "{store_summary}",
           "confirm": "{save_note}"
@@ -745,6 +756,10 @@
           "name": "Tariff",
           "description": "The tariff to search."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "duration": {
           "name": "Duration",
           "description": "How long the load runs."
@@ -779,6 +794,10 @@
           "name": "Tariff",
           "description": "The tariff to read."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "start": {
           "name": "Start",
           "description": "The first moment wanted. Defaults to now."
@@ -796,6 +815,10 @@
         "config_entry_id": {
           "name": "Tariff",
           "description": "The tariff whose bill to show."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         }
       }
     },
@@ -806,6 +829,10 @@
         "config_entry_id": {
           "name": "Tariff",
           "description": "The tariff whose history to fill."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         },
         "start": {
           "name": "First day",
@@ -876,6 +903,9 @@
     },
     "plan_withdrawn": {
       "message": "The store no longer lists {tariff}. Use Reconfigure to follow a plan that is on offer."
+    },
+    "fuel_not_followed": {
+      "message": "No {service} tariff is followed."
     }
   },
   "issues": {

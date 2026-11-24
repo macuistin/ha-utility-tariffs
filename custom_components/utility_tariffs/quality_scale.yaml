@@ -63,7 +63,9 @@ rules:
   docs-use-cases: done
   dynamic-devices:
     status: exempt
-    comment: One tariff makes one device, and it never changes.
+    comment: >-
+      Each followed fuel makes one device under the hub, and the fuels are only added in
+      Configure, which reloads the entry.
   entity-category: done
   entity-device-class: done
   entity-disabled-by-default: done
@@ -74,7 +76,7 @@ rules:
   repair-issues: done
   stale-devices:
     status: exempt
-    comment: One tariff makes one device, and it never changes.
+    comment: A fuel's device and entities go with its subentry when it is removed.
   # Platinum
   async-dependency:
     status: done

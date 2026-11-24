@@ -151,6 +151,16 @@
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
+      },
+      "reconfigure": {
+        "title": "Choose a tariff",
+        "description": "Which tariff should follow a different plan?",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The tariff to change."
+        }
       }
     },
     "abort": {
@@ -158,7 +168,8 @@
       "no_tariffs": "Níl aon phlean ag an soláthraí seo a bhfuil praghsanna i bhfeidhm inniu aige.",
       "single_instance_allowed": "Ní féidir ach taraif amháin a leanúint. Úsáid Athchumraigh chun plean a athrú.",
       "already_configured": "Tá an plean seo socraithe cheana.",
-      "reconfigure_successful": "Athraíodh an plean. Coimeádann na braiteoirí a n-ainmneacha agus a stair."
+      "reconfigure_successful": "Athraíodh an plean. Coimeádann na braiteoirí a n-ainmneacha agus a stair.",
+      "no_tariff": "No tariff is followed yet."
     },
     "error": {
       "invalid_tariff": "Ní féidir na rátaí seo a úsáid. Seiceáil an cód airgeadra agus na luachanna.",
@@ -462,7 +473,7 @@
           "tariff_electricity": "{electricity_summary}",
           "tariff_gas": "{gas_summary}",
           "meters": "{meters_summary}",
-          "meters_gas": "{meters_summary}",
+          "meters_gas": "{meters_gas_summary}",
           "battery": "{battery_summary}",
           "store": "{store_summary}",
           "confirm": "{save_note}"
@@ -745,6 +756,10 @@
           "name": "Taraif",
           "description": "An taraif le cuardach."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "duration": {
           "name": "Fad",
           "description": "Cá fhad a ritheann an t-ualach."
@@ -779,6 +794,10 @@
           "name": "Taraif",
           "description": "An taraif le léamh."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "start": {
           "name": "Tús",
           "description": "An chéad nóiméad a theastaíonn. Is é anois an réamhshocrú."
@@ -796,6 +815,10 @@
         "config_entry_id": {
           "name": "Taraif",
           "description": "An taraif a dtaispeánfar a bille."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         }
       }
     },
@@ -806,6 +829,10 @@
         "config_entry_id": {
           "name": "Taraif",
           "description": "An taraif a bhfuil a stair le líonadh."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         },
         "start": {
           "name": "An chéad lá",
@@ -876,6 +903,9 @@
     },
     "plan_withdrawn": {
       "message": "Ní liostálann an stór taraifí {tariff} a thuilleadh. Úsáid Athchumraigh chun plean atá ar fáil a leanúint."
+    },
+    "fuel_not_followed": {
+      "message": "No {service} tariff is followed."
     }
   },
   "issues": {

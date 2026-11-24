@@ -16,6 +16,17 @@ SERVICES = (SERVICE_ELECTRICITY, SERVICE_GAS)
 DEVICE_NAME = "Utility Tariff"
 DEVICE_NAMES = {SERVICE_ELECTRICITY: DEVICE_NAME, SERVICE_GAS: "Gas Tariff"}
 
+
+
+HUB_NAME = "Utility Tariffs"
+CONF_MOVED_TO = "moved_to"  # set on an old entry whose fuel moved into the single entry
+
+
+def hub_identifier(entry_id: str) -> str:
+    """The identifier of the hub device both tariffs sit under."""
+    return f"hub_{entry_id}"
+
+
 # Where the open tariff store is read from: the raw files of its main branch, over https.
 STORE_ROOT_URL = "https://raw.githubusercontent.com/macuistin/utility-tariff-data/main/tariffs"
 DEFAULT_STORE_URL = f"{STORE_ROOT_URL}/{SERVICE_ELECTRICITY}"

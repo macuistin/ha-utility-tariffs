@@ -7,7 +7,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from homeassistant.config_entries import SOURCE_RECONFIGURE, SOURCE_USER
+from homeassistant.config_entries import SOURCE_RECONFIGURE, SOURCE_USER, ConfigSubentryData
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -18,6 +18,7 @@ from tests.helpers import without_bands
 from tests.options_support import configure
 from tests.support.building import build_store
 from tests.support.fixtures import flat, tariff, write_store
+from tests.test_sensor import _options, _sub
 
 
 async def _start(hass: HomeAssistant):
@@ -45,8 +46,10 @@ async def test_a_plan_with_areas_is_chosen_in_three_pages(
     result = await _skip_options(hass, result)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "P Energy Plan (Urban)"
-    assert result["data"] == {
+    assert result["title"] == "Utility Tariffs"
+    assert result["data"] == {}
+    assert _sub(result["result"]).title == "P Energy Plan (Urban)"
+    assert dict(_sub(result["result"]).data) == {
         "country": "IE",
         "provider": "p",
         "tariff": "plan",
@@ -54,7 +57,7 @@ async def test_a_plan_with_areas_is_chosen_in_three_pages(
         "name": "P Energy Plan (Urban)",
         "entity_key": "IE/p/plan/urban",
     }
-    assert result["result"].unique_id == "IE/p/plan/urban"
+    assert _sub(result["result"]).unique_id == "IE/p/plan/urban"
 
 
 async def test_the_pages_say_where_the_person_is_and_what_comes_next(
@@ -184,38 +187,18 @@ async def test_a_plan_with_one_price_skips_the_area_step(
     result = await _skip_options(hass, result)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "P Energy Flat"
-    assert result["data"]["area"] == "all"
+    assert _sub(result["result"]).title == "P Energy Flat"
+    assert _sub(result["result"]).data["area"] == "all"
 
 
-async def test_only_one_tariff_can_be_followed(
+async def test_the_integration_is_set_up_once_and_the_other_fuel_is_added_in_configure(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
-    MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
-    MockConfigEntry(domain=DOMAIN, unique_id="gas/IE/p/flat/all", data={"service": "gas"}).add_to_hass(hass)
+    MockConfigEntry(domain=DOMAIN, unique_id=DOMAIN, data={}, version=2).add_to_hass(hass)
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "single_instance_allowed"
-
-
-async def test_the_second_service_can_be_added_beside_the_first(
-    hass: HomeAssistant, use_store: Callable[..., Path]
-) -> None:
-    MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert result["step_id"] == "user"
-    assert result["data_schema"].schema["service"].config["options"] == ["gas"]
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"service": "gas"})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"tariff": "P Energy \u2013 Flat"}
-    )
-    result = await _skip_options(hass, result)
-
-    assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["data"]["service"] == "gas"
-    assert result["result"].unique_id == "gas/IE/p/flat/all"
 
 
 async def test_only_countries_the_store_holds_are_offered(
@@ -346,9 +329,9 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
-    assert entry.unique_id == "IE/p/flat/all"
-    assert entry.data["tariff"] == "flat"
-    assert entry.title == "P Energy Flat"
+    assert _sub(entry).unique_id == "IE/p/flat/all"
+    assert _sub(entry).data["tariff"] == "flat"
+    assert _sub(entry).title == "P Energy Flat"
     after = {
         e.unique_id: e.entity_id
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
@@ -356,55 +339,41 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
     assert without_bands(after) == without_bands(before)
 
 
-async def test_an_entry_made_before_the_entity_key_keeps_its_entities(
+async def test_reconfigure_asks_which_fuel_when_both_are_followed(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
-    from homeassistant.helpers import entity_registry as er
-
-    old = MockConfigEntry(
-        domain=DOMAIN,
-        unique_id="IE/p/plan/urban",
-        data={
-            "country": "IE",
-            "provider": "p",
-            "tariff": "plan",
-            "area": "urban",
-            "name": "P Energy Plan (Urban)",
-        },
+    other = MockConfigEntry(
+        domain=DOMAIN, unique_id=DOMAIN, data={}, version=2,
+        subentries_data=[
+            ConfigSubentryData(
+                data={"entity_key": "IE/p/flat/all"}, subentry_type="electricity",
+                title="Flat", unique_id="IE/p/flat/all",
+            ),
+            ConfigSubentryData(
+                data={"entity_key": "x", "service": "gas"}, subentry_type="gas",
+                title="Gas", unique_id="gas/IE/p/other",
+            ),
+        ],
     )
-    old.add_to_hass(hass)
-    await hass.config_entries.async_setup(old.entry_id)
-    await hass.async_block_till_done()
-    registry = er.async_get(hass)
-    before = {
-        e.unique_id: e.entity_id for e in er.async_entries_for_config_entry(registry, old.entry_id)
-    }
-    assert all(uid.startswith("IE/p/plan/urban_") for uid in before)
-
-    result = await _reconfigure(hass, old)
-    for key, value in (("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
-        result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
-    await hass.async_block_till_done()
-
-    assert old.data["entity_key"] == "IE/p/plan/urban"
-    after = {
-        e.unique_id: e.entity_id for e in er.async_entries_for_config_entry(registry, old.entry_id)
-    }
-    assert without_bands(after) == without_bands(before)
-
-
-async def test_changing_to_a_plan_already_followed_is_refused(
-    hass: HomeAssistant, use_store: Callable[..., Path]
-) -> None:
-    # Entries made before the single-tariff rule can still exist side by side.
-    MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
-    other = MockConfigEntry(domain=DOMAIN, unique_id="IE/p/plan/urban", data={"entity_key": "x"})
     other.add_to_hass(hass)
     result = await _reconfigure(hass, other)
-    for key, value in (("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
-        result = await hass.config_entries.flow.async_configure(result["flow_id"], {key: value})
+    assert result["step_id"] == "reconfigure"  # two fuels: which one?
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"service": "electricity"}
+    )
+    assert result["step_id"] == "country"
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"country": "IE"})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"tariff": "P Energy \u2013 Plan"}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"area": "urban"})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert _sub(other).data["tariff"] == "plan"
+    assert _sub(other, "gas").data["entity_key"] == "x"  # the other fuel is untouched
 
-    assert result["reason"] == "already_configured"
+    await hass.async_block_till_done()
+    await hass.config_entries.async_unload(other.entry_id)
 
 
 async def test_the_bill_dates_are_saved_as_options(
@@ -421,9 +390,9 @@ async def test_the_bill_dates_are_saved_as_options(
     )
 
     assert flow["type"] is FlowResultType.CREATE_ENTRY
-    assert flow["data"]["bill_start_day"] == 16
-    assert flow["data"]["bill_months"] == 2
-    assert flow["data"]["bill_start_month"] == 2
+    assert _options(entry)["bill_start_day"] == 16
+    assert _options(entry)["bill_months"] == 2
+    assert _options(entry)["bill_start_month"] == 2
     await hass.async_block_till_done()
     await hass.config_entries.async_unload(entry.entry_id)
 
@@ -442,7 +411,7 @@ async def test_setup_asks_for_the_meters_and_bill_dates_and_keeps_them_as_option
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["options"] == {
+    assert _options(result["result"]) == {
         "import_energy_entity": "sensor.grid_in",
         "bill_start_day": 16,
         "bill_months": 2,

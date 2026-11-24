@@ -24,7 +24,7 @@ class _SavingsEntity(TariffEntity, SensorEntity):
         return saving_so_far(
             accountant.store.history,
             self.coordinator.data,
-            self.coordinator.config_entry.options,
+            self.coordinator.fuel.options,
             dt_util.now(),
         )
 

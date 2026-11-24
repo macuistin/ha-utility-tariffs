@@ -122,5 +122,6 @@ to a file:
 action: utility_tariffs.bill_summary
 data:
   config_entry_id: <your entry>
+  service: electricity  # or gas, electricity when left out
 response_variable: bill
 ```

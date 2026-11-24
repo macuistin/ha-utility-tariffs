@@ -24,7 +24,7 @@ from .bill_sensor import BILL_SENSORS, BillSensor
 from .cheap_sensor import CHEAP_SHARE_SENSORS, CheapRatingSensor, CheapShareSensor
 from .const import CONF_HOUSE_ENERGY, CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES, SERVICE_GAS
 from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
-from .entity import TariffEntity
+from .entity import AddEntities, TariffEntity, per_fuel
 from .forecast_sensor import (
     NextPeriodSensor,
     NextTariffChangeSensor,
@@ -286,31 +286,33 @@ async def async_setup_entry(
     entry: TariffConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = entry.runtime_data
-    async_add_entities(
+    for coordinator, add in per_fuel(entry, async_add_entities):
+        _add_fuel_sensors(coordinator, add)
+
+
+def _add_fuel_sensors(coordinator: TariffCoordinator, add: AddEntities) -> None:
+    add(
         TariffSensor(coordinator, description)
         for description in SENSORS
         if coordinator.service != SERVICE_GAS or not _is_export(description.key)
     )
-    async_add_entities(info_sensors(coordinator))
-    async_setup_band_sensors(entry, async_add_entities)
-    async_add_entities([
+    add(info_sensors(coordinator))
+    async_setup_band_sensors(coordinator, add)
+    add([
         PriceForecastSensor(coordinator),
         NextTariffChangeSensor(coordinator),
         NextPeriodSensor(coordinator, high=False),
         NextPeriodSensor(coordinator, high=True),
     ])
     if coordinator.data.on_a_feed:  # a fixed tariff has no price that is low or high by chance
-        async_add_entities([PriceLevelSensor(coordinator)])
+        add([PriceLevelSensor(coordinator)])
     if coordinator.accountant is not None:
-        async_add_entities([PlanRankSensor(coordinator), CheapestPlanSavingSensor(coordinator)])
-        async_add_entities(BillSensor(coordinator, description) for description in BILL_SENSORS)
-        async_add_entities(
-            CheapShareSensor(coordinator, description) for description in CHEAP_SHARE_SENSORS
-        )
-        async_add_entities([CheapRatingSensor(coordinator)])
-        if entry.options.get(CONF_HOUSE_ENERGY):
-            async_add_entities([SavingsSensor(coordinator), SavingsShareSensor(coordinator)])
+        add([PlanRankSensor(coordinator), CheapestPlanSavingSensor(coordinator)])
+        add(BillSensor(coordinator, description) for description in BILL_SENSORS)
+        add(CheapShareSensor(coordinator, description) for description in CHEAP_SHARE_SENSORS)
+        add([CheapRatingSensor(coordinator)])
+        if coordinator.fuel.options.get(CONF_HOUSE_ENERGY):
+            add([SavingsSensor(coordinator), SavingsShareSensor(coordinator)])
 
 
 class TariffSensor(TariffEntity, SensorEntity):
@@ -330,7 +332,7 @@ class TariffSensor(TariffEntity, SensorEntity):
 
     @property
     def native_value(self) -> str | float | datetime | None:
-        minutes = self.coordinator.config_entry.options.get(
+        minutes = self.coordinator.fuel.options.get(
             CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES
         )
         return self.entity_description.value(self.coordinator.data, dt_util.now(), minutes)

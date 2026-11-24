@@ -57,7 +57,7 @@ class PlanRanker:
             return None
         data = coordinator.data
         definition = data.definition
-        entry = coordinator.config_entry
+        entry = coordinator.fuel
         area = entry.data.get(CONF_AREA)
         through = today - timedelta(days=1)
         try:
@@ -108,7 +108,7 @@ class PlanRanker:
     @callback
     def async_start(self) -> None:
         """Rank once now and every day at 00:30 local time, until the entry unloads."""
-        entry = self._coordinator.config_entry
+        entry = self._coordinator.fuel
         hass = self._coordinator.hass
 
         async def run() -> None:

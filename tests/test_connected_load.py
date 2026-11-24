@@ -23,7 +23,7 @@ from tests.helpers import async_reader
 from tests.options_support import configure
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
-from tests.test_sensor import NOON, _setup, _state
+from tests.test_sensor import NOON, _options, _setup, _state
 
 METER = "sensor.meter_in"
 DATA = {
@@ -103,7 +103,7 @@ async def test_the_options_keep_the_connected_load(
     flow = await configure(hass, entry.entry_id, bills={CONF_CONNECTED_LOAD: 4.5})
 
     assert flow["type"] is FlowResultType.CREATE_ENTRY
-    assert flow["data"][CONF_CONNECTED_LOAD] == 4.5
+    assert _options(entry)[CONF_CONNECTED_LOAD] == 4.5
     await hass.async_block_till_done()
     await hass.config_entries.async_unload(entry.entry_id)
 

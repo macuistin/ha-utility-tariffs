@@ -11,7 +11,7 @@ saved until you choose **Save changes**, which then reloads the integration once
 
 | Page | What is on it |
 | --- | --- |
-| Electricity tariff, Gas tariff | **Choose a different plan** with the same pages as setup: country, supplier and plan, area, or your own rates. A Bills page follows, for the day a bill starts, how long it runs and, for electricity, the connected load. The same page, and the window length and cheap rule, can also be opened from the tariff page without changing the plan, because they belong to that fuel's tariff. The sensors keep their entity IDs and history. Either fuel can be changed from either entry. A fuel that is not followed yet shows "not followed yet" and is added when you save |
+| Electricity tariff, Gas tariff | **Choose a different plan** with the same pages as setup: country, supplier and plan, area, or your own rates. A Bills page follows, for the day a bill starts, how long it runs and, for electricity, the connected load. The same page, and the window length and cheap rule, can also be opened from the tariff page without changing the plan, because they belong to that fuel's tariff. The sensors keep their entity IDs and history. Either fuel is changed from this one Configure. A fuel that is not followed yet shows "not followed yet" and is added when you save |
 | Energy meters (Gas meter for gas) | The import, export and whole-home sensors, the start of history and the largest rise a meter can show. **Fill history now** reads the meters' statistics and fills the half hours nothing was booked for when you save. It is the same as the `backfill` action |
 | Battery | The battery's discharge meter, charge, size and wear. Electricity only |
 | Tariff store | Read the store again, or delete the saved files. Both happen when you save |
@@ -56,10 +56,18 @@ Public holidays are not applied. Changing the rates means reconfiguring again.
 
 ## Changing plan
 
-Open the integration, choose the three dots, then **Reconfigure**, and pick another country,
-supplier, plan or area. The sensors keep their entity IDs, history and place in the Energy
+Open the integration, choose the three dots, then **Reconfigure** (or use the Electricity tariff or
+Gas tariff page in Configure), and pick another country, supplier, plan or area. The sensors keep their entity IDs, history and place in the Energy
 dashboard and your automations, and the saved energy history is priced again under the new plan.
-One tariff of each service is followed. The electricity device is always called Utility Tariff and the gas device Gas Tariff, and the plan
+## One integration, two tariffs
+
+Utility Tariffs is one integration entry. It holds one device, **Utility Tariffs**, and under it a
+device for each fuel you follow, so the integration page shows both tariffs together. Add the
+second fuel from Configure. Removing a tariff from the integration page removes its device,
+sensors and saved history. One tariff of each service is followed. The electricity device is always called Utility Tariff and the gas device Gas Tariff, and the plan
 is its model, so sensors read `sensor.utility_tariff_import_price` or `sensor.gas_tariff_import_price`
-whatever the plan. Entries made before this
-rule keep their existing entity IDs.
+whatever the plan. Installs from before the single entry keep their entity IDs, history and saved
+energy history: the first start moves each existing tariff under the one entry.
+
+Actions such as `find_window` take the integration's entry and an optional `service` (`electricity`
+by default, or `gas`) that says which tariff to use.

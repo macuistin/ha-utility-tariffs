@@ -151,6 +151,16 @@
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
+      },
+      "reconfigure": {
+        "title": "Choose a tariff",
+        "description": "Which tariff should follow a different plan?",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The tariff to change."
+        }
       }
     },
     "abort": {
@@ -158,7 +168,8 @@
       "no_tariffs": "Denne leverandør har ingen plan med priser, der gælder i dag.",
       "single_instance_allowed": "Kun én tarif kan følges. Brug Omkonfigurer for at skifte plan.",
       "already_configured": "Denne plan er allerede sat op.",
-      "reconfigure_successful": "Planen er ændret. Sensorerne beholder deres navne og historik."
+      "reconfigure_successful": "Planen er ændret. Sensorerne beholder deres navne og historik.",
+      "no_tariff": "No tariff is followed yet."
     },
     "error": {
       "invalid_tariff": "Disse priser kan ikke bruges. Tjek valutakoden og værdierne.",
@@ -462,7 +473,7 @@
           "tariff_electricity": "{electricity_summary}",
           "tariff_gas": "{gas_summary}",
           "meters": "{meters_summary}",
-          "meters_gas": "{meters_summary}",
+          "meters_gas": "{meters_gas_summary}",
           "battery": "{battery_summary}",
           "store": "{store_summary}",
           "confirm": "{save_note}"
@@ -745,6 +756,10 @@
           "name": "Tarif",
           "description": "Den tarif, der skal søges i."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "duration": {
           "name": "Varighed",
           "description": "Hvor længe belastningen kører."
@@ -779,6 +794,10 @@
           "name": "Tarif",
           "description": "Den tarif, der skal læses."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "start": {
           "name": "Start",
           "description": "Det første ønskede tidspunkt. Standard er nu."
@@ -796,6 +815,10 @@
         "config_entry_id": {
           "name": "Tarif",
           "description": "Den tarif, hvis regning der skal vises."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         }
       }
     },
@@ -806,6 +829,10 @@
         "config_entry_id": {
           "name": "Tarif",
           "description": "Tariffen, hvis historik skal udfyldes."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         },
         "start": {
           "name": "Første dag",
@@ -876,6 +903,9 @@
     },
     "plan_withdrawn": {
       "message": "Tarifdatabasen fører ikke længere {tariff}. Brug Omkonfigurer for at følge en plan, der tilbydes."
+    },
+    "fuel_not_followed": {
+      "message": "No {service} tariff is followed."
     }
   },
   "issues": {

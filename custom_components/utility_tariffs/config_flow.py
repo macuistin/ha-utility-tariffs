@@ -13,6 +13,8 @@ from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
+    ConfigSubentry,
+    ConfigSubentryData,
 )
 from homeassistant.core import callback
 from homeassistant.helpers.selector import (
@@ -26,20 +28,22 @@ from .const import (
     CONF_ENTITY_KEY,
     CONF_SERVICE,
     DOMAIN,
+    HUB_NAME,
     SERVICE_ELECTRICITY,
     SERVICE_GAS,
     SERVICES,
 )
 from .energy_suggest import energy_dashboard_meters, gas_dashboard_meter
+from .migrate import ENTRY_VERSION
 from .option_fields import _bill_fields, _gas_meter_fields, _meter_fields, _saved_setup
 from .options_flow import TariffOptionsFlow
-from .plan_steps import PlanSteps, _schema, entry_data, service_data
+from .plan_steps import PLAN_KEYS, PlanSteps, _schema, entry_data, service_data
 
 
 class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
     """Country, then supplier and plan together, then an area only where the plan has one."""
 
-    VERSION = 1
+    VERSION = ENTRY_VERSION
 
     @staticmethod
     @callback
@@ -49,25 +53,18 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         super().__init__()
         self._pending: tuple[str, str, dict[str, Any]] = ("", "", {})
+        self._reconfigured: ConfigSubentry | None = None
 
     def _current_country(self) -> str | None:
         """On reconfigure the list starts at the followed plan's country."""
-        if self.source != SOURCE_RECONFIGURE:
-            return None
-        country = self._get_reconfigure_entry().data.get(CONF_COUNTRY)
+        subentry = self._reconfigured
+        country = subentry.data.get(CONF_COUNTRY) if subentry else None
         return country if isinstance(country, str) else None
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Step 1: the service. Reconfigure keeps the entry's own service and starts at the country."""
-        if self.source == SOURCE_RECONFIGURE:
-            self._service = self._get_reconfigure_entry().data.get(CONF_SERVICE, SERVICE_ELECTRICITY)
-            return await self.async_step_country()
-        taken = {
-            entry.data.get(CONF_SERVICE, SERVICE_ELECTRICITY)
-            for entry in self._async_current_entries()
-        }
-        free = [service for service in SERVICES if service not in taken]
-        if not free:
+        """Step 1: the first fuel to follow. The other is added later, in Configure."""
+        await self.async_set_unique_id(DOMAIN, raise_on_progress=False)
+        if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
         if user_input is not None:
             self._service = user_input[CONF_SERVICE]
@@ -76,9 +73,9 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=_schema(
                 {
-                    vol.Required(CONF_SERVICE, default=free[0]): SelectSelector(
+                    vol.Required(CONF_SERVICE, default=SERVICE_ELECTRICITY): SelectSelector(
                         SelectSelectorConfig(
-                            options=free,
+                            options=list(SERVICES),
                             translation_key="service",
                             mode=SelectSelectorMode.LIST,
                         )
@@ -88,17 +85,33 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
             last_step=False,
         )
 
-
-    async def async_step_import(self, data: dict[str, Any]) -> ConfigFlowResult:
-        """A plan chosen in Configure, for the fuel that is not followed yet."""
-        self._service = data["service"]
-        return await self._save(data["unique"], data["title"], data["plan"], data["options"])
-
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Follow a different plan. The entities keep their ids, history and place in dashboards."""
-        return await self.async_step_user()
+        """Follow a different plan for a fuel. The entities keep their ids and history."""
+        entry = self._get_reconfigure_entry()
+        fuels = {sub.subentry_type: sub for sub in entry.subentries.values()}
+        if user_input is None and len(fuels) > 1:
+            return self.async_show_form(
+                step_id="reconfigure",
+                data_schema=_schema(
+                    {
+                        vol.Required(CONF_SERVICE, default=SERVICE_ELECTRICITY): SelectSelector(
+                            SelectSelectorConfig(
+                                options=list(fuels),
+                                translation_key="service",
+                                mode=SelectSelectorMode.LIST,
+                            )
+                        )
+                    }
+                ),
+            )
+        chosen = user_input[CONF_SERVICE] if user_input else next(iter(fuels), None)
+        if chosen is None:
+            return self.async_abort(reason="no_tariff")
+        self._reconfigured = fuels[chosen]
+        self._service = chosen
+        return await self.async_step_country()
 
     async def async_step_options(
         self, user_input: dict[str, Any] | None = None
@@ -119,7 +132,7 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
         self, step_id: str, user_input: dict[str, Any] | None
     ) -> ConfigFlowResult:
         if user_input is not None:
-            return await self._save(*self._pending, options=_saved_setup(user_input))
+            return self._save(*self._pending, options=_saved_setup(user_input))
         if self._service == SERVICE_GAS:
             suggested = await gas_dashboard_meter(self.hass)
             fields = {**_gas_meter_fields(suggested), **_bill_fields(suggested)}
@@ -136,9 +149,11 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
     async def _finish(self, unique: str, title: str, plan: dict[str, Any]) -> ConfigFlowResult:
         """Ask for the options when making a new entry. A plan change keeps what is set."""
         if self.source == SOURCE_RECONFIGURE:
-            return await self._save(unique, title, plan)
-        await self.async_set_unique_id(unique)
-        self._abort_if_unique_id_configured()
+            others = self._get_reconfigure_entry().subentries.values()
+            followed = {sub.unique_id for sub in others if sub is not self._reconfigured}
+            if unique in followed:
+                return self.async_abort(reason="already_configured")
+            return self._save(unique, title, plan)
         self._pending = (unique, title, plan)
         if self._service == SERVICE_GAS:
             return await self.async_step_options_gas()
@@ -148,23 +163,35 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
         """The service, written only when it is not the default so older entries read the same."""
         return service_data(self._service)
 
-    async def _save(
+    def _save(
         self, unique: str, title: str, plan: dict[str, Any], options: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Make the entry, or on reconfigure move it to this plan and keep its entities."""
-        await self.async_set_unique_id(unique)
-        self._abort_if_unique_id_configured()
-        if self.source == SOURCE_RECONFIGURE:
-            entry = self._get_reconfigure_entry()
-            key = entry.data.get(CONF_ENTITY_KEY) or entry.unique_id or entry.entry_id
-            return self.async_update_reload_and_abort(
-                entry,
-                unique_id=unique,
-                title=title,
-                data=entry_data(plan, self._service, title, key),
-            )
+        """Make the entry with its first fuel, or on reconfigure move a fuel to this plan."""
+        if self._reconfigured is not None:
+            return self._save_reconfigured(self._reconfigured, unique, title, plan)
+        data = {**entry_data(plan, self._service, title, unique), **(options or {})}
         return self.async_create_entry(
-            title=title,
-            data=entry_data(plan, self._service, title, unique),
-            options=options or {},
+            title=HUB_NAME,
+            data={},
+            subentries=[
+                ConfigSubentryData(
+                    data=data, subentry_type=self._service, title=title, unique_id=unique
+                )
+            ],
         )
+
+    def _save_reconfigured(
+        self, subentry: ConfigSubentry, unique: str, title: str, plan: dict[str, Any]
+    ) -> ConfigFlowResult:
+        entry = self._get_reconfigure_entry()
+        key = subentry.data.get(CONF_ENTITY_KEY) or subentry.unique_id or subentry.subentry_id
+        kept = {k: v for k, v in subentry.data.items() if k not in PLAN_KEYS}
+        self.hass.config_entries.async_update_subentry(
+            entry,
+            subentry,
+            data={**kept, **entry_data(plan, self._service, title, str(key))},
+            title=title,
+            unique_id=unique,
+        )
+        self.hass.config_entries.async_schedule_reload(entry.entry_id)
+        return self.async_abort(reason="reconfigure_successful")
