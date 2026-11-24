@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.0b2
+
+This is a beta. It fixes adding a gas tariff, which failed in 1.5.0b1. Gas tariffs, the Tariff status sensor and the repair issue for a plan that is no longer offered are described under 1.5.0b1. Tell us if setup or the gas sensors misbehave.
+
 **Fixes**
 
 - Adding a gas tariff in 1.5.0b1 failed with "The tariff store could not be read", because the
