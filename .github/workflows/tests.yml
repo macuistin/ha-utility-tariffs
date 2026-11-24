@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   lint:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -39,6 +40,7 @@ jobs:
   # Each plugin release pins one Home Assistant version, so a requirements file stands for one
   # Home Assistant version: the minimum in hacs.json and the latest release.
   tests:
+    if: github.event_name != 'schedule'
     name: Tests (Home Assistant ${{ matrix.home-assistant }})
     runs-on: ubuntu-latest
     strategy:
@@ -61,8 +63,11 @@ jobs:
       - name: Run tests
         run: python -m pytest tests -q
 
-  # Early warning for the next Home Assistant release. A failure here does not fail the workflow.
+  # Early warning for the next Home Assistant release, run by the nightly schedule only. A
+  # failure here does not fail the workflow. Until a beta is out it resolves to the latest
+  # release, so it also catches a new release that the pull request runs have not seen.
   tests-beta:
+    if: github.event_name == 'schedule'
     name: Tests (Home Assistant beta, not blocking)
     runs-on: ubuntu-latest
     continue-on-error: true
