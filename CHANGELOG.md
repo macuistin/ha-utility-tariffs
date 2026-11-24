@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.0b5
+
+This is a beta. Electricity and gas now sit in one entry, under one Utility Tariffs hub, with one Configure for both. Existing installs move over on the first start, so take a backup first. Tell us if an entity ID, a history, a dashboard or an action call changed, or if the integration page shows the tariffs wrongly.
+
 **Changed**
 
 - Electricity and gas are now two tariffs inside one integration entry, not two entries. The
