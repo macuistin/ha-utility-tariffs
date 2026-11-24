@@ -246,7 +246,7 @@ async def _reconfigure(hass: HomeAssistant, entry):
 
 async def _skip_options(hass: HomeAssistant, result):
     """Leave the meters and bill dates page empty, which is allowed."""
-    assert result["step_id"] == "options"
+    assert result["step_id"] in ("options", "options_gas")
     return await hass.config_entries.flow.async_configure(result["flow_id"], {})
 
 

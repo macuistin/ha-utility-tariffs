@@ -119,7 +119,8 @@
           "battery_soc_entity": "Batteriets opladning (procent)",
           "bill_start_day": "Dag i måneden, hvor en regning starter",
           "bill_months": "Måneder på én regning",
-          "bill_start_month": "En måned, hvor en regning starter"
+          "bill_start_month": "En måned, hvor en regning starter",
+          "history_start": "Start of history"
         },
         "data_description": {
           "import_energy_entity": "Nødvendig for regningen. Læses hvert minut.",
@@ -129,7 +130,26 @@
           "battery_soc_entity": "Valgfri. Sammen med batteriets størrelse værdisætter den energien i batteriet.",
           "bill_start_day": "1 til 28. Lad den stå tom for at følge tariffen.",
           "bill_months": "1, 2, 3, 4, 6 eller 12. Lad den stå tom for at følge tariffen.",
-          "bill_start_month": "Kun for regninger på mere end en måned, så de passer til din leverandørs. Fx 2 for en regning på to måneder, der starter i februar."
+          "bill_start_month": "Kun for regninger på mere end en måned, så de passer til din leverandørs. Fx 2 for en regning på to måneder, der starter i februar.",
+          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year."
+        }
+      },
+      "options_gas": {
+        "title": "Your gas meter and bill",
+        "description": "Both are optional and can be changed later in the options. A meter is a sensor in kWh that only ever rises, such as your smart meter's gas total. A gas meter from your Energy dashboard is suggested when it counts in kWh. Without a meter you see prices only.",
+        "data": {
+          "import_energy_entity": "Gas used",
+          "history_start": "Start of history",
+          "bill_start_day": "Day of the month a bill starts",
+          "bill_months": "Months in one bill",
+          "bill_start_month": "A month a bill starts in"
+        },
+        "data_description": {
+          "import_energy_entity": "Needed for the bill. A sensor in kWh that only rises. Read every minute.",
+          "history_start": "Optional. The first day to fill from the meter's statistics when the plan starts. Leave empty for the last year.",
+          "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
+          "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
       }
     },
@@ -327,6 +347,72 @@
           "ended": "Tilbydes ikke længere",
           "withdrawn": "Trukket tilbage"
         }
+      },
+      "gas_import_price": {
+        "name": "Gas price"
+      },
+      "gas_import_band": {
+        "name": "Gas rate band"
+      },
+      "gas_next_import_price": {
+        "name": "Next gas price"
+      },
+      "gas_previous_import_price": {
+        "name": "Previous gas price"
+      },
+      "gas_import_price_rating": {
+        "name": "Gas price rating"
+      },
+      "gas_lowest_import_price_today": {
+        "name": "Lowest gas price today"
+      },
+      "gas_highest_import_price_today": {
+        "name": "Highest gas price today"
+      },
+      "gas_average_import_price_today": {
+        "name": "Average gas price today"
+      },
+      "gas_period_import": {
+        "name": "Gas used this bill period"
+      },
+      "gas_import_band_price": {
+        "name": "Gas price: {band}"
+      },
+      "gas_lowest_import_price_tomorrow": {
+        "name": "Lowest gas price tomorrow"
+      },
+      "gas_highest_import_price_tomorrow": {
+        "name": "Highest gas price tomorrow"
+      },
+      "gas_average_import_price_tomorrow": {
+        "name": "Average gas price tomorrow"
+      },
+      "gas_cheap_share_today": {
+        "name": "Cheap gas used today"
+      },
+      "gas_cheap_share_period": {
+        "name": "Cheap gas used this bill period"
+      },
+      "gas_cheap_share_30_days": {
+        "name": "Cheap gas used, last 30 days"
+      },
+      "gas_cheap_use_rating": {
+        "name": "Cheap gas rating today"
+      },
+      "gas_lowest_price_time_today": {
+        "name": "Lowest gas price time today"
+      },
+      "gas_lowest_price_time_tomorrow": {
+        "name": "Lowest gas price time tomorrow"
+      },
+      "gas_highest_price_time_today": {
+        "name": "Highest gas price time today"
+      },
+      "gas_highest_price_time_tomorrow": {
+        "name": "Highest gas price time tomorrow"
+      },
+      "gas_import_price_percent_of_highest": {
+        "name": "Gas price as a share of today's highest"
       }
     },
     "binary_sensor": {
@@ -398,6 +484,30 @@
           "connected_load_kw": "Kun for en tarif, der opkræver pr. kW tilsluttet (godkendt) belastning. Find den på din regning eller aftale. Uden den viser tariffen ingen regning.",
           "max_meter_kw": "Valgfrit. Den største effekt dit hjem kan trække. En målerværdi, der stiger hurtigere, udelades af regningen. Lad feltet stå tomt for 100 kW.",
           "history_start": "Valgfrit. Den første dag der udfyldes fra dine måleres statistik, når planen starter. Lad feltet stå tomt for det seneste år."
+        }
+      },
+      "init_gas": {
+        "title": "Gas options",
+        "description": "How long the cheapest and dearest windows are, and the gas meter your bill is worked out from. A meter is a sensor in kWh that only ever rises. Leave it empty to show prices only.",
+        "data": {
+          "window_minutes": "Window length (minutes)",
+          "bill_start_day": "Day of the month a bill starts",
+          "bill_months": "Months in one bill",
+          "bill_start_month": "A month a bill starts in",
+          "refresh_now": "Read the tariff store again now",
+          "clear_cache": "Delete the saved tariff files first",
+          "history_start": "Start of history",
+          "cheap_rule": "Which half hours count as cheap",
+          "import_energy_entity": "Gas used"
+        },
+        "data_description": {
+          "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
+          "clear_cache": "Deletes the saved copies of the tariff and its prices, then reads them again from the store. Use it if prices look wrong. It needs the store to be reachable.",
+          "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
+          "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
+          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year.",
+          "import_energy_entity": "Needed for the bill. A sensor in kWh that only rises. Read every minute."
         }
       }
     },
