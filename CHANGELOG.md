@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.0b4
+
+This is a beta. It rebuilds Configure as a list of pages and lets you change a plan, add a fuel and fill the history from there. Tell us if a page, a save or the fill misbehaves, or if an existing entry changed.
+
 **Changed**
 
 - Configure is now a list of pages instead of one long form: Electricity tariff, Gas tariff, Energy meters (or
