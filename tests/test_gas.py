@@ -145,3 +145,5 @@ async def test_the_gas_options_ask_only_for_gas_things(
         result["flow_id"], {"window_minutes": 60, "import_energy_entity": "sensor.gas_kwh"}
     )
     assert saved["data"]["import_energy_entity"] == "sensor.gas_kwh"
+    await hass.async_block_till_done()
+    await hass.config_entries.async_unload(entry.entry_id)
