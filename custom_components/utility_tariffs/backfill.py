@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 from homeassistant.components.recorder.statistics import statistics_during_period
 from homeassistant.helpers.recorder import get_instance
+from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import SlotEnergy
 from utility_tariffs_lib.tariff.defaults import SLOT_SECONDS
 from utility_tariffs_lib.tariff.slots import SlotDay, local_midnight
@@ -27,6 +28,9 @@ if TYPE_CHECKING:
 
     from homeassistant.core import HomeAssistant
     from utility_tariffs_lib.tariff import SlotHistory
+
+    from .accountant import EnergyAccountant
+    from .coordinator import TariffCoordinator
 
 HOUR_SECONDS = 3600
 # A slot counts as read for a series when its hours cover it, give or take a second.
@@ -48,6 +52,16 @@ class BackfillResult:
     slots: int = 0
     first: date | None = None
     last: date | None = None
+
+
+async def async_fill_history(
+    coordinator: TariffCoordinator, accountant: EnergyAccountant
+) -> BackfillResult:
+    """Fill the history from the statistics, then price the plans again over what it now holds."""
+    result = await accountant.async_backfill()
+    if result.slots and coordinator.ranker is not None:
+        await coordinator.ranker.async_refresh(dt_util.now().date())
+    return result
 
 
 @dataclass

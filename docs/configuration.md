@@ -5,8 +5,16 @@
 The last page of setup asks for the meters and bill dates below, with the meters from your Energy
 dashboard suggested. Leave it empty to show prices only. The same fields are in the options.
 
-Open the integration, choose the three dots, then **Configure**. Saving the options reloads the
-integration.
+Open the integration, choose the three dots, then **Configure**. Configure is a list of pages, each
+with a line saying what is set now. Open a page, change it and you come back to the list. Nothing is
+saved until you choose **Save changes**, which then reloads the integration once.
+
+| Page | What is on it |
+| --- | --- |
+| Electricity tariff, Gas tariff | **Choose a different plan** with the same pages as setup: country, supplier and plan, area, or your own rates. A Bills page follows, for the day a bill starts, how long it runs and, for electricity, the connected load. The same page, and the window length and cheap rule, can also be opened from the tariff page without changing the plan, because they belong to that fuel's tariff. The sensors keep their entity IDs and history. Either fuel can be changed from either entry. A fuel that is not followed yet shows "not followed yet" and is added when you save |
+| Energy meters (Gas meter for gas) | The import, export and whole-home sensors, the start of history and the largest rise a meter can show. **Fill history now** reads the meters' statistics and fills the half hours nothing was booked for when you save. It is the same as the `backfill` action |
+| Battery | The battery's discharge meter, charge, size and wear. Electricity only |
+| Tariff store | Read the store again, or delete the saved files. Both happen when you save |
 
 | Option | Meaning |
 | --- | --- |
@@ -18,7 +26,7 @@ integration.
 | Start of history | Optional. The first day to fill from your meters' hourly statistics when the plan starts. Leave empty for the last year. Saving the options runs the fill again |
 | Day of the month a bill starts, months in one bill, a month a bill starts in | Line the bill up with your supplier's. Empty follows the tariff |
 
-Two tick boxes in the same form act once and are not saved: **Read the tariff store again now** and
+Two tick boxes on the Tariff store page act once and are not saved: **Read the tariff store again now** and
 **Delete the saved tariff files first**. See [how the tariffs are kept current](tariff-store.md).
 
 ## Bill dates

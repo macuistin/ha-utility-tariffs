@@ -15,6 +15,7 @@ from utility_tariffs_lib.tariffstore import folder_reader
 
 from custom_components.utility_tariffs.const import DOMAIN
 from tests.helpers import without_bands
+from tests.options_support import configure
 from tests.support.building import build_store
 from tests.support.fixtures import flat, tariff, write_store
 
@@ -413,15 +414,10 @@ async def test_the_bill_dates_are_saved_as_options(
         hass, await _to(hass, ("country", "IE"), ("tariff", "P Energy \u2013 Flat"))
     )
     entry = result["result"]
-    flow = await hass.config_entries.options.async_init(entry.entry_id)
-    flow = await hass.config_entries.options.async_configure(
-        flow["flow_id"],
-        {
-            "window_minutes": 120,
-            "bill_start_day": 16,
-            "bill_months": "2",
-            "bill_start_month": 2,
-        },
+    flow = await configure(
+        hass,
+        entry.entry_id,
+        bills={"bill_start_day": 16, "bill_months": "2", "bill_start_month": 2},
     )
 
     assert flow["type"] is FlowResultType.CREATE_ENTRY

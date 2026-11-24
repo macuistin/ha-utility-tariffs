@@ -5,6 +5,32 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Changed**
+
+- Configure is now a list of pages instead of one long form: Electricity tariff, Gas tariff, Energy meters (or
+  Gas meter), Battery and Tariff store. The bill dates, the window length and the cheap rule are on each
+  fuel's tariff page, since they belong to that tariff. Each page shows what is set now, and
+  nothing is saved until you choose **Save changes**, which reloads the integration once. Every
+  field is on the page where you would look for it. The battery meters share a page with the
+  battery size, and the connected load is with the bill dates.
+- The Electricity tariff and Gas tariff pages change the plan with the same pages as setup,
+  including your own rates, then ask for the bill start day and length. The sensors keep their
+  entity IDs and history, as with Reconfigure. Either fuel can be changed from either entry.
+
+**Added**
+
+- **Fill history now** on the Energy meters (Gas meter) page of Configure. When you save, it fills
+  the half-hourly history from your meters' long-term statistics, from the start of history or else
+  the last year, so the bill and sensors catch up without calling the `backfill` action. It needs
+  the import meter.
+- Add gas or electricity from Configure: a fuel that is not followed yet shows "not followed yet"
+  on its tariff row. Choosing a plan there makes its entry when you save, with its meters and bill
+  dates asked on the way.
+
+**Upgrading**
+
+- Saved options are unchanged and read the same. Nothing to do.
+
 ## 1.5.0b3
 
 This is a beta. It makes a gas entry say gas: its sensor names and its setup and options pages. Tell us if a gas entry still shows electricity wording or fields.

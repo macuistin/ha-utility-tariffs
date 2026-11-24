@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from utility_tariffs_lib.tariffstore import folder_reader
 
+from tests.options_support import configure, fill_page, open_menu
 from tests.test_sensor import NOON, _setup
 
 
@@ -37,10 +38,7 @@ async def _finish(hass: HomeAssistant, entry_id: str) -> None:
 
 
 async def _save(hass: HomeAssistant, entry_id: str, **actions: bool) -> dict:
-    flow = await hass.config_entries.options.async_init(entry_id)
-    return await hass.config_entries.options.async_configure(
-        flow["flow_id"], {"window_minutes": 120, **actions}
-    )
+    return await configure(hass, entry_id, store=actions)
 
 
 async def test_refresh_reads_the_store_index_again(
@@ -86,8 +84,10 @@ async def test_nothing_is_read_again_when_neither_is_asked(
     entry = await _setup(hass)
     before = len(reader.reads)
 
-    await _save(hass, entry.entry_id)
+    menu = await open_menu(hass, entry.entry_id)
+    menu = await fill_page(hass, menu["flow_id"], "store", {})
 
+    assert "confirm" not in menu["menu_options"]  # nothing to save
     assert len(reader.reads) == before
     await _finish(hass, entry.entry_id)
 
@@ -103,9 +103,14 @@ async def test_clear_is_refused_while_the_store_is_unreachable(
     await entry.runtime_data.async_refresh_store()
     assert entry.runtime_data.access.offline
 
-    result = await _save(hass, entry.entry_id, clear_cache=True)
+    menu = await open_menu(hass, entry.entry_id)
+    await hass.config_entries.options.async_configure(menu["flow_id"], {"next_step_id": "store"})
+    result = await hass.config_entries.options.async_configure(
+        menu["flow_id"], {"clear_cache": True}
+    )
 
     assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "store"
     assert result["errors"] == {"base": "clear_while_offline"}
     assert hass.states.get("sensor.utility_tariff_import_price").state == "0.3"
     await _finish(hass, entry.entry_id)

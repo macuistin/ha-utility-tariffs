@@ -20,6 +20,7 @@ from custom_components.utility_tariffs.const import (
     CONF_IMPORT_ENERGY,
 )
 from custom_components.utility_tariffs.savings import battery_of, opening_charge
+from tests.options_support import configure
 from tests.test_bill import METER, _minute, _set
 from tests.test_sensor import NOON, _setup, _state
 
@@ -157,22 +158,15 @@ async def test_the_options_flow_keeps_the_battery_settings(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        {
-            "window_minutes": 120,
-            CONF_IMPORT_ENERGY: METER,
-            CONF_HOUSE_ENERGY: HOUSE,
-            CONF_BATTERY_SOC: SOC,
-            CONF_BATTERY_CAPACITY: 9.5,
-            CONF_BATTERY_WEAR: 0.0,
-        },
+    result = await configure(
+        hass,
+        entry.entry_id,
+        meters={CONF_IMPORT_ENERGY: METER, CONF_HOUSE_ENERGY: HOUSE},
+        battery={CONF_BATTERY_SOC: SOC, CONF_BATTERY_CAPACITY: 9.5, CONF_BATTERY_WEAR: 0.0},
     )
 
     await hass.async_block_till_done()  # the reload the save schedules
     assert result["data"] == {
-        "window_minutes": 120,
         CONF_IMPORT_ENERGY: METER,
         CONF_HOUSE_ENERGY: HOUSE,
         CONF_BATTERY_SOC: SOC,

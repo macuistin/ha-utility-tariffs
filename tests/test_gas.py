@@ -11,10 +11,11 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from utility_tariffs_lib.tariffstore import AsyncMemoryCache, AsyncStore, folder_reader
 
-from custom_components.utility_tariffs import config_flow, coordinator
+from custom_components.utility_tariffs import coordinator, plan_steps
 from custom_components.utility_tariffs.const import DOMAIN
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 from tests.helpers import async_reader
+from tests.options_support import open_menu
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
 from tests.test_sensor import DATA, NOON, _setup
@@ -40,7 +41,7 @@ def stores(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
         asked.append(service)
         return accesses[service]
 
-    monkeypatch.setattr(config_flow, "store_access", access)
+    monkeypatch.setattr(plan_steps, "store_access", access)
     monkeypatch.setattr(coordinator, "store_access", access)
     return asked
 
@@ -127,22 +128,27 @@ async def test_the_gas_options_ask_only_for_gas_things(
     freezer.move_to(NOON)
     entry = await _setup(hass, GAS)
 
-    result = await hass.config_entries.options.async_init(entry.entry_id)
+    menu = await open_menu(hass, entry.entry_id)
 
-    assert result["step_id"] == "init_gas"
-    fields = {str(key) for key in result["data_schema"].schema}
-    assert {"import_energy_entity", "bill_start_day", "window_minutes"} <= fields
-    assert not fields & {
-        "export_energy_entity",
-        "house_energy_entity",
-        "battery_discharge_energy_entity",
-        "battery_soc_entity",
-        "battery_capacity_kwh",
-        "battery_wear_per_kwh",
-        "connected_load_kw",
-    }
+    assert menu["menu_options"] == [
+        "tariff_electricity", "tariff_gas", "meters_gas", "store"
+    ]
+    page = await hass.config_entries.options.async_configure(
+        menu["flow_id"], {"next_step_id": "meters_gas"}
+    )
+    fields = {str(key) for key in page["data_schema"].schema}
+    assert fields == {"import_energy_entity", "history_start", "backfill_now"}
+    page = await hass.config_entries.options.async_configure(
+        menu["flow_id"], {"import_energy_entity": "sensor.gas_kwh"}
+    )
+    for step in ("tariff_gas", "bills"):
+        page = await hass.config_entries.options.async_configure(
+            page["flow_id"], {"next_step_id": step}
+        )
+    assert "connected_load_kw" not in {str(key) for key in page["data_schema"].schema}
+    page = await hass.config_entries.options.async_configure(page["flow_id"], {})
     saved = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"window_minutes": 60, "import_energy_entity": "sensor.gas_kwh"}
+        page["flow_id"], {"next_step_id": "confirm"}
     )
     assert saved["data"]["import_energy_entity"] == "sensor.gas_kwh"
     await hass.async_block_till_done()

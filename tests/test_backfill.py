@@ -215,6 +215,49 @@ async def test_the_action_fills_again_and_answers_with_what_it_did(
     assert answer == {"half_hours_filled": 4, "first_day": "2026-11-13", "last_day": "2026-11-13"}
 
 
+async def test_configure_fills_the_history_when_saved(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    from tests.options_support import configure
+
+    freezer.move_to(NOON)
+    hass.states.async_set(METER, "100", {"unit_of_measurement": "kWh"})
+    entry = await _setup(hass, options={CONF_IMPORT_ENERGY: METER, CONF_HISTORY_START: "2026-11-13"})
+    _import_statistics(hass, METER, FIRST, [2.0])
+    await async_wait_recording_done(hass)
+    accountant, day = await _history_of(hass, entry.entry_id, DAY)
+    assert day is None or day.flows["import"][12] == 0.0
+
+    result = await configure(
+        hass,
+        entry.entry_id,
+        meters={CONF_IMPORT_ENERGY: METER, CONF_HISTORY_START: "2026-11-13", "backfill_now": True},
+    )
+
+    assert result["data"][CONF_IMPORT_ENERGY] == METER
+    assert "backfill_now" not in result["data"]
+    await hass.async_block_till_done()
+    _, day = await _history_of(hass, entry.entry_id, DAY)
+    assert day is not None
+    assert day.flows["import"][12:14] == pytest.approx([1.0, 1.0])
+
+
+async def test_configure_does_not_fill_without_the_import_meter(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    entry = await _setup(hass)
+    flow = hass.config_entries.options
+    menu = await flow.async_init(entry.entry_id)
+    await flow.async_configure(menu["flow_id"], {"next_step_id": "meters"})
+
+    page = await flow.async_configure(menu["flow_id"], {"backfill_now": True})
+
+    assert page["step_id"] == "meters"
+    assert page["errors"] == {"base": "backfill_needs_meter"}
+    flow.async_abort(menu["flow_id"])
+
+
 async def test_the_action_needs_a_meter(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:

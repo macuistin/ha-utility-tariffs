@@ -18,6 +18,7 @@ from custom_components.utility_tariffs.const import (
     CONF_CHEAP_RULE,
     CONF_IMPORT_ENERGY,
 )
+from tests.options_support import configure
 from tests.test_sensor import DATA, NOON, _setup
 
 METER = "sensor.meter_in"
@@ -195,10 +196,10 @@ async def test_the_options_flow_saves_the_cheap_rule_only_when_changed(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:
     entry, _ = await _meter_setup(hass, freezer)
-    flow = await hass.config_entries.options.async_init(entry.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        flow["flow_id"],
-        user_input={"window_minutes": 120, CONF_CHEAP_RULE: CHEAP_BELOW_AVERAGE},
+    result = await configure(
+        hass,
+        entry.entry_id,
+        windows={"window_minutes": 120, CONF_CHEAP_RULE: CHEAP_BELOW_AVERAGE},
     )
 
     await hass.async_block_till_done()

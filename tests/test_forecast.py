@@ -86,9 +86,9 @@ def feed(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
 
     access = TariffStoreAccess(hass, store)
     monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
-    from custom_components.utility_tariffs import config_flow
+    from custom_components.utility_tariffs import plan_steps
 
-    monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
+    monkeypatch.setattr(plan_steps, "store_access", lambda _hass, _service="electricity": access)
     return Feed(hass, monkeypatch)
 
 

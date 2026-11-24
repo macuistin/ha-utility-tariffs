@@ -12,6 +12,7 @@ from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.utility_tariffs.const import DOMAIN
+from tests.options_support import configure
 from tests.test_sensor import NOON, _setup, _state
 
 TIMES = "2026-11-14 22:00:00+00:00"
@@ -79,11 +80,7 @@ async def test_a_longer_window_from_the_options_is_used(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert result["step_id"] == "init"
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"window_minutes": 360}
-    )
+    result = await configure(hass, entry.entry_id, windows={"window_minutes": 360})
     await hass.async_block_till_done()
 
     assert result["data"] == {"window_minutes": 360}
