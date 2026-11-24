@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from utility_tariffs_lib.tariffstore import AsyncFolderCache, AsyncStore, folder_reader
 
-from custom_components.utility_tariffs import config_flow, coordinator
+from custom_components.utility_tariffs import coordinator, plan_steps
 from custom_components.utility_tariffs.bill_period import period_rules
 from custom_components.utility_tariffs.const import (
     CONF_CONNECTED_LOAD,
@@ -20,6 +20,7 @@ from custom_components.utility_tariffs.const import (
 )
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 from tests.helpers import async_reader
+from tests.options_support import configure
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
 from tests.test_sensor import NOON, _setup, _state
@@ -56,7 +57,7 @@ def load_store(
     build_store(folder)
     store = AsyncStore(async_reader(folder_reader(folder)), AsyncFolderCache(tmp_path / "cache"))
     access = TariffStoreAccess(hass, store, tmp_path / "cache")
-    monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
+    monkeypatch.setattr(plan_steps, "store_access", lambda _hass, _service="electricity": access)
     monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
     return folder
 
@@ -99,10 +100,7 @@ async def test_the_options_keep_the_connected_load(
     freezer.move_to(NOON)
     entry = await _setup(hass, data=DATA)
 
-    flow = await hass.config_entries.options.async_init(entry.entry_id)
-    flow = await hass.config_entries.options.async_configure(
-        flow["flow_id"], {"window_minutes": 120, CONF_CONNECTED_LOAD: 4.5}
-    )
+    flow = await configure(hass, entry.entry_id, bills={CONF_CONNECTED_LOAD: 4.5})
 
     assert flow["type"] is FlowResultType.CREATE_ENTRY
     assert flow["data"][CONF_CONNECTED_LOAD] == 4.5

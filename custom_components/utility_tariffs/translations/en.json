@@ -447,72 +447,274 @@
   "options": {
     "step": {
       "init": {
-        "title": "Options",
-        "description": "How long the cheapest and dearest windows are, the energy meters your bill is worked out from, and your battery. A meter is a sensor in kWh that only ever rises, such as your smart meter's import and export totals. Leave them empty to show prices only. The savings need the whole home's use, and a battery needs its charge and size.",
+        "title": "Configure",
+        "description": "{unsaved}Pick a page to change. Nothing is saved until you choose **Save changes**.",
+        "menu_options": {
+          "tariff": "Tariff",
+          "meters": "Energy meters",
+          "meters_gas": "Gas meter",
+          "battery": "Battery",
+          "bills": "Bills",
+          "windows": "Cheap and dear windows",
+          "store": "Tariff store",
+          "add_fuel": "Add gas or electricity",
+          "confirm": "Save changes"
+        },
+        "menu_option_descriptions": {
+          "tariff": "{tariff_summary}",
+          "meters": "{meters_summary}",
+          "meters_gas": "{meters_summary}",
+          "battery": "{battery_summary}",
+          "bills": "{bills_summary}",
+          "windows": "{windows_summary}",
+          "store": "{store_summary}",
+          "add_fuel": "{fuel_summary}",
+          "confirm": "{save_note}"
+        }
+      },
+      "tariff": {
+        "title": "Tariff",
+        "description": "Followed now: {tariff_summary}. Choosing a different plan keeps your sensors, their names and their history.",
+        "menu_options": {
+          "country": "Choose a different plan",
+          "init": "Back"
+        }
+      },
+      "meters": {
+        "title": "Energy meters",
+        "description": "A meter is a sensor in kWh that only ever rises, such as your smart meter's totals. Leave them empty to show prices only. The savings need the whole home's use.",
+        "data": {
+          "import_energy_entity": "Energy imported from the grid",
+          "export_energy_entity": "Energy exported to the grid",
+          "house_energy_entity": "Energy used by the whole home",
+          "history_start": "Start of history",
+          "max_meter_kw": "Largest rise a meter can show (kW)"
+        },
+        "data_description": {
+          "import_energy_entity": "Needed for the bill. Read every minute.",
+          "export_energy_entity": "Optional. Credits what you export.",
+          "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
+          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year.",
+          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW."
+        }
+      },
+      "meters_gas": {
+        "title": "Gas meter",
+        "description": "A meter is a sensor in kWh that only ever rises, such as your smart meter's gas total. Leave it empty to show prices only.",
+        "data": {
+          "import_energy_entity": "Gas used",
+          "history_start": "Start of history"
+        },
+        "data_description": {
+          "import_energy_entity": "Needed for the bill. A sensor in kWh that only rises. Read every minute.",
+          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year."
+        }
+      },
+      "battery": {
+        "title": "Battery",
+        "description": "Optional. With the battery's charge and size the savings value the energy it holds, and its discharge meter takes wear off the savings.",
+        "data": {
+          "battery_discharge_energy_entity": "Energy taken out of the battery",
+          "battery_soc_entity": "Battery charge (percent)",
+          "battery_capacity_kwh": "Battery size (kWh)",
+          "battery_wear_per_kwh": "Battery wear per kWh"
+        },
+        "data_description": {
+          "battery_discharge_energy_entity": "Optional. Takes battery wear off the savings.",
+          "battery_soc_entity": "Optional. With the battery size, values the energy the battery holds.",
+          "battery_capacity_kwh": "Optional. Usable size of the battery.",
+          "battery_wear_per_kwh": "Optional. What each kWh taken out of the battery costs in wear, in the tariff's currency."
+        }
+      },
+      "bills": {
+        "title": "Bills",
+        "description": "Where a bill starts and how long it runs. Left empty, the tariff's own dates apply.",
+        "data": {
+          "bill_start_day": "Day of the month a bill starts",
+          "bill_months": "Months in one bill",
+          "bill_start_month": "A month a bill starts in",
+          "connected_load_kw": "Connected load (kW)"
+        },
+        "data_description": {
+          "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
+          "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
+          "connected_load_kw": "Only for a tariff that charges per kW of connected (sanctioned) load. Find it on your bill or supply agreement. Without it, that tariff shows no bill."
+        }
+      },
+      "windows": {
+        "title": "Cheap and dear windows",
+        "description": "How long the cheapest and dearest windows are, and which half hours count as cheap.",
         "data": {
           "window_minutes": "Window length (minutes)",
+          "cheap_rule": "Which half hours count as cheap"
+        },
+        "data_description": {}
+      },
+      "store": {
+        "title": "Tariff store",
+        "description": "Both happen when you choose Save changes.",
+        "data": {
+          "refresh_now": "Read the tariff store again now",
+          "clear_cache": "Delete the saved tariff files first"
+        },
+        "data_description": {
+          "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
+          "clear_cache": "Deletes the saved copies of the tariff and its prices, then reads them again from the store. Use it if prices look wrong. It needs the store to be reachable."
+        }
+      },
+      "country": {
+        "title": "Choose a country",
+        "description": "Only countries whose tariffs the open store holds are listed.",
+        "data": {
+          "country": "Country"
+        },
+        "data_description": {
+          "country": "The country whose suppliers you want to choose from."
+        }
+      },
+      "plan": {
+        "title": "Choose a supplier and plan",
+        "description": "Plans with prices in force today. A page for the area follows only if the plan's prices differ by area. {country_note}",
+        "data": {
+          "tariff": "Supplier and plan"
+        },
+        "data_description": {
+          "tariff": "Your electricity supplier and the plan you are on. Only plans with prices in force today are listed. Choose your supplier and plan, or choose Type in my own rates at the top of the list. Type to search the list."
+        }
+      },
+      "area": {
+        "title": "Choose an area",
+        "description": "{plan} has different prices in different areas.",
+        "data": {
+          "area": "Area"
+        },
+        "data_description": {
+          "area": "Pick the area of your supply. It is usually in the name of your distribution network or on your bill."
+        }
+      },
+      "manual_template": {
+        "title": "Your own rates: start from a shape",
+        "description": "Pick the shape closest to your tariff. It fills in the rate names and hours on the next page, and you type the prices. Choose the last option to start from nothing.",
+        "data": {
+          "template": "Shape of the tariff"
+        },
+        "data_description": {
+          "template": "Only the names and hours are filled in. You can add more timed rates afterwards."
+        }
+      },
+      "manual": {
+        "title": "Your own rates",
+        "description": "Prices as they appear on your bill. Timed rates, such as a night rate, are added next.",
+        "data": {
+          "name": "Name",
+          "country": "Country",
+          "currency": "Currency code",
+          "base_rate_name": "Name of the main rate",
+          "base_rate": "Main rate",
+          "export_rate": "Export rate",
+          "standing_charge": "Standing charge",
+          "levy": "Monthly levy",
+          "discount_rate": "Discount on energy",
+          "vat_rate": "VAT",
+          "vat_included": "Prices already include VAT",
+          "bill_start_day": "Day of the month a bill starts",
+          "timed_rate": "Price of the timed rate"
+        },
+        "data_description": {
+          "name": "A name for the tariff, shown as the integration's title.",
+          "country": "The country of the supply.",
+          "currency": "The three-letter currency code, such as EUR or GBP.",
+          "base_rate_name": "The name shown for the rate that applies when no timed rate does.",
+          "base_rate": "The price of one kWh at the main rate, as it appears on your bill. For example 0.30.",
+          "export_rate": "What you are paid for one kWh exported. Leave at 0 if you are paid nothing.",
+          "standing_charge": "The fixed charge for each day, before VAT unless you say prices include it.",
+          "levy": "A fixed charge for each month, such as a public service levy. Leave at 0 if there is none.",
+          "discount_rate": "A percentage taken off the energy charge, such as a prompt payment discount.",
+          "vat_rate": "The VAT rate in percent. It starts at the rate in force in the country today, from the tariff store, and you can change it. Turn on \"Prices already include VAT\" when the prices above already contain it.",
+          "vat_included": "Turn on when the rates above are the prices you pay, with VAT in them.",
+          "bill_start_day": "The day of the month your supplier's bill period starts, 1 to 28.",
+          "timed_rate": "The price of one kWh in the timed rate of the shape you chose, as it appears on your bill. For example 0.15."
+        }
+      },
+      "manual_more": {
+        "title": "Timed rates",
+        "description": "Add a rate that applies at certain hours, such as a night rate. Where rates overlap, the cheapest applies.",
+        "menu_options": {
+          "manual_period": "Add a timed rate",
+          "manual_done": "Finish"
+        }
+      },
+      "manual_period": {
+        "title": "Add a timed rate",
+        "data": {
+          "name": "Name",
+          "rate": "Rate",
+          "start": "From",
+          "end": "To"
+        },
+        "data_description": {
+          "name": "A name for this timed rate, such as Night.",
+          "rate": "The price of one kWh while this rate applies.",
+          "start": "The time this rate starts each day.",
+          "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight."
+        }
+      },
+      "new_options": {
+        "title": "Meters and bill for the new tariff",
+        "description": "Both are optional and can be changed later. Meters from your Energy dashboard are suggested.",
+        "data": {
           "import_energy_entity": "Energy imported from the grid",
           "export_energy_entity": "Energy exported to the grid",
           "house_energy_entity": "Energy used by the whole home",
           "battery_discharge_energy_entity": "Energy taken out of the battery",
           "battery_soc_entity": "Battery charge (percent)",
-          "battery_capacity_kwh": "Battery size (kWh)",
-          "battery_wear_per_kwh": "Battery wear per kWh",
-          "connected_load_kw": "Connected load (kW)",
           "bill_start_day": "Day of the month a bill starts",
           "bill_months": "Months in one bill",
           "bill_start_month": "A month a bill starts in",
-          "refresh_now": "Read the tariff store again now",
-          "clear_cache": "Delete the saved tariff files first",
-          "max_meter_kw": "Largest rise a meter can show (kW)",
-          "history_start": "Start of history",
-          "cheap_rule": "Which half hours count as cheap"
+          "history_start": "Start of history"
         },
         "data_description": {
-          "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
-          "clear_cache": "Deletes the saved copies of the tariff and its prices, then reads them again from the store. Use it if prices look wrong. It needs the store to be reachable.",
           "import_energy_entity": "Needed for the bill. Read every minute.",
           "export_energy_entity": "Optional. Credits what you export.",
           "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
           "battery_discharge_energy_entity": "Optional. Takes battery wear off the savings.",
           "battery_soc_entity": "Optional. With the battery size, values the energy the battery holds.",
-          "battery_capacity_kwh": "Optional. Usable size of the battery.",
-          "battery_wear_per_kwh": "Optional. What each kWh taken out of the battery costs in wear, in the tariff's currency.",
-          "connected_load_kw": "Only for a tariff that charges per kW of connected (sanctioned) load. Find it on your bill or supply agreement. Without it, that tariff shows no bill.",
           "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
-          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW.",
           "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year."
         }
       },
-      "init_gas": {
-        "title": "Gas options",
-        "description": "How long the cheapest and dearest windows are, and the gas meter your bill is worked out from. A meter is a sensor in kWh that only ever rises. Leave it empty to show prices only.",
+      "new_options_gas": {
+        "title": "Gas meter and bill for the new tariff",
+        "description": "Both are optional and can be changed later. A gas meter from your Energy dashboard is suggested when it counts in kWh.",
         "data": {
-          "window_minutes": "Window length (minutes)",
+          "import_energy_entity": "Gas used",
+          "history_start": "Start of history",
           "bill_start_day": "Day of the month a bill starts",
           "bill_months": "Months in one bill",
-          "bill_start_month": "A month a bill starts in",
-          "refresh_now": "Read the tariff store again now",
-          "clear_cache": "Delete the saved tariff files first",
-          "history_start": "Start of history",
-          "cheap_rule": "Which half hours count as cheap",
-          "import_energy_entity": "Gas used"
+          "bill_start_month": "A month a bill starts in"
         },
         "data_description": {
-          "refresh_now": "Reads the store's index and your plan again when you save, instead of waiting for tonight. Use it after the store has published a change.",
-          "clear_cache": "Deletes the saved copies of the tariff and its prices, then reads them again from the store. Use it if prices look wrong. It needs the store to be reachable.",
+          "import_energy_entity": "Needed for the bill. A sensor in kWh that only rises. Read every minute.",
+          "history_start": "Optional. The first day to fill from the meter's statistics when the plan starts. Leave empty for the last year.",
           "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
-          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
-          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year.",
-          "import_energy_entity": "Needed for the bill. A sensor in kWh that only rises. Read every minute."
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
       }
     },
     "error": {
-      "clear_while_offline": "The store cannot be reached, so deleting the saved files would leave no prices. Try again when it is reachable."
+      "clear_while_offline": "The store cannot be reached, so deleting the saved files would leave no prices. Try again when it is reachable.",
+      "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
+      "empty_period": "The rate must start and end at different times.",
+      "unknown_plan": "Choose a plan from the list."
+    },
+    "abort": {
+      "cannot_connect": "The tariff store could not be read. Check the connection and try again.",
+      "no_tariffs": "This supplier has no plan with prices in force today.",
+      "already_configured": "This plan is already set up."
     }
   },
   "services": {

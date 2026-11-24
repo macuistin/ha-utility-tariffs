@@ -11,7 +11,7 @@ from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from utility_tariffs_lib.tariffstore import AsyncMemoryCache, AsyncStore, folder_reader
 
-from custom_components.utility_tariffs import config_flow, coordinator
+from custom_components.utility_tariffs import coordinator, plan_steps
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 from tests.helpers import async_reader
 from tests.support.building import build_store
@@ -44,7 +44,7 @@ def store(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     access = TariffStoreAccess(
         hass, AsyncStore(async_reader(folder_reader(folder)), AsyncMemoryCache())
     )
-    monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
+    monkeypatch.setattr(plan_steps, "store_access", lambda _hass, _service="electricity": access)
     monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
 
 

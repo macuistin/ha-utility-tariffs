@@ -5,8 +5,19 @@
 The last page of setup asks for the meters and bill dates below, with the meters from your Energy
 dashboard suggested. Leave it empty to show prices only. The same fields are in the options.
 
-Open the integration, choose the three dots, then **Configure**. Saving the options reloads the
-integration.
+Open the integration, choose the three dots, then **Configure**. Configure is a list of pages, each
+with a line saying what is set now. Open a page, change it and you come back to the list. Nothing is
+saved until you choose **Save changes**, which then reloads the integration once.
+
+| Page | What is on it |
+| --- | --- |
+| Tariff | **Choose a different plan** with the same pages as setup: country, supplier and plan, area, or your own rates. The sensors keep their entity IDs and history |
+| Energy meters (Gas meter for gas) | The import, export and whole-home sensors, the start of history and the largest rise a meter can show |
+| Battery | The battery's discharge meter, charge, size and wear. Electricity only |
+| Bills | The bill dates and the connected load |
+| Cheap and dear windows | The window length and which half hours count as cheap |
+| Tariff store | Read the store again, or delete the saved files. Both happen when you save |
+| Add gas or electricity | Follows the other fuel as a second entry with its own sensors. It is made when you save |
 
 | Option | Meaning |
 | --- | --- |
@@ -18,7 +29,7 @@ integration.
 | Start of history | Optional. The first day to fill from your meters' hourly statistics when the plan starts. Leave empty for the last year. Saving the options runs the fill again |
 | Day of the month a bill starts, months in one bill, a month a bill starts in | Line the bill up with your supplier's. Empty follows the tariff |
 
-Two tick boxes in the same form act once and are not saved: **Read the tariff store again now** and
+Two tick boxes on the Tariff store page act once and are not saved: **Read the tariff store again now** and
 **Delete the saved tariff files first**. See [how the tariffs are kept current](tariff-store.md).
 
 ## Bill dates

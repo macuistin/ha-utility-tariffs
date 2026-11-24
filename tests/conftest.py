@@ -9,7 +9,7 @@ import pytest
 from homeassistant.core import HomeAssistant
 from utility_tariffs_lib.tariffstore import AsyncFolderCache, AsyncStore, folder_reader
 
-from custom_components.utility_tariffs import config_flow, coordinator
+from custom_components.utility_tariffs import coordinator, plan_steps
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 from tests.helpers import async_reader
 from tests.support.building import build_store
@@ -34,7 +34,7 @@ def use_store(
             async_reader(reader or folder_reader(folder)), AsyncFolderCache(tmp_path / "cache")
         )
         access = TariffStoreAccess(hass, store, tmp_path / "cache")
-        monkeypatch.setattr(config_flow, "store_access", lambda _hass, _service="electricity": access)
+        monkeypatch.setattr(plan_steps, "store_access", lambda _hass, _service="electricity": access)
         monkeypatch.setattr(coordinator, "store_access", lambda _hass, _service="electricity": access)
         return folder
 

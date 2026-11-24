@@ -21,6 +21,7 @@ from custom_components.utility_tariffs.const import (
 )
 from custom_components.utility_tariffs.diagnostics import async_get_config_entry_diagnostics
 from custom_components.utility_tariffs.energy_store import storage_key
+from tests.options_support import configure
 from tests.test_sensor import NOON, _setup, _state
 
 METER = "sensor.meter_in"
@@ -112,23 +113,14 @@ async def test_the_options_flow_saves_and_clears_the_meters(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        {"window_minutes": 120, CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER},
+    result = await configure(
+        hass, entry.entry_id, meters={CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER}
     )
     await hass.async_block_till_done()  # the reload the save schedules
-    assert result["data"] == {
-        "window_minutes": 120,
-        CONF_IMPORT_ENERGY: METER,
-        CONF_EXPORT_ENERGY: EXPORT_METER,
-    }
+    assert result["data"] == {CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER}
 
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"window_minutes": 120}
-    )
-    assert result["data"] == {"window_minutes": 120}
+    result = await configure(hass, entry.entry_id, meters={})
+    assert result["data"] == {}
     await hass.async_block_till_done()
     assert await hass.config_entries.async_unload(entry.entry_id)
 

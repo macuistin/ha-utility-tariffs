@@ -73,5 +73,5 @@ flowchart TD
 
 | You want to change | Use |
 | --- | --- |
-| Plan, supplier, area or your own rates | Reconfigure |
-| Meters, window length, bill dates, battery details | Configure (options) |
+| Plan, supplier, area or your own rates | Configure, Tariff (or Reconfigure) |
+| Meters, battery, bill dates, window length, the other fuel | Configure, on the page for that topic |
