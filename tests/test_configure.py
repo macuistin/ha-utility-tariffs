@@ -21,9 +21,11 @@ FLAT = "P Energy – Flat"
 FLAT_DATA = {**DATA, "tariff": "flat", "area": "all", "name": "P Energy Flat"}
 
 
-async def _choose_plan(hass: HomeAssistant, flow_id: str, plan: str = FLAT) -> dict:
+async def _choose_plan(
+    hass: HomeAssistant, flow_id: str, plan: str = FLAT, service: str = "electricity"
+) -> dict:
     flow = hass.config_entries.options
-    await flow.async_configure(flow_id, {"next_step_id": "tariff"})
+    await flow.async_configure(flow_id, {"next_step_id": f"tariff_{service}"})
     result = await flow.async_configure(flow_id, {"next_step_id": "country"})
     assert result["step_id"] == "country"
     result = await flow.async_configure(flow_id, {"country": "IE"})
@@ -39,10 +41,11 @@ async def test_the_menu_says_what_each_page_holds_now(
     menu = await open_menu(hass, entry.entry_id)
 
     assert menu["menu_options"] == [
-        "tariff", "meters", "battery", "bills", "windows", "store", "add_fuel"
+        "tariff_electricity", "tariff_gas", "meters", "battery", "bills", "windows", "store"
     ]
     lines = menu["description_placeholders"]
-    assert lines["tariff_summary"] == "P Energy Plan (Urban) (IE)"
+    assert lines["electricity_summary"] == "P Energy Plan (Urban) (IE)"
+    assert lines["gas_summary"] == "not followed yet, choose a gas plan"
     assert lines["meters_summary"] == "import sensor.grid_in"
     assert lines["battery_summary"] == "no battery set"
     assert lines["windows_summary"] == "120 minute windows, cheap is only the cheapest band"
@@ -98,10 +101,17 @@ async def test_the_tariff_changes_in_configure_and_keeps_the_entities(
     }
     menu = await open_menu(hass, entry.entry_id)
 
-    menu = await _choose_plan(hass, menu["flow_id"])
+    page = await _choose_plan(hass, menu["flow_id"])
+    assert page["step_id"] == "plan_bills"  # the bill dates are asked before the plan is saved
+    assert "connected_load_kw" in {str(key) for key in page["data_schema"].schema}
+    menu = await hass.config_entries.options.async_configure(
+        menu["flow_id"], {"bill_start_day": 16, "bill_months": "2"}
+    )
 
     assert menu["step_id"] == "init"
-    assert menu["description_placeholders"]["tariff_summary"] == "changes to P Energy Flat when you save"
+    assert menu["description_placeholders"]["electricity_summary"] == (
+        "changes to P Energy Flat when you save"
+    )
     assert entry.data["tariff"] == "plan"  # not saved yet
     result = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "confirm"}
@@ -110,6 +120,7 @@ async def test_the_tariff_changes_in_configure_and_keeps_the_entities(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.data["tariff"] == "flat"
+    assert entry.options == {"bill_start_day": 16, "bill_months": 2}
     assert entry.title == "P Energy Flat"
     assert entry.unique_id == "IE/p/flat/all"
     after = {
@@ -140,7 +151,9 @@ async def test_the_own_rates_pages_work_from_configure(
         },
     )
     assert result["step_id"] == "manual_more"
-    menu = await flow.async_configure(flow_id, {"next_step_id": "manual_done"})
+    page = await flow.async_configure(flow_id, {"next_step_id": "manual_done"})
+    assert page["step_id"] == "plan_bills"
+    menu = await flow.async_configure(flow_id, {})
     assert menu["step_id"] == "init"
     result = await flow.async_configure(flow_id, {"next_step_id": "confirm"})
     await hass.async_block_till_done()
@@ -175,7 +188,7 @@ async def test_gas_is_added_from_configure_and_made_when_saved(
     menu = await open_menu(hass, entry.entry_id)
     flow, flow_id = hass.config_entries.options, menu["flow_id"]
 
-    result = await flow.async_configure(flow_id, {"next_step_id": "add_fuel"})
+    result = await flow.async_configure(flow_id, {"next_step_id": "tariff_gas"})
     assert result["step_id"] == "country"
     result = await flow.async_configure(flow_id, {"country": "IE"})
     result = await flow.async_configure(flow_id, {"tariff": FLAT})
@@ -183,8 +196,7 @@ async def test_gas_is_added_from_configure_and_made_when_saved(
     menu = await flow.async_configure(flow_id, {"import_energy_entity": "sensor.gas_kwh"})
 
     assert menu["step_id"] == "init"
-    assert "add_fuel" not in menu["menu_options"]
-    assert menu["description_placeholders"]["fuel_summary"] == "gas P Energy Flat is added when you save"
+    assert menu["description_placeholders"]["gas_summary"] == "P Energy Flat is added when you save"
     assert len(hass.config_entries.async_entries(DOMAIN)) == 1
     await flow.async_configure(flow_id, {"next_step_id": "confirm"})
     await hass.async_block_till_done()
@@ -195,3 +207,34 @@ async def test_gas_is_added_from_configure_and_made_when_saved(
     assert hass.states.get("sensor.gas_tariff_gas_price") is not None
     await hass.config_entries.async_unload(entry.entry_id)
     await hass.config_entries.async_unload(gas[0].entry_id)
+
+
+async def test_the_other_fuel_is_changed_from_the_same_menu_with_its_bill_dates(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, stores: list[str]  # noqa: F811
+) -> None:
+    from tests.test_gas import GAS
+
+    freezer.move_to(NOON)
+    power = await _setup(hass, FLAT_DATA)
+    gas = await _setup(hass, GAS)
+    menu = await open_menu(hass, power.entry_id)
+    assert menu["description_placeholders"]["gas_summary"] == "Gas Flat (IE)"
+
+    page = await _choose_plan(hass, menu["flow_id"], FLAT, service="gas")
+    assert page["step_id"] == "plan_bills"
+    assert "connected_load_kw" not in {str(key) for key in page["data_schema"].schema}
+    menu = await hass.config_entries.options.async_configure(
+        menu["flow_id"], {"bill_start_day": 5}
+    )
+
+    assert power.options == {} and gas.options == {}  # nothing saved yet
+    await hass.config_entries.options.async_configure(
+        menu["flow_id"], {"next_step_id": "confirm"}
+    )
+    await hass.async_block_till_done()
+    assert gas.unique_id == "gas/IE/p/flat/all"  # moved to the store's own gas plan id
+    assert gas.data["service"] == "gas"
+    assert gas.options == {"bill_start_day": 5}
+    assert power.options == {}
+    await hass.config_entries.async_unload(power.entry_id)
+    await hass.config_entries.async_unload(gas.entry_id)

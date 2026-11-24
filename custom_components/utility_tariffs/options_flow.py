@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import ConfigEntry, ConfigFlowResult, OptionsFlow
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
@@ -55,7 +55,6 @@ from .const import (
     MIN_WINDOW_MINUTES,
     SERVICE_ELECTRICITY,
     SERVICE_GAS,
-    SERVICES,
     WINDOW_STEP_MINUTES,
 )
 from .energy_suggest import energy_dashboard_meters, gas_dashboard_meter
@@ -133,7 +132,8 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
     def __init__(self) -> None:
         super().__init__()
         self._changes: dict[str, Any] = {}
-        self._plan: _StagedPlan | None = None
+        self._other_changes: dict[str, dict[str, Any]] = {}  # the other followed fuel's options
+        self._new_plans: dict[str, _StagedPlan] = {}  # a new plan for each fuel already followed
         self._new_fuel: _NewFuel | None = None
         self._adding = False
         self._refresh = False
@@ -156,7 +156,8 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
 
     def _dirty(self) -> bool:
         return bool(
-            self._plan
+            self._new_plans
+            or any(self._other_changes.values())
             or self._new_fuel
             or self._refresh
             or self._clear
@@ -167,18 +168,41 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         country = self.config_entry.data.get("country")
         return country if isinstance(country, str) else None
 
-    def _free_services(self) -> list[str]:
-        taken = {
-            entry.data.get(CONF_SERVICE, SERVICE_ELECTRICITY)
-            for entry in self.hass.config_entries.async_entries(DOMAIN)
-        }
-        if self._new_fuel:
-            taken.add(self._new_fuel.service)
-        return [service for service in SERVICES if service not in taken]
+    def _entry_for(self, service: str) -> ConfigEntry | None:
+        """The entry that follows this fuel, or None when it is not followed yet."""
+        if service == self._own_service():
+            return self.config_entry
+        for entry in self.hass.config_entries.async_entries(DOMAIN):
+            if entry.data.get(CONF_SERVICE, SERVICE_ELECTRICITY) == service:
+                return entry
+        return None
+
+    def _tariff_line(self, service: str) -> str:
+        """What the Electricity tariff and Gas tariff rows say: the plan now, or the one chosen."""
+        entry = self._entry_for(service)
+        if entry is None:
+            if self._new_fuel and self._new_fuel.service == service:
+                return f"{self._new_fuel.plan.title} is added when you save"
+            return f"not followed yet, choose a {service} plan"
+        staged = self._new_plans.get(service)
+        return tariff_line(entry.title, entry.data, staged.title if staged else None)
 
     def _stage(self, keys: tuple[str, ...], user_input: dict[str, Any]) -> None:
         for key in keys:
             self._changes[key] = _clean(key, user_input.get(key))
+
+    def _options_of(self, service: str) -> dict[str, Any]:
+        """A followed fuel's options with the changes made here, for either fuel."""
+        if service == self._own_service():
+            return self._effective()
+        entry = self._entry_for(service)
+        merged = dict(entry.options) if entry else {}
+        for key, value in self._other_changes.get(service, {}).items():
+            if value is None:
+                merged.pop(key, None)
+            else:
+                merged[key] = value
+        return merged
 
     # -- the menu --------------------------------------------------------------------------------
 
@@ -188,14 +212,12 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         self._service, self._adding = self._own_service(), False
         gas = self._service == SERVICE_GAS
         options = self._effective()
-        pages = ["tariff", "meters_gas" if gas else "meters"]
+        pages = ["tariff_electricity", "tariff_gas", "meters_gas" if gas else "meters"]
         if not gas:
             pages.append("battery")
         pages += ["bills", "windows"]
         if CONF_MANUAL not in self.config_entry.data:
             pages.append("store")
-        if self._free_services():
-            pages.append("add_fuel")
         if self._dirty():
             pages.append("confirm")
         return self.async_show_menu(
@@ -203,17 +225,13 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             menu_options=pages,
             description_placeholders={
                 "unsaved": "You have unsaved changes.\n\n" if self._dirty() else "",
-                "tariff_summary": tariff_line(
-                    self.config_entry.title,
-                    self.config_entry.data,
-                    self._plan.title if self._plan else None,
-                ),
+                "electricity_summary": self._tariff_line(SERVICE_ELECTRICITY),
+                "gas_summary": self._tariff_line(SERVICE_GAS),
                 "meters_summary": meters_line(options, self._service),
                 "battery_summary": battery_line(options),
                 "bills_summary": bills_line(options),
                 "windows_summary": windows_line(options),
                 "store_summary": self._store_line(),
-                "fuel_summary": self._fuel_line(),
                 "save_note": "Applies every change on the other pages and reloads the entry.",
             },
         )
@@ -225,49 +243,81 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             return "the store will be read again when you save"
         return "read the store again, or delete the saved files"
 
-    def _fuel_line(self) -> str:
-        if self._new_fuel:
-            return f"{self._new_fuel.service} {self._new_fuel.plan.title} is added when you save"
-        free = self._free_services()
-        return f"follow {free[0]} as well, with its own sensors" if free else ""
-
     # -- the tariff ------------------------------------------------------------------------------
+
+    async def async_step_tariff_electricity(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._tariff_of(SERVICE_ELECTRICITY)
+
+    async def async_step_tariff_gas(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._tariff_of(SERVICE_GAS)
+
+    async def _tariff_of(self, service: str) -> ConfigFlowResult:
+        """Choose the plan of one fuel, with the setup pages. A fuel not followed yet is added."""
+        self._service = service
+        self._reset_pick()
+        if self._entry_for(service) is None:
+            self._adding = True
+            return await self.async_step_country()
+        self._adding = False
+        return await self.async_step_tariff()
 
     async def async_step_tariff(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Choose a different plan, or go back. The sensors keep their names and history."""
-        self._service, self._adding = self._own_service(), False
         return self.async_show_menu(
             step_id="tariff",
             menu_options=["country", "init"],
-            description_placeholders={
-                "tariff_summary": tariff_line(
-                    self.config_entry.title,
-                    self.config_entry.data,
-                    self._plan.title if self._plan else None,
-                )
-            },
+            description_placeholders={"tariff_summary": self._tariff_line(self._service)},
         )
 
     async def _plan_ready(
         self, unique: str, title: str, plan: dict[str, Any]
     ) -> ConfigFlowResult:
         """A plan was chosen. Keep it until Save changes, or ask for a new fuel's meters."""
+        target = self._entry_for(self._service)
         taken = [
             entry
             for entry in self.hass.config_entries.async_entries(DOMAIN)
-            if entry.unique_id == unique and entry.entry_id != self.config_entry.entry_id
+            if entry.unique_id == unique and (target is None or entry.entry_id != target.entry_id)
         ]
-        same_plan = unique == self.config_entry.unique_id and not self._adding
-        if taken or (self._adding and unique == self.config_entry.unique_id):
+        if taken:
             return self.async_abort(reason="already_configured")
         staged = _StagedPlan(unique, title, plan)
-        if self._adding:
+        if target is None:
             self._new_fuel = _NewFuel(self._service, staged, {})
             return await self._new_options_page(None)
-        self._plan = None if same_plan else staged
-        return await self.async_step_init()
+        if unique == target.unique_id:
+            self._new_plans.pop(self._service, None)
+            return await self.async_step_init()
+        self._new_plans[self._service] = staged
+        return await self.async_step_plan_bills()
+
+    async def async_step_plan_bills(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """The page after a plan is chosen: where a bill starts and how long it runs."""
+        keys = _BILL_KEYS[:3] if self._service == SERVICE_GAS else _BILL_KEYS
+        if user_input is not None:
+            changes = {key: _clean(key, user_input.get(key)) for key in keys}
+            if self._service == self._own_service():
+                self._changes.update(changes)
+            else:
+                self._other_changes.setdefault(self._service, {}).update(changes)
+            return await self.async_step_init()
+        fields = self._bill_fields_for(self._service)
+        return self.async_show_form(step_id="plan_bills", data_schema=_schema(fields))
+
+    def _bill_fields_for(self, service: str) -> dict[Any, Any]:
+        options = self._options_of(service)
+        fields = _bill_fields(options)
+        if service != SERVICE_GAS:
+            fields[_suggest(CONF_CONNECTED_LOAD, options)] = _number("kW")
+        return fields
 
     # -- one page for each topic -----------------------------------------------------------------
 
@@ -317,10 +367,7 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
     async def async_step_bills(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        options = self._effective()
-        fields = _bill_fields(options)
-        if self._own_service() != SERVICE_GAS:
-            fields[_suggest(CONF_CONNECTED_LOAD, options)] = _number("kW")
+        fields = self._bill_fields_for(self._own_service())
         keys = _BILL_KEYS[:3] if self._own_service() == SERVICE_GAS else _BILL_KEYS
         return await self._page("bills", fields, keys, user_input)
 
@@ -367,18 +414,7 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         }
         return self.async_show_form(step_id="store", data_schema=_schema(fields), errors=errors)
 
-    # -- adding the other fuel -------------------------------------------------------------------
-
-    async def async_step_add_fuel(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Choose the plan of the fuel that is not followed yet, with the setup pages."""
-        free = self._free_services()
-        if not free:
-            return await self.async_step_init()
-        self._service, self._adding = free[0], True
-        self._reset_pick()
-        return await self.async_step_country()
+    # -- the fuel that is not followed yet -------------------------------------------------------
 
     async def async_step_new_options(
         self, user_input: dict[str, Any] | None = None
@@ -413,25 +449,44 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
     async def async_step_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Write the plan, the options and the new fuel together, and reload the entry once."""
+        """Write the plans, the options and the new fuel together, and reload each entry once."""
         entry = self.config_entry
         options = self._effective()
-        changed = bool(self._plan) or options != dict(entry.options)
-        if self._plan:
-            key = entry.data.get("entity_key") or entry.unique_id or entry.entry_id
-            self.hass.config_entries.async_update_entry(
-                entry,
-                unique_id=self._plan.unique,
-                title=self._plan.title,
-                data=entry_data(self._plan.data, self._own_service(), self._plan.title, key),
-            )
-        if (self._refresh or self._clear) and not self._plan:
+        changed = options != dict(entry.options) or self._own_service() in self._new_plans
+        for service, plan in self._new_plans.items():
+            self._apply_plan(service, plan)
+        self._apply_other_options()
+        if (self._refresh or self._clear) and self._own_service() not in self._new_plans:
             await entry.runtime_data.async_refresh_store(clear=self._clear)
         if self._new_fuel:
             await self._create_new_fuel(self._new_fuel)
         if changed:
             self.hass.config_entries.async_schedule_reload(entry.entry_id)
         return self.async_create_entry(data=options)
+
+    def _apply_other_options(self) -> None:
+        """The bill dates chosen for the other followed fuel are saved on its own entry."""
+        for service, changes in self._other_changes.items():
+            target = self._entry_for(service)
+            if target is None or not changes:
+                continue
+            options = self._options_of(service)
+            self.hass.config_entries.async_update_entry(target, options=options)
+            self.hass.config_entries.async_schedule_reload(target.entry_id)
+
+    def _apply_plan(self, service: str, plan: _StagedPlan) -> None:
+        """Move a followed fuel to its new plan. Its entity key stays, so its entities do too."""
+        target = self._entry_for(service)
+        assert target is not None  # noqa: S101  a plan is only staged for a followed fuel
+        key = target.data.get("entity_key") or target.unique_id or target.entry_id
+        self.hass.config_entries.async_update_entry(
+            target,
+            unique_id=plan.unique,
+            title=plan.title,
+            data=entry_data(plan.data, service, plan.title, key),
+        )
+        if target.entry_id != self.config_entry.entry_id:
+            self.hass.config_entries.async_schedule_reload(target.entry_id)
 
     async def _create_new_fuel(self, fuel: _NewFuel) -> None:
         await self.hass.config_entries.flow.async_init(

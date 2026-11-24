@@ -11,13 +11,12 @@ saved until you choose **Save changes**, which then reloads the integration once
 
 | Page | What is on it |
 | --- | --- |
-| Tariff | **Choose a different plan** with the same pages as setup: country, supplier and plan, area, or your own rates. The sensors keep their entity IDs and history |
+| Electricity tariff, Gas tariff | **Choose a different plan** with the same pages as setup: country, supplier and plan, area, or your own rates. A Bills page follows, for the day a bill starts and how long it runs. The sensors keep their entity IDs and history. Either fuel can be changed from either entry. A fuel that is not followed yet shows "not followed yet" and is added when you save |
 | Energy meters (Gas meter for gas) | The import, export and whole-home sensors, the start of history and the largest rise a meter can show |
 | Battery | The battery's discharge meter, charge, size and wear. Electricity only |
 | Bills | The bill dates and the connected load |
 | Cheap and dear windows | The window length and which half hours count as cheap |
 | Tariff store | Read the store again, or delete the saved files. Both happen when you save |
-| Add gas or electricity | Follows the other fuel as a second entry with its own sensors. It is made when you save |
 
 | Option | Meaning |
 | --- | --- |

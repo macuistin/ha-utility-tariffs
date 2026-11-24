@@ -131,7 +131,7 @@ async def test_the_gas_options_ask_only_for_gas_things(
     menu = await open_menu(hass, entry.entry_id)
 
     assert menu["menu_options"] == [
-        "tariff", "meters_gas", "bills", "windows", "store", "add_fuel"
+        "tariff_electricity", "tariff_gas", "meters_gas", "bills", "windows", "store"
     ]
     page = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "meters_gas"}

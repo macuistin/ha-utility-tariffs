@@ -450,25 +450,25 @@
         "title": "Configure",
         "description": "{unsaved}Pick a page to change. Nothing is saved until you choose **Save changes**.",
         "menu_options": {
-          "tariff": "Tariff",
+          "tariff_electricity": "Electricity tariff",
+          "tariff_gas": "Gas tariff",
           "meters": "Energy meters",
           "meters_gas": "Gas meter",
           "battery": "Battery",
           "bills": "Bills",
           "windows": "Cheap and dear windows",
           "store": "Tariff store",
-          "add_fuel": "Add gas or electricity",
           "confirm": "Save changes"
         },
         "menu_option_descriptions": {
-          "tariff": "{tariff_summary}",
+          "tariff_electricity": "{electricity_summary}",
+          "tariff_gas": "{gas_summary}",
           "meters": "{meters_summary}",
           "meters_gas": "{meters_summary}",
           "battery": "{battery_summary}",
           "bills": "{bills_summary}",
           "windows": "{windows_summary}",
           "store": "{store_summary}",
-          "add_fuel": "{fuel_summary}",
           "confirm": "{save_note}"
         }
       },
@@ -702,6 +702,22 @@
           "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
+        }
+      },
+      "plan_bills": {
+        "title": "Bills for this tariff",
+        "description": "Where a bill starts and how long it runs, for the plan you just chose. They are on your supplier's bill. Left empty, the tariff's own dates apply.",
+        "data": {
+          "bill_start_day": "Day of the month a bill starts",
+          "bill_months": "Months in one bill",
+          "bill_start_month": "A month a bill starts in",
+          "connected_load_kw": "Connected load (kW)"
+        },
+        "data_description": {
+          "bill_start_day": "1 to 28. Leave empty to follow the tariff.",
+          "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
+          "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February.",
+          "connected_load_kw": "Only for a tariff that charges per kW of connected (sanctioned) load. Find it on your bill or supply agreement. Without it, that tariff shows no bill."
         }
       }
     },
