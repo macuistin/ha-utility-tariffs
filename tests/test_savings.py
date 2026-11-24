@@ -22,7 +22,7 @@ from custom_components.utility_tariffs.const import (
 from custom_components.utility_tariffs.savings import battery_of, opening_charge
 from tests.options_support import configure
 from tests.test_bill import METER, _minute, _set
-from tests.test_sensor import NOON, _setup, _state
+from tests.test_sensor import NOON, _options, _setup, _state
 
 HOUSE = "sensor.house_energy"
 SOC = "sensor.battery_charge"
@@ -158,7 +158,7 @@ async def test_the_options_flow_keeps_the_battery_settings(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    result = await configure(
+    await configure(
         hass,
         entry.entry_id,
         meters={CONF_IMPORT_ENERGY: METER, CONF_HOUSE_ENERGY: HOUSE},
@@ -166,7 +166,7 @@ async def test_the_options_flow_keeps_the_battery_settings(
     )
 
     await hass.async_block_till_done()  # the reload the save schedules
-    assert result["data"] == {
+    assert _options(entry) == {
         CONF_IMPORT_ENERGY: METER,
         CONF_HOUSE_ENERGY: HOUSE,
         CONF_BATTERY_SOC: SOC,

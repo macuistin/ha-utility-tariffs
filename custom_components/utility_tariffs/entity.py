@@ -2,11 +2,29 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Iterator
+from functools import partial
+from typing import TYPE_CHECKING, Any
+
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_ENTITY_KEY, DEVICE_NAMES, DOMAIN, SERVICE_GAS
-from .coordinator import TariffCoordinator
+from .const import DEVICE_NAMES, DOMAIN, SERVICE_GAS, hub_identifier
+from .coordinator import TariffConfigEntry, TariffCoordinator
+
+if TYPE_CHECKING:
+    from homeassistant.helpers.entity import Entity
+    from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+
+type AddEntities = Callable[[Iterable[Entity]], None]
+
+
+def per_fuel(
+    entry: TariffConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+) -> Iterator[tuple[TariffCoordinator, AddEntities]]:
+    """Each followed fuel with an adder that puts its entities under its own subentry."""
+    for subentry_id, coordinator in entry.runtime_data.items():
+        yield coordinator, partial(async_add_entities, config_subentry_id=subentry_id)
 
 GAS_NAMES = frozenset(
     {
@@ -36,6 +54,16 @@ GAS_NAMES = frozenset(
 )
 
 
+def _via_hub(coordinator: TariffCoordinator) -> dict[str, Any]:
+    """Link the tariff's device to the hub. Home Assistant 2026.5 names the hub by its identifier,
+    later releases by its device id, and each rejects the other's key."""
+    if coordinator.hub_device_id is None:
+        return {}
+    if "via_device_id" in DeviceInfo.__annotations__:
+        return {"via_device_id": coordinator.hub_device_id}
+    return {"via_device": (DOMAIN, hub_identifier(coordinator.config_entry.entry_id))}
+
+
 class TariffEntity(CoordinatorEntity[TariffCoordinator]):
     """Base of the tariff's entities."""
 
@@ -43,10 +71,9 @@ class TariffEntity(CoordinatorEntity[TariffCoordinator]):
 
     def __init__(self, coordinator: TariffCoordinator, key: str) -> None:
         super().__init__(coordinator)
-        entry = coordinator.config_entry
-        # The key is fixed when the entry is made. A plan chosen later changes the entry's unique
+        # The key is fixed when the fuel is first followed. A plan chosen later changes its unique
         # id but not this key, so the entities, their ids and their history stay as they were.
-        stable = entry.data.get(CONF_ENTITY_KEY) or entry.unique_id or entry.entry_id
+        stable = coordinator.fuel.key
         self._attr_unique_id = f"{stable}_{key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, stable)},
@@ -55,6 +82,7 @@ class TariffEntity(CoordinatorEntity[TariffCoordinator]):
             model=coordinator.data.definition.name,
             entry_type=DeviceEntryType.SERVICE,
         )
+        self._attr_device_info.update(_via_hub(coordinator))  # type: ignore[typeddict-item]
 
     @property
     def translation_key(self) -> str | None:

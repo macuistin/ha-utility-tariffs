@@ -22,10 +22,11 @@ async def test_the_report_holds_the_held_prices_and_hides_the_household(
 
     report = await async_get_config_entry_diagnostics(hass, entry)
 
-    assert report["entry"]["data"]["area"] == "**REDACTED**"
-    assert report["entry"]["data"]["provider"] == "p"
-    assert report["entry"]["options"]["import_energy_entity"] == "**REDACTED**"
-    held = report["coordinator"]
+    fuel = report["fuels"]["electricity"]
+    assert fuel["settings"]["area"] == "**REDACTED**"
+    assert fuel["settings"]["provider"] == "p"
+    assert fuel["settings"]["import_energy_entity"] == "**REDACTED**"
+    held = fuel["coordinator"]
     assert held["last_update_success"] is True
     assert held["tariff"] == "plan-urban"
     assert held["own_rates"] is False

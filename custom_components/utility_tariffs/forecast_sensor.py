@@ -39,7 +39,7 @@ class PercentSensor(TariffEntity, SensorEntity):
     """A sensor that reads the low and high percentiles the user chose, live."""
 
     def percents(self) -> Percents:
-        options = self.coordinator.config_entry.options
+        options = self.coordinator.fuel.options
         return Percents(
             int(options.get(CONF_LOW_PERCENTILE, DEFAULT_LOW_PERCENTILE)),
             int(options.get(CONF_HIGH_PERCENTILE, DEFAULT_HIGH_PERCENTILE)),

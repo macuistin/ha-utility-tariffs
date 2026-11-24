@@ -28,7 +28,7 @@ from custom_components.utility_tariffs.helper.store_access import PriceStoreAcce
 from tests.helpers import async_reader
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
-from tests.test_sensor import DATA, NOON, _setup, _state
+from tests.test_sensor import DATA, NOON, _options, _setup, _state, _sub_id
 
 AGILE_BILL = {"total": {
     "kind": "tax", "name": "VAT", "mode": "included", "percent": "$country.vat_percent",
@@ -212,7 +212,7 @@ async def test_changing_a_percentile_moves_what_counts_as_low_with_no_reload(
     )
     await hass.async_block_till_done()
 
-    assert entry.options["low_percentile"] == 40
+    assert _options(entry)["low_percentile"] == 40
     low = attributes(hass, "next_low_price")
     assert (low["threshold"], low["percentile"]) == (0.25, 40)  # the 40th price known is 0.25
     assert _state(hass, "next_low_price") == "2026-11-14T19:00:00+00:00"  # 0.25 is low enough now
@@ -227,7 +227,7 @@ async def test_a_repair_is_raised_when_tomorrow_is_still_missing_late_in_the_eve
     freezer.move_to("2026-11-14 22:30:00+00:00")
     entry = await _setup(hass, FEED)
 
-    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"prices_not_published_{entry.entry_id}")
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"prices_not_published_{_sub_id(entry)}")
     assert (issue is not None) is (not published)
 
 

@@ -22,7 +22,7 @@ from custom_components.utility_tariffs.const import (
 from custom_components.utility_tariffs.diagnostics import async_get_config_entry_diagnostics
 from custom_components.utility_tariffs.energy_store import storage_key
 from tests.options_support import configure
-from tests.test_sensor import NOON, _setup, _state
+from tests.test_sensor import NOON, _options, _setup, _state, _sub_id
 
 METER = "sensor.meter_in"
 EXPORT_METER = "sensor.meter_out"
@@ -45,7 +45,7 @@ async def _setup_with_meters(hass: HomeAssistant, freezer: FrozenDateTimeFactory
     entry = await _setup(
         hass, options={CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER}
     )
-    assert entry.options[CONF_IMPORT_ENERGY] == METER
+    assert _options(entry)[CONF_IMPORT_ENERGY] == METER
 
 
 async def test_no_bill_sensors_without_a_meter(
@@ -113,14 +113,14 @@ async def test_the_options_flow_saves_and_clears_the_meters(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    result = await configure(
+    await configure(
         hass, entry.entry_id, meters={CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER}
     )
     await hass.async_block_till_done()  # the reload the save schedules
-    assert result["data"] == {CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER}
+    assert _options(entry) == {CONF_IMPORT_ENERGY: METER, CONF_EXPORT_ENERGY: EXPORT_METER}
 
-    result = await configure(hass, entry.entry_id, meters={})
-    assert result["data"] == {}
+    await configure(hass, entry.entry_id, meters={})
+    assert _options(entry) == {}
     await hass.async_block_till_done()
     assert await hass.config_entries.async_unload(entry.entry_id)
 
@@ -136,7 +136,7 @@ async def test_the_history_survives_a_restart_and_goes_with_the_plan(
     _set(hass, METER, 101.0)
     await _minute(hass, freezer)
     assert await hass.config_entries.async_unload(entry.entry_id)
-    key = storage_key(entry.entry_id)
+    key = storage_key(_sub_id(entry))
     assert hass_storage[key]["data"]["days"]
 
     assert await hass.config_entries.async_setup(entry.entry_id)
@@ -282,6 +282,6 @@ async def test_diagnostics_list_what_was_left_out(
 
     report = await async_get_config_entry_diagnostics(hass, entry)
 
-    [row] = report["coordinator"]["meter_readings_left_out"]
+    [row] = report["fuels"]["electricity"]["coordinator"]["meter_readings_left_out"]
     assert (row["meter"], row["reason"], row["kwh"]) == (CONF_IMPORT_ENERGY, "too_large", 4900.0)
     assert METER not in str(report)

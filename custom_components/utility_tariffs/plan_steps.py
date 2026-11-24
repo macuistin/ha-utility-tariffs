@@ -43,6 +43,8 @@ from .manual import CountryDefaults, problem_with
 from .manual_templates import BLANK, TEMPLATES, Template, timed_periods
 from .store import store_access
 
+# What a plan stores, replaced when the plan changes. The rest of a fuel's settings is kept.
+PLAN_KEYS = (CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, CONF_AREA, CONF_MANUAL, CONF_NAME)
 OWN_RATES = "own_rates"  # the key of the first choice label in the translations
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
 SINGLE_AREA = "all"

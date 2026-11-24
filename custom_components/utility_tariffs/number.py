@@ -16,7 +16,7 @@ from .const import (
     MIN_HIGH_PERCENTILE,
 )
 from .coordinator import TariffConfigEntry, TariffCoordinator
-from .entity import TariffEntity
+from .entity import TariffEntity, per_fuel
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -30,13 +30,13 @@ async def async_setup_entry(
     entry: TariffConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = entry.runtime_data
-    async_add_entities([
-        PercentileNumber(coordinator, CONF_LOW_PERCENTILE, DEFAULT_LOW_PERCENTILE, 1,
-                         MAX_LOW_PERCENTILE),
-        PercentileNumber(coordinator, CONF_HIGH_PERCENTILE, DEFAULT_HIGH_PERCENTILE,
-                         MIN_HIGH_PERCENTILE, 99),
-    ])
+    for coordinator, add in per_fuel(entry, async_add_entities):
+        add([
+            PercentileNumber(coordinator, CONF_LOW_PERCENTILE, DEFAULT_LOW_PERCENTILE, 1,
+                             MAX_LOW_PERCENTILE),
+            PercentileNumber(coordinator, CONF_HIGH_PERCENTILE, DEFAULT_HIGH_PERCENTILE,
+                             MIN_HIGH_PERCENTILE, 99),
+        ])
 
 
 class PercentileNumber(TariffEntity, NumberEntity):
@@ -58,11 +58,9 @@ class PercentileNumber(TariffEntity, NumberEntity):
 
     @property
     def native_value(self) -> float:
-        return float(self.coordinator.config_entry.options.get(self._key, self._default))
+        return float(self.coordinator.fuel.options.get(self._key, self._default))
 
     async def async_set_native_value(self, value: float) -> None:
-        entry = self.coordinator.config_entry
-        self.hass.config_entries.async_update_entry(
-            entry, options={**entry.options, self._key: int(value)}
-        )
+        fuel = self.coordinator.fuel
+        fuel.async_update(self.hass, {**fuel.data, self._key: int(value)})
         self.coordinator.async_update_listeners()

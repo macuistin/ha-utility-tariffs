@@ -14,7 +14,7 @@ from custom_components.utility_tariffs.const import DOMAIN
 from tests.support.building import build_store
 from tests.support.fixtures import tariff, write_store
 from tests.test_cache_options import CountingReader
-from tests.test_sensor import NOON, _setup
+from tests.test_sensor import NOON, _coordinator, _setup, _sub_id
 
 
 async def test_the_dates_the_prices_apply_are_shown(
@@ -79,7 +79,7 @@ async def test_a_plan_that_is_ending_with_nothing_after_it_raises_a_repair(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"plan_ending_{entry.entry_id}")
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"plan_ending_{_sub_id(entry)}")
     assert issue is not None
     assert issue.translation_placeholders is not None
     assert issue.translation_placeholders["date"] == "2026-11-20"
@@ -92,7 +92,7 @@ async def test_no_plan_ending_repair_for_an_open_ended_plan(
     freezer.move_to(NOON)
     entry = await _setup(hass)
 
-    assert ir.async_get(hass).async_get_issue(DOMAIN, f"plan_ending_{entry.entry_id}") is None
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"plan_ending_{_sub_id(entry)}") is None
     await hass.config_entries.async_unload(entry.entry_id)
 
 
@@ -103,9 +103,9 @@ async def test_days_without_reaching_the_store_raise_a_repair_that_clears_when_i
     use_store(reader)
     freezer.move_to(NOON)
     entry = await _setup(hass)
-    coordinator = entry.runtime_data
+    coordinator = _coordinator(entry)
     issues = ir.async_get(hass)
-    issue_id = f"store_unreached_{entry.entry_id}"
+    issue_id = f"store_unreached_{_sub_id(entry)}"
 
     reader.down = True
     freezer.move_to("2026-11-17 12:00:00+00:00")

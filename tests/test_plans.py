@@ -15,7 +15,7 @@ from utility_tariffs_lib.tariff import SlotEnergy
 from utility_tariffs_lib.tariffstore import StoreError
 
 from custom_components.utility_tariffs.const import CONF_IMPORT_ENERGY, DOMAIN
-from tests.test_sensor import NOON, _setup, _state
+from tests.test_sensor import NOON, _coordinator, _setup, _state
 
 METER = "sensor.meter_in"
 DUBLIN = ZoneInfo("Europe/Dublin")
@@ -60,7 +60,7 @@ async def test_a_cheaper_plan_is_ranked_first_and_suggested(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:
     entry = await _entry(hass, freezer)
-    coordinator = entry.runtime_data
+    coordinator = _coordinator(entry)
     _fill_october(coordinator)
 
     await coordinator.ranker.async_refresh(TODAY)
@@ -86,18 +86,19 @@ async def test_the_cheapest_plan_raises_no_suggestion(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:
     entry = await _entry(hass, freezer)
-    coordinator = entry.runtime_data
+    coordinator = _coordinator(entry)
     _fill_october(coordinator)
     await coordinator.ranker.async_refresh(TODAY)
     assert ir.async_get(hass).async_get_issue(DOMAIN, "cheaper_plan") is not None
 
     # Following the cheaper plan instead leaves nothing cheaper to suggest.
-    hass.config_entries.async_update_entry(
-        entry, data={**entry.data, "tariff": "flat", "area": "all"}
+    sub = next(iter(entry.subentries.values()))
+    hass.config_entries.async_update_subentry(
+        entry, sub, data={**sub.data, "tariff": "flat", "area": "all"}
     )
     await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
-    coordinator = entry.runtime_data
+    coordinator = _coordinator(entry)
     _fill_october(coordinator)
     await coordinator.ranker.async_refresh(TODAY)
 
@@ -113,7 +114,7 @@ async def test_a_store_that_cannot_be_read_keeps_the_last_ranking(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     entry = await _entry(hass, freezer)
-    coordinator = entry.runtime_data
+    coordinator = _coordinator(entry)
     _fill_october(coordinator)
     kept = await coordinator.ranker.async_refresh(TODAY)
 

@@ -49,13 +49,12 @@ from .const import (
     CONF_MANUAL,
     CONF_NAME,
     CONF_PROVIDER,
-    CONF_SERVICE,
     CONF_TARIFF,
     DOMAIN,
-    SERVICE_ELECTRICITY,
 )
 from .country_reason import reason_for
 from .freshness import STATUS_CURRENT, days_unreached, plan_ending, plan_status
+from .fuel import Fuel
 from .manual import definition_from
 from .store import price_access, store_access
 
@@ -81,7 +80,7 @@ ISSUE_STORE_UNREACHED = "store_unreached"
 ISSUE_PLAN_ENDED = "plan_ended"
 ISSUE_PLAN_WITHDRAWN = "plan_withdrawn"
 STORE_ERRORS = (StoreError, OSError, ValueError, KeyError, TypeError)
-type TariffConfigEntry = ConfigEntry[TariffCoordinator]
+type TariffConfigEntry = ConfigEntry[dict[str, TariffCoordinator]]
 
 
 @dataclass(frozen=True)
@@ -153,19 +152,20 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
 
     config_entry: TariffConfigEntry
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         hass: HomeAssistant,
         entry: TariffConfigEntry,
+        subentry_id: str,
         access: TariffStoreAccess | None = None,
         prices: PriceStoreAccess | None = None,
     ) -> None:
         super().__init__(
             hass, _LOGGER, config_entry=entry, name=DOMAIN, update_interval=None
         )
-        self._access = (
-            access if access is not None else store_access(hass, self.service_of(entry))
-        )
+        self.fuel = Fuel(entry, subentry_id)
+        self.hub_device_id: str | None = None  # the device both tariffs sit under
+        self._access = access if access is not None else store_access(hass, self.fuel.service)
         self._prices = prices if prices is not None else price_access(hass)
         # Set at start-up when the user has chosen an energy meter. None means no bill is kept.
         self.accountant: EnergyAccountant | None = None
@@ -174,14 +174,9 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         # "ended" or "withdrawn" while the store can no longer give this plan's prices.
         self._gone: str | None = None
 
-    @staticmethod
-    def service_of(entry: TariffConfigEntry) -> str:
-        """The service the entry follows. An entry made before gas was added is electricity."""
-        return str(entry.data.get(CONF_SERVICE, SERVICE_ELECTRICITY))
-
     @property
     def service(self) -> str:
-        return self.service_of(self.config_entry)
+        return self.fuel.service
 
     @property
     def access(self) -> TariffStoreAccess:
@@ -212,25 +207,25 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
 
         @callback
         def nightly(_now: datetime) -> None:
-            self.config_entry.async_create_background_task(
+            self.fuel.async_create_background_task(
                 self.hass, self.async_request_refresh(), "utility_tariffs nightly read"
             )
 
-        self.config_entry.async_on_unload(
+        self.fuel.async_on_unload(
             async_track_utc_time_change(self.hass, tick, minute=(0, 30), second=0)
         )
-        self.config_entry.async_on_unload(
+        self.fuel.async_on_unload(
             async_track_time_change(self.hass, nightly, hour=0, minute=5, second=0)
         )
 
         @callback
         def afternoon(now: datetime) -> None:
             if self.data is not None and self.data.on_a_feed and self._tomorrow_missing(now):
-                self.config_entry.async_create_background_task(
+                self.fuel.async_create_background_task(
                     self.hass, self.async_request_refresh(), "utility_tariffs price read"
                 )
 
-        self.config_entry.async_on_unload(
+        self.fuel.async_on_unload(
             async_track_time_change(
                 self.hass, afternoon, hour=range(PRICES_DUE_HOUR, PRICES_LATE_HOUR),
                 minute=(2, 32), second=0,
@@ -264,7 +259,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
                 raise UpdateFailed(
                     translation_domain=DOMAIN,
                     translation_key=f"plan_{self._gone}",
-                    translation_placeholders={"tariff": self.config_entry.title},
+                    translation_placeholders={"tariff": self.fuel.title},
                 ) from err
             if self.data is not None:
                 _LOGGER.warning("The tariff store could not be read, keeping saved prices: %s", err)
@@ -283,7 +278,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
     async def _gone_state(self, today: date) -> str | None:
         """"ended" or "withdrawn" when the store says the plan is no longer offered, else None.
         A store that cannot be reached says nothing, so the plan is not called ended then."""
-        entry = self.config_entry.data
+        entry = self.fuel.data
         if CONF_MANUAL in entry:
             return None
         try:
@@ -296,17 +291,17 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
 
     def _set_gone_issues(self) -> None:
         """Raise the repair for an ended or withdrawn plan. Clear the one that no longer holds."""
-        title = {"tariff": self.config_entry.title}
+        title = {"tariff": self.fuel.title}
         self._set_issue(ISSUE_PLAN_ENDED, title if self._gone == "ended" else None)
         self._set_issue(ISSUE_PLAN_WITHDRAWN, title if self._gone == "withdrawn" else None)
 
     def _check_freshness(self, data: TariffData) -> None:
         """Raise a repair when the plan is about to end or the store has not been reached for days.
         Each clears itself once the cause has gone."""
-        if CONF_MANUAL in self.config_entry.data:
+        if CONF_MANUAL in self.fuel.data:
             return
         now = dt_util.now()
-        title = self.config_entry.title
+        title = self.fuel.title
         ending = plan_ending(data, now.date())
         self._set_issue(
             ISSUE_PLAN_ENDING,
@@ -320,7 +315,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
 
     def _set_issue(self, key: str, placeholders: dict[str, str] | None) -> None:
         """Raise the repair with its text, or clear it when there are no placeholders."""
-        issue = f"{key}_{self.config_entry.entry_id}"
+        issue = f"{key}_{self.fuel.subentry_id}"
         if placeholders is None:
             ir.async_delete_issue(self.hass, DOMAIN, issue)
             return
@@ -330,7 +325,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         )
 
     async def _read(self, today: date) -> TariffData:
-        entry = self.config_entry.data
+        entry = self.fuel.data
         holidays_known = True
         is_holiday: Callable[[date], bool]
         if CONF_MANUAL in entry:  # the household's own rates: no store, and no public holidays
@@ -369,10 +364,10 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
 
     async def _country_status(self) -> tuple[str | None, str | None]:
         """How complete the store says this country is, and why. Nothing for own rates."""
-        if CONF_MANUAL in self.config_entry.data:
+        if CONF_MANUAL in self.fuel.data:
             return None, None
         try:
-            row = (await self._access.async_countries()).get(self.config_entry.data[CONF_COUNTRY])
+            row = (await self._access.async_countries()).get(self.fuel.data[CONF_COUNTRY])
         except STORE_ERRORS:
             return None, None
         if not row:
@@ -401,7 +396,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
     async def _later_revisions(self, today: date) -> list[Revision]:
         """The revisions the store already holds that start after today, with their definitions.
         One that cannot be read ends the list, so a bad future file never hides today's prices."""
-        entry = self.config_entry.data
+        entry = self.fuel.data
         found: list[Revision] = []
         try:
             starts = await self._access.async_revision_starts(
@@ -422,7 +417,7 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         self, names: tuple[str, ...], today: date
     ) -> dict[str, list[PriceSeries]]:
         """The runs of published prices for each series a tariff reads."""
-        entry = self.config_entry.data
+        entry = self.fuel.data
         runs: dict[str, list[PriceSeries]] = {}
         for name in names:
             docs, _missing = await self._prices.async_days(
@@ -442,12 +437,12 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             now.date() + timedelta(days=FEED_HORIZON_DAYS), datetime.min.time(), now.tzinfo
         )
         held = all(found and found[-1].end >= wanted for found in runs.values())
-        issue = f"{ISSUE_PRICES_LATE}_{self.config_entry.entry_id}"
+        issue = f"{ISSUE_PRICES_LATE}_{self.fuel.subentry_id}"
         if held:
             ir.async_delete_issue(self.hass, DOMAIN, issue)
         elif now.hour >= PRICES_LATE_HOUR:
             ir.async_create_issue(
                 self.hass, DOMAIN, issue, is_fixable=False, severity=ir.IssueSeverity.WARNING,
                 translation_key=ISSUE_PRICES_LATE,
-                translation_placeholders={"tariff": self.config_entry.title},
+                translation_placeholders={"tariff": self.fuel.title},
             )

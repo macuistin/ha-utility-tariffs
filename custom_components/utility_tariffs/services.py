@@ -15,24 +15,26 @@ from utility_tariffs_lib.tariff import WindowSearch, find_window
 
 from .bill import bill_so_far
 from .bill_summary import render_bill_html
-from .const import CONF_NAME, DOMAIN
+from .const import CONF_NAME, DOMAIN, SERVICE_ELECTRICITY, SERVICES
 from .windows import end_of_tomorrow
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
-    from .coordinator import TariffConfigEntry
+    from .coordinator import TariffConfigEntry, TariffCoordinator
 
 SERVICE_FIND_WINDOW = "find_window"
 SERVICE_GET_PRICES = "get_prices"
 SERVICE_BILL_SUMMARY = "bill_summary"
 SERVICE_BACKFILL = "backfill"
 ATTR_ENTRY = "config_entry_id"
+ATTR_SERVICE = "service"
 FLOWS = ("import", "export")
 
 FIND_WINDOW_SCHEMA: Any = vol.Schema(
     {
         vol.Required(ATTR_ENTRY): cv.string,
+        vol.Optional(ATTR_SERVICE, default=SERVICE_ELECTRICITY): vol.In(SERVICES),
         vol.Required("duration"): vol.All(cv.time_period, vol.Range(min=timedelta(minutes=1))),
         vol.Optional("flow", default="import"): vol.In(FLOWS),
         vol.Optional("highest", default=False): cv.boolean,
@@ -45,17 +47,40 @@ FIND_WINDOW_SCHEMA: Any = vol.Schema(
 GET_PRICES_SCHEMA: Any = vol.Schema(
     {
         vol.Required(ATTR_ENTRY): cv.string,
+        vol.Optional(ATTR_SERVICE, default=SERVICE_ELECTRICITY): vol.In(SERVICES),
         vol.Optional("start"): cv.datetime,
         vol.Optional("end"): cv.datetime,
     }
 )
 
 
-BILL_SUMMARY_SCHEMA: Any = vol.Schema({vol.Required(ATTR_ENTRY): cv.string})
+BILL_SUMMARY_SCHEMA: Any = vol.Schema(
+    {
+        vol.Required(ATTR_ENTRY): cv.string,
+        vol.Optional(ATTR_SERVICE, default=SERVICE_ELECTRICITY): vol.In(SERVICES),
+    }
+)
 
 BACKFILL_SCHEMA: Any = vol.Schema(
-    {vol.Required(ATTR_ENTRY): cv.string, vol.Optional("start"): cv.date}
+    {
+        vol.Required(ATTR_ENTRY): cv.string,
+        vol.Optional(ATTR_SERVICE, default=SERVICE_ELECTRICITY): vol.In(SERVICES),
+        vol.Optional("start"): cv.date,
+    }
 )
+
+
+def _coordinator(call: ServiceCall) -> TariffCoordinator:
+    """The coordinator of the fuel the call names, from the integration's one entry."""
+    entry = _entry(call.hass, call.data[ATTR_ENTRY])
+    for coordinator in entry.runtime_data.values():
+        if coordinator.service == call.data[ATTR_SERVICE]:
+            return coordinator
+    raise ServiceValidationError(
+        translation_domain=DOMAIN,
+        translation_key="fuel_not_followed",
+        translation_placeholders={"service": call.data[ATTR_SERVICE]},
+    )
 
 
 def _entry(hass: HomeAssistant, entry_id: str) -> TariffConfigEntry:
@@ -79,8 +104,7 @@ def _aware(value: datetime | None) -> datetime | None:
 
 
 async def _find_window(call: ServiceCall) -> ServiceResponse:
-    entry = _entry(call.hass, call.data[ATTR_ENTRY])
-    data = entry.runtime_data.data
+    data = _coordinator(call).data
     search = WindowSearch(
         duration=call.data["duration"],
         flow=call.data["flow"],
@@ -106,8 +130,7 @@ async def _find_window(call: ServiceCall) -> ServiceResponse:
 
 async def _get_prices(call: ServiceCall) -> ServiceResponse:
     """The held prices that overlap the range, cut to it. Defaults to the next 24 hours."""
-    entry = _entry(call.hass, call.data[ATTR_ENTRY])
-    data = entry.runtime_data.data
+    data = _coordinator(call).data
     start = _aware(call.data.get("start")) or dt_util.now()
     end = _aware(call.data.get("end")) or start + timedelta(days=1)
     if end <= start:
@@ -138,17 +161,16 @@ async def _get_prices(call: ServiceCall) -> ServiceResponse:
 
 async def _bill_summary(call: ServiceCall) -> ServiceResponse:
     """The bill so far as an HTML page, with its total and period."""
-    entry = _entry(call.hass, call.data[ATTR_ENTRY])
-    coordinator = entry.runtime_data
+    coordinator = _coordinator(call)
     accountant = coordinator.accountant
     if accountant is None:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_meter")
     data = coordinator.data
-    bill = bill_so_far(accountant.store.history, data, entry.options, dt_util.now())
+    bill = bill_so_far(accountant.store.history, data, coordinator.fuel.options, dt_util.now())
     if bill is None:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_load")
     return {
-        "html": render_bill_html(bill, data.definition, entry.data[CONF_NAME]),
+        "html": render_bill_html(bill, data.definition, coordinator.fuel.data[CONF_NAME]),
         "total": float(bill.priced.total),
         "currency": data.definition.currency,
         "period_start": bill.first_day.isoformat(),
@@ -160,13 +182,13 @@ async def _bill_summary(call: ServiceCall) -> ServiceResponse:
 
 async def _backfill(call: ServiceCall) -> ServiceResponse:
     """Fill the half hours nothing was booked for from the meters' hourly statistics."""
-    entry = _entry(call.hass, call.data[ATTR_ENTRY])
-    accountant = entry.runtime_data.accountant
+    coordinator = _coordinator(call)
+    accountant = coordinator.accountant
     if accountant is None:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_meter_history")
     result = await accountant.async_backfill(call.data.get("start"))
     if result.slots:
-        entry.runtime_data.async_update_listeners()
+        coordinator.async_update_listeners()
     return {
         "half_hours_filled": result.slots,
         "first_day": None if result.first is None else result.first.isoformat(),

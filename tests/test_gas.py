@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 from freezegun.api import FrozenDateTimeFactory
@@ -12,13 +13,14 @@ from homeassistant.helpers import entity_registry as er
 from utility_tariffs_lib.tariffstore import AsyncMemoryCache, AsyncStore, folder_reader
 
 from custom_components.utility_tariffs import coordinator, plan_steps
-from custom_components.utility_tariffs.const import DOMAIN
+from custom_components.utility_tariffs.const import DOMAIN, hub_identifier
+from custom_components.utility_tariffs.energy_store import storage_key
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 from tests.helpers import async_reader
 from tests.options_support import open_menu
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
-from tests.test_sensor import DATA, NOON, _setup
+from tests.test_sensor import DATA, NOON, _coordinator, _options, _setup, _sub
 
 GAS = {**DATA, "service": "gas", "tariff": "flat", "area": "all", "name": "Gas Flat",
        "entity_key": "gas/IE/p/flat/all"}
@@ -57,10 +59,11 @@ async def test_a_gas_entry_reads_the_gas_store_on_its_own_device(
     assert state is not None
     assert state.state == "0.07"
     devices = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
-    assert [(d.identifiers, d.name) for d in devices] == [
+    tariff_devices = [d for d in devices if d.via_device_id]
+    assert [(d.identifiers, d.name) for d in tariff_devices] == [
         ({(DOMAIN, "gas/IE/p/flat/all")}, "Gas Tariff")
     ]
-    assert entry.data["service"] == "gas"
+    assert _sub(entry, "gas").data["service"] == "gas"
 
 
 async def test_a_gas_entry_has_no_export_sensors(
@@ -113,13 +116,19 @@ async def test_each_service_has_its_own_device_and_no_entity_is_on_both(
 
     devices = dr.async_get(hass)
     registry = er.async_get(hass)
+    assert power is gas  # one entry holds both tariffs
     seen: dict[str, set[str | None]] = {}
-    for entry in (power, gas):
-        for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
-            seen.setdefault(entry.entry_id, set()).add(entity.device_id)
-    assert seen[power.entry_id].isdisjoint(seen[gas.entry_id])
-    assert {devices.async_get(d).name for d in seen[power.entry_id]} == {"Utility Tariff"}  # type: ignore[union-attr]
-    assert {devices.async_get(d).name for d in seen[gas.entry_id]} == {"Gas Tariff"}  # type: ignore[union-attr]
+    for entity in er.async_entries_for_config_entry(registry, power.entry_id):
+        seen.setdefault(entity.config_subentry_id or "", set()).add(entity.device_id)
+    elec, gas_id = _sub(power, "electricity").subentry_id, _sub(power, "gas").subentry_id
+    assert seen[elec].isdisjoint(seen[gas_id])
+    assert {devices.async_get(d).name for d in seen[elec]} == {"Utility Tariff"}  # type: ignore[union-attr]
+    assert {devices.async_get(d).name for d in seen[gas_id]} == {"Gas Tariff"}  # type: ignore[union-attr]
+    hub = devices.async_get(_coordinator(power).hub_device_id)
+    assert hub is not None
+    assert hub.identifiers == {(DOMAIN, hub_identifier(power.entry_id))}
+    assert {d.via_device_id for d in dr.async_entries_for_config_entry(devices, power.entry_id)
+            if d.id != hub.id} == {hub.id}
 
 
 async def test_the_gas_options_ask_only_for_gas_things(
@@ -132,7 +141,7 @@ async def test_the_gas_options_ask_only_for_gas_things(
 
     assert menu["menu_options"] == [
         "tariff_electricity", "tariff_gas", "meters_gas", "store"
-    ]
+    ]  # no electricity meters or battery: only gas is followed
     page = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "meters_gas"}
     )
@@ -150,6 +159,49 @@ async def test_the_gas_options_ask_only_for_gas_things(
     saved = await hass.config_entries.options.async_configure(
         page["flow_id"], {"next_step_id": "confirm"}
     )
-    assert saved["data"]["import_energy_entity"] == "sensor.gas_kwh"
+    assert saved["type"] == "create_entry"
+    assert _options(entry, "gas")["import_energy_entity"] == "sensor.gas_kwh"
     await hass.async_block_till_done()
     await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_removing_the_gas_tariff_removes_its_device_and_saved_history(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, stores: list[str],
+    hass_storage: dict[str, Any],
+) -> None:
+    freezer.move_to(NOON)
+    hass.states.async_set("sensor.gas_kwh", "100", {"unit_of_measurement": "kWh"})
+    power = await _setup(hass, {**DATA, "tariff": "flat", "area": "all", "name": "Elec Flat"})
+    await _setup(hass, {**GAS, "import_energy_entity": "sensor.gas_kwh"})
+    key = storage_key(_sub(power, "gas").subentry_id)
+    gas_device = next(
+        d.id for d in dr.async_entries_for_config_entry(dr.async_get(hass), power.entry_id)
+        if d.name == "Gas Tariff"
+    )
+
+    hass.config_entries.async_remove_subentry(power, _sub(power, "gas").subentry_id)
+    await hass.async_block_till_done()
+
+    assert hass.states.get("sensor.gas_tariff_gas_price") is None
+    assert hass.states.get("sensor.utility_tariff_import_price") is not None
+    assert dr.async_get(hass).async_get(gas_device) is None
+    assert key not in hass_storage
+
+
+async def test_an_action_names_the_fuel_it_uses(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, stores: list[str]
+) -> None:
+    freezer.move_to(NOON)
+    power = await _setup(hass, {**DATA, "tariff": "flat", "area": "all", "name": "Elec Flat"})
+    await _setup(hass, GAS)
+    call = {"config_entry_id": power.entry_id, "start": NOON, "end": "2026-11-14 13:00:00+00:00"}
+
+    elec = await hass.services.async_call(
+        DOMAIN, "get_prices", call, blocking=True, return_response=True
+    )
+    gas = await hass.services.async_call(
+        DOMAIN, "get_prices", {**call, "service": "gas"}, blocking=True, return_response=True
+    )
+
+    assert elec["prices"][0]["import_price"] == 0.25
+    assert gas["prices"][0]["import_price"] == 0.07

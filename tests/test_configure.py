@@ -4,18 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+from types import MappingProxyType
 
 from freezegun.api import FrozenDateTimeFactory
+from homeassistant.config_entries import ConfigSubentry
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.utility_tariffs.const import DOMAIN
 from tests.helpers import without_bands
 from tests.options_support import configure, fill_windows, open_menu
 from tests.test_gas import stores  # noqa: F401  the electricity and gas stores
-from tests.test_sensor import DATA, NOON, _setup
+from tests.test_sensor import DATA, NOON, _options, _setup, _sub
 
 FLAT = "P Energy – Flat"
 FLAT_DATA = {**DATA, "tariff": "flat", "area": "all", "name": "P Energy Flat"}
@@ -62,7 +63,7 @@ async def test_nothing_is_saved_until_save_changes(
 
     menu = await fill_windows(hass, menu["flow_id"], "electricity", {"window_minutes": 240})
 
-    assert entry.options == {}
+    assert _options(entry) == {}
     assert "confirm" in menu["menu_options"]
     assert menu["description_placeholders"]["unsaved"].startswith("You have unsaved changes")
     result = await hass.config_entries.options.async_configure(
@@ -70,7 +71,7 @@ async def test_nothing_is_saved_until_save_changes(
     )
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options == {"window_minutes": 240}
+    assert _options(entry) == {"window_minutes": 240}
     await hass.config_entries.async_unload(entry.entry_id)
 
 
@@ -80,10 +81,10 @@ async def test_a_field_emptied_on_its_page_is_removed(
     freezer.move_to(NOON)
     entry = await _setup(hass, options={"import_energy_entity": "sensor.grid_in"})
 
-    result = await configure(hass, entry.entry_id, meters={})
+    await configure(hass, entry.entry_id, meters={})
     await hass.async_block_till_done()
 
-    assert result["data"] == {}
+    assert _options(entry) == {}
     await hass.config_entries.async_unload(entry.entry_id)
 
 
@@ -110,17 +111,17 @@ async def test_the_tariff_changes_in_configure_and_keeps_the_entities(
     assert menu["description_placeholders"]["electricity_summary"] == (
         "changes to P Energy Flat when you save, bill starts on day 16, 2 months a bill"
     )
-    assert entry.data["tariff"] == "plan"  # not saved yet
+    assert _sub(entry).data["tariff"] == "plan"  # not saved yet
     result = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "confirm"}
     )
     await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.data["tariff"] == "flat"
-    assert entry.options == {"bill_start_day": 16, "bill_months": 2}
-    assert entry.title == "P Energy Flat"
-    assert entry.unique_id == "IE/p/flat/all"
+    assert _sub(entry).data["tariff"] == "flat"
+    assert _options(entry) == {"bill_start_day": 16, "bill_months": 2}
+    assert _sub(entry).title == "P Energy Flat"
+    assert _sub(entry).unique_id == "IE/p/flat/all"
     after = {
         e.unique_id: e.entity_id
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
@@ -157,18 +158,22 @@ async def test_the_own_rates_pages_work_from_configure(
     await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.data["manual"]["base_rate"] == 0.3
-    assert entry.title == "Mine"
-    assert entry.data["entity_key"] == "IE/p/plan/urban"
+    assert _sub(entry).data["manual"]["base_rate"] == 0.3
+    assert _sub(entry).title == "Mine"
+    assert _sub(entry).data["entity_key"] == "IE/p/plan/urban"
     await hass.config_entries.async_unload(entry.entry_id)
 
 
-async def test_a_plan_another_entry_follows_is_refused(
+async def test_a_plan_the_entry_already_follows_is_refused(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:
     freezer.move_to(NOON)
-    MockConfigEntry(domain=DOMAIN, unique_id="IE/p/flat/all", data={}).add_to_hass(hass)
     entry = await _setup(hass)
+    entry_flat = hass.config_entries
+    entry_flat.async_add_subentry(entry, ConfigSubentry(
+        data=MappingProxyType({}), subentry_type="electricity", title="Other",
+        unique_id="IE/p/flat/all",
+    ))
     menu = await open_menu(hass, entry.entry_id)
 
     result = await _choose_plan(hass, menu["flow_id"])
@@ -195,16 +200,14 @@ async def test_gas_is_added_from_configure_and_made_when_saved(
 
     assert menu["step_id"] == "init"
     assert menu["description_placeholders"]["gas_summary"] == "P Energy Flat is added when you save"
-    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+    assert "gas" not in {s.subentry_type for s in entry.subentries.values()}  # not saved yet
     await flow.async_configure(flow_id, {"next_step_id": "confirm"})
     await hass.async_block_till_done()
 
-    gas = [e for e in hass.config_entries.async_entries(DOMAIN) if e.data.get("service") == "gas"]
-    assert len(gas) == 1
-    assert gas[0].options == {"import_energy_entity": "sensor.gas_kwh"}
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1  # the same entry holds both
+    assert _options(entry, "gas") == {"import_energy_entity": "sensor.gas_kwh"}
     assert hass.states.get("sensor.gas_tariff_gas_price") is not None
     await hass.config_entries.async_unload(entry.entry_id)
-    await hass.config_entries.async_unload(gas[0].entry_id)
 
 
 async def test_the_other_fuel_is_changed_from_the_same_menu_with_its_bill_dates(
@@ -214,7 +217,9 @@ async def test_the_other_fuel_is_changed_from_the_same_menu_with_its_bill_dates(
 
     freezer.move_to(NOON)
     power = await _setup(hass, FLAT_DATA)
-    gas = await _setup(hass, GAS)
+    await _setup(hass, GAS)
+    old = _sub(power, "gas")  # a gas plan followed under the electricity-style id of its first release
+    hass.config_entries.async_update_subentry(power, old, unique_id="gas-first-release")
     menu = await open_menu(hass, power.entry_id)
     assert menu["description_placeholders"]["gas_summary"] == "Gas Flat (IE)"
 
@@ -225,17 +230,16 @@ async def test_the_other_fuel_is_changed_from_the_same_menu_with_its_bill_dates(
         menu["flow_id"], {"bill_start_day": 5}
     )
 
-    assert power.options == {} and gas.options == {}  # nothing saved yet
+    assert _options(power) == {} and _options(power, "gas") == {}  # nothing saved yet
     await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "confirm"}
     )
     await hass.async_block_till_done()
-    assert gas.unique_id == "gas/IE/p/flat/all"  # moved to the store's own gas plan id
-    assert gas.data["service"] == "gas"
-    assert gas.options == {"bill_start_day": 5}
-    assert power.options == {}
+    assert _sub(power, "gas").unique_id == "gas/IE/p/flat/all"  # the store's own gas plan id
+    assert _sub(power, "gas").data["service"] == "gas"
+    assert _options(power, "gas") == {"bill_start_day": 5}
+    assert _options(power) == {}
     await hass.config_entries.async_unload(power.entry_id)
-    await hass.config_entries.async_unload(gas.entry_id)
 
 
 async def test_the_window_settings_are_on_the_tariff_page_of_each_fuel(
@@ -245,7 +249,7 @@ async def test_the_window_settings_are_on_the_tariff_page_of_each_fuel(
 
     freezer.move_to(NOON)
     power = await _setup(hass, FLAT_DATA)
-    gas = await _setup(hass, GAS)
+    await _setup(hass, GAS)
     menu = await open_menu(hass, power.entry_id)
     flow = hass.config_entries.options
     page = await flow.async_configure(menu["flow_id"], {"next_step_id": "tariff_gas"})
@@ -257,7 +261,6 @@ async def test_the_window_settings_are_on_the_tariff_page_of_each_fuel(
     await flow.async_configure(menu["flow_id"], {"next_step_id": "confirm"})
     await hass.async_block_till_done()
 
-    assert gas.options == {"window_minutes": 60}
-    assert power.options == {}
+    assert _options(power, "gas") == {"window_minutes": 60}
+    assert _options(power) == {}
     await hass.config_entries.async_unload(power.entry_id)
-    await hass.config_entries.async_unload(gas.entry_id)

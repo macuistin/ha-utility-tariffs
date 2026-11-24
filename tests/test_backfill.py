@@ -29,7 +29,7 @@ from custom_components.utility_tariffs.const import (
     DOMAIN,
     METER_TARGETS,
 )
-from tests.test_sensor import NOON, _setup
+from tests.test_sensor import NOON, _coordinator, _options, _setup
 
 DUBLIN = ZoneInfo("Europe/Dublin")
 METER = "sensor.meter_in"
@@ -158,7 +158,7 @@ def _import_statistics(hass: HomeAssistant, entity_id: str, start: datetime, ris
 
 
 async def _history_of(hass: HomeAssistant, entry_id: str, day: date):  # type: ignore[no-untyped-def]
-    accountant = hass.config_entries.async_get_entry(entry_id).runtime_data.accountant
+    accountant = _coordinator(hass.config_entries.async_get_entry(entry_id)).accountant
     await hass.async_block_till_done()
     return accountant, accountant.store.history.get(day)
 
@@ -228,14 +228,14 @@ async def test_configure_fills_the_history_when_saved(
     accountant, day = await _history_of(hass, entry.entry_id, DAY)
     assert day is None or day.flows["import"][12] == 0.0
 
-    result = await configure(
+    await configure(
         hass,
         entry.entry_id,
         meters={CONF_IMPORT_ENERGY: METER, CONF_HISTORY_START: "2026-11-13", "backfill_now": True},
     )
 
-    assert result["data"][CONF_IMPORT_ENERGY] == METER
-    assert "backfill_now" not in result["data"]
+    assert _options(entry)[CONF_IMPORT_ENERGY] == METER
+    assert "backfill_now" not in _options(entry)
     await hass.async_block_till_done()
     _, day = await _history_of(hass, entry.entry_id, DAY)
     assert day is not None

@@ -15,16 +15,15 @@ from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import slugify
 
-from .const import CONF_ENTITY_KEY, DOMAIN, SERVICE_GAS
-from .entity import TariffEntity
+from .const import DOMAIN, SERVICE_GAS
+from .entity import AddEntities, TariffEntity
+from .fuel import Fuel
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from decimal import Decimal
 
-    from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
-
-    from .coordinator import TariffConfigEntry, TariffCoordinator, TariffData
+    from .coordinator import TariffCoordinator, TariffData
 
 type Flow = Literal["import", "export"]
 FLOWS: tuple[Flow, ...] = ("import", "export")
@@ -72,17 +71,15 @@ class BandPriceSensor(TariffEntity, SensorEntity):
         return None if price is None else float(price)
 
 
-def _unique_prefix(entry: TariffConfigEntry, flow: Flow) -> str:
-    stable = entry.data.get(CONF_ENTITY_KEY) or entry.unique_id or entry.entry_id
-    return f"{stable}_{flow}_band_price_"
+def _unique_prefix(fuel: Fuel, flow: Flow) -> str:
+    return f"{fuel.key}_{flow}_band_price_"
 
 
 @callback
 def async_setup_band_sensors(
-    entry: TariffConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    coordinator: TariffCoordinator, async_add_entities: AddEntities
 ) -> None:
     """Add a sensor for every band now, and keep them in step with the tariff afterwards."""
-    coordinator = entry.runtime_data
     added: set[tuple[Flow, str]] = set()
 
     @callback
@@ -97,17 +94,17 @@ def async_setup_band_sensors(
         added.intersection_update(wanted)
 
     sync()
-    entry.async_on_unload(coordinator.async_add_listener(sync))
+    coordinator.fuel.async_on_unload(coordinator.async_add_listener(sync))
 
 
 def _remove_dropped(coordinator: TariffCoordinator, wanted: set[tuple[Flow, str]]) -> None:
     """Delete the registry entry of every band sensor whose band the tariff no longer prices."""
-    entry = coordinator.config_entry
+    fuel = coordinator.fuel
     registry = er.async_get(coordinator.hass)
-    keep = {f"{_unique_prefix(entry, flow)}{slugify(band)}" for flow, band in wanted}
-    for item in er.async_entries_for_config_entry(registry, entry.entry_id):
+    keep = {f"{_unique_prefix(fuel, flow)}{slugify(band)}" for flow, band in wanted}
+    for item in er.async_entries_for_config_entry(registry, fuel.entry.entry_id):
         is_band = item.domain == "sensor" and item.platform == DOMAIN and any(
-            (item.unique_id or "").startswith(_unique_prefix(entry, flow)) for flow in FLOWS
+            (item.unique_id or "").startswith(_unique_prefix(fuel, flow)) for flow in FLOWS
         )
         if is_band and item.unique_id not in keep:
             registry.async_remove(item.entity_id)

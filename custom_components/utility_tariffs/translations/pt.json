@@ -151,6 +151,16 @@
           "bill_months": "1, 2, 3, 4, 6 or 12. Leave empty to follow the tariff.",
           "bill_start_month": "Only for bills longer than a month, so they line up with your supplier's. For example 2 with a two-month bill starting in February."
         }
+      },
+      "reconfigure": {
+        "title": "Choose a tariff",
+        "description": "Which tariff should follow a different plan?",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The tariff to change."
+        }
       }
     },
     "abort": {
@@ -158,7 +168,8 @@
       "no_tariffs": "Este fornecedor não tem nenhum plano com preços em vigor hoje.",
       "single_instance_allowed": "Só se pode seguir um tarifário. Use Reconfigurar para mudar de plano.",
       "already_configured": "Este plano já está configurado.",
-      "reconfigure_successful": "O plano foi alterado. Os sensores mantêm os nomes e o histórico."
+      "reconfigure_successful": "O plano foi alterado. Os sensores mantêm os nomes e o histórico.",
+      "no_tariff": "No tariff is followed yet."
     },
     "error": {
       "invalid_tariff": "Estes preços não podem ser usados. Verifique o código da moeda e os valores.",
@@ -462,7 +473,7 @@
           "tariff_electricity": "{electricity_summary}",
           "tariff_gas": "{gas_summary}",
           "meters": "{meters_summary}",
-          "meters_gas": "{meters_summary}",
+          "meters_gas": "{meters_gas_summary}",
           "battery": "{battery_summary}",
           "store": "{store_summary}",
           "confirm": "{save_note}"
@@ -745,6 +756,10 @@
           "name": "Tarifário",
           "description": "O tarifário a pesquisar."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "duration": {
           "name": "Duração",
           "description": "Durante quanto tempo a carga funciona."
@@ -779,6 +794,10 @@
           "name": "Tarifário",
           "description": "O tarifário a ler."
         },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
+        },
         "start": {
           "name": "Início",
           "description": "O primeiro momento pretendido. Por omissão, agora."
@@ -796,6 +815,10 @@
         "config_entry_id": {
           "name": "Tarifário",
           "description": "O tarifário cuja fatura mostrar."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         }
       }
     },
@@ -806,6 +829,10 @@
         "config_entry_id": {
           "name": "Tarifa",
           "description": "A tarifa cujo histórico deve ser preenchido."
+        },
+        "service": {
+          "name": "Service",
+          "description": "Which tariff to use: electricity or gas. Electricity when left out."
         },
         "start": {
           "name": "Primeiro dia",
@@ -876,6 +903,9 @@
     },
     "plan_withdrawn": {
       "message": "O repositório de tarifários já não lista {tariff}. Use Reconfigurar para seguir um plano disponível."
+    },
+    "fuel_not_followed": {
+      "message": "No {service} tariff is followed."
     }
   },
   "issues": {

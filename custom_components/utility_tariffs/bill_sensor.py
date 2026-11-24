@@ -78,7 +78,7 @@ class BillSensor(TariffEntity, SensorEntity):
         return bill_so_far(
             accountant.store.history,
             self.coordinator.data,
-            self.coordinator.config_entry.options,
+            self.coordinator.fuel.options,
             dt_util.now(),
         )
 

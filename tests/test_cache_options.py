@@ -11,7 +11,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from utility_tariffs_lib.tariffstore import folder_reader
 
 from tests.options_support import configure, fill_page, open_menu
-from tests.test_sensor import NOON, _setup
+from tests.test_sensor import NOON, _coordinator, _setup
 
 
 class CountingReader:
@@ -100,8 +100,8 @@ async def test_clear_is_refused_while_the_store_is_unreachable(
     freezer.move_to(NOON)
     entry = await _setup(hass)
     reader.down = True
-    await entry.runtime_data.async_refresh_store()
-    assert entry.runtime_data.access.offline
+    await _coordinator(entry).async_refresh_store()
+    assert _coordinator(entry).access.offline
 
     menu = await open_menu(hass, entry.entry_id)
     await hass.config_entries.options.async_configure(menu["flow_id"], {"next_step_id": "store"})
