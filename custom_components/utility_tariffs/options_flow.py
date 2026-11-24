@@ -185,7 +185,11 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
                 return f"{self._new_fuel.plan.title} is added when you save"
             return f"not followed yet, choose a {service} plan"
         staged = self._new_plans.get(service)
-        return tariff_line(entry.title, entry.data, staged.title if staged else None)
+        line = tariff_line(entry.title, entry.data, staged.title if staged else None)
+        options = self._options_of(service)
+        if options.get(CONF_BILL_START_DAY) or options.get(CONF_BILL_MONTHS):
+            line += f", {bills_line(options)}"
+        return line
 
     def _stage(self, keys: tuple[str, ...], user_input: dict[str, Any]) -> None:
         for key in keys:
@@ -215,7 +219,6 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         pages = ["tariff_electricity", "tariff_gas", "meters_gas" if gas else "meters"]
         if not gas:
             pages.append("battery")
-        pages += ["bills", "windows"]
         if CONF_MANUAL not in self.config_entry.data:
             pages.append("store")
         if self._dirty():
@@ -229,7 +232,6 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
                 "gas_summary": self._tariff_line(SERVICE_GAS),
                 "meters_summary": meters_line(options, self._service),
                 "battery_summary": battery_line(options),
-                "bills_summary": bills_line(options),
                 "windows_summary": windows_line(options),
                 "store_summary": self._store_line(),
                 "save_note": "Applies every change on the other pages and reloads the entry.",
@@ -271,8 +273,12 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         """Choose a different plan, or go back. The sensors keep their names and history."""
         return self.async_show_menu(
             step_id="tariff",
-            menu_options=["country", "init"],
-            description_placeholders={"tariff_summary": self._tariff_line(self._service)},
+            menu_options=["country", "bills", "windows", "init"],
+            description_placeholders={
+                "tariff_summary": self._tariff_line(self._service),
+                "bills_summary": bills_line(self._options_of(self._service)),
+                "windows_summary": windows_line(self._options_of(self._service)),
+            },
         )
 
     async def _plan_ready(
@@ -301,16 +307,37 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """The page after a plan is chosen: where a bill starts and how long it runs."""
+        return await self._bills_page("plan_bills", user_input)
+
+    async def async_step_bills(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """The bill dates of the fuel chosen on the tariff page, without changing its plan."""
+        return await self._bills_page("bills", user_input)
+
+    async def _bills_page(
+        self, step_id: str, user_input: dict[str, Any] | None
+    ) -> ConfigFlowResult:
         keys = _BILL_KEYS[:3] if self._service == SERVICE_GAS else _BILL_KEYS
-        if user_input is not None:
-            changes = {key: _clean(key, user_input.get(key)) for key in keys}
-            if self._service == self._own_service():
-                self._changes.update(changes)
-            else:
-                self._other_changes.setdefault(self._service, {}).update(changes)
-            return await self.async_step_init()
         fields = self._bill_fields_for(self._service)
-        return self.async_show_form(step_id="plan_bills", data_schema=_schema(fields))
+        return await self._fuel_page(step_id, fields, keys, user_input)
+
+    async def _fuel_page(
+        self,
+        step_id: str,
+        fields: dict[Any, Any],
+        keys: tuple[str, ...],
+        user_input: dict[str, Any] | None,
+    ) -> ConfigFlowResult:
+        """A page of the fuel chosen on the tariff page. Its answers are kept for that fuel."""
+        if user_input is None:
+            return self.async_show_form(step_id=step_id, data_schema=_schema(fields))
+        changes = {key: _clean(key, user_input.get(key)) for key in keys}
+        if self._service == self._own_service():
+            self._changes.update(changes)
+        else:
+            self._other_changes.setdefault(self._service, {}).update(changes)
+        return await self.async_step_init()
 
     def _bill_fields_for(self, service: str) -> dict[Any, Any]:
         options = self._options_of(service)
@@ -364,17 +391,10 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         }
         return await self._page("battery", fields, _BATTERY_KEYS, user_input)
 
-    async def async_step_bills(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        fields = self._bill_fields_for(self._own_service())
-        keys = _BILL_KEYS[:3] if self._own_service() == SERVICE_GAS else _BILL_KEYS
-        return await self._page("bills", fields, keys, user_input)
-
     async def async_step_windows(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        options = self._effective()
+        options = self._options_of(self._service)
         minutes = NumberSelectorConfig(
             min=MIN_WINDOW_MINUTES,
             max=MAX_WINDOW_MINUTES,
@@ -393,7 +413,7 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
                 )
             ),
         }
-        return await self._page("windows", fields, _WINDOW_KEYS, user_input)
+        return await self._fuel_page("windows", fields, _WINDOW_KEYS, user_input)
 
     async def async_step_store(
         self, user_input: dict[str, Any] | None = None

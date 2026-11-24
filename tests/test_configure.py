@@ -13,7 +13,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.utility_tariffs.const import DOMAIN
 from tests.helpers import without_bands
-from tests.options_support import configure, fill_page, open_menu
+from tests.options_support import configure, fill_windows, open_menu
 from tests.test_gas import stores  # noqa: F401  the electricity and gas stores
 from tests.test_sensor import DATA, NOON, _setup
 
@@ -41,14 +41,13 @@ async def test_the_menu_says_what_each_page_holds_now(
     menu = await open_menu(hass, entry.entry_id)
 
     assert menu["menu_options"] == [
-        "tariff_electricity", "tariff_gas", "meters", "battery", "bills", "windows", "store"
+        "tariff_electricity", "tariff_gas", "meters", "battery", "store"
     ]
     lines = menu["description_placeholders"]
     assert lines["electricity_summary"] == "P Energy Plan (Urban) (IE)"
     assert lines["gas_summary"] == "not followed yet, choose a gas plan"
     assert lines["meters_summary"] == "import sensor.grid_in"
     assert lines["battery_summary"] == "no battery set"
-    assert lines["windows_summary"] == "120 minute windows, cheap is only the cheapest band"
     assert lines["unsaved"] == ""
     hass.config_entries.options.async_abort(menu["flow_id"])
     await hass.config_entries.async_unload(entry.entry_id)
@@ -61,12 +60,11 @@ async def test_nothing_is_saved_until_save_changes(
     entry = await _setup(hass)
     menu = await open_menu(hass, entry.entry_id)
 
-    menu = await fill_page(hass, menu["flow_id"], "windows", {"window_minutes": 240})
+    menu = await fill_windows(hass, menu["flow_id"], "electricity", {"window_minutes": 240})
 
     assert entry.options == {}
     assert "confirm" in menu["menu_options"]
     assert menu["description_placeholders"]["unsaved"].startswith("You have unsaved changes")
-    assert menu["description_placeholders"]["windows_summary"].startswith("240 minute")
     result = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "confirm"}
     )
@@ -110,7 +108,7 @@ async def test_the_tariff_changes_in_configure_and_keeps_the_entities(
 
     assert menu["step_id"] == "init"
     assert menu["description_placeholders"]["electricity_summary"] == (
-        "changes to P Energy Flat when you save"
+        "changes to P Energy Flat when you save, bill starts on day 16, 2 months a bill"
     )
     assert entry.data["tariff"] == "plan"  # not saved yet
     result = await hass.config_entries.options.async_configure(
@@ -235,6 +233,31 @@ async def test_the_other_fuel_is_changed_from_the_same_menu_with_its_bill_dates(
     assert gas.unique_id == "gas/IE/p/flat/all"  # moved to the store's own gas plan id
     assert gas.data["service"] == "gas"
     assert gas.options == {"bill_start_day": 5}
+    assert power.options == {}
+    await hass.config_entries.async_unload(power.entry_id)
+    await hass.config_entries.async_unload(gas.entry_id)
+
+
+async def test_the_window_settings_are_on_the_tariff_page_of_each_fuel(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, stores: list[str]  # noqa: F811
+) -> None:
+    from tests.test_gas import GAS
+
+    freezer.move_to(NOON)
+    power = await _setup(hass, FLAT_DATA)
+    gas = await _setup(hass, GAS)
+    menu = await open_menu(hass, power.entry_id)
+    flow = hass.config_entries.options
+    page = await flow.async_configure(menu["flow_id"], {"next_step_id": "tariff_gas"})
+    assert "windows" in page["menu_options"]
+    assert page["description_placeholders"]["windows_summary"].startswith("120 minute")
+    await flow.async_configure(menu["flow_id"], {"next_step_id": "init"})
+
+    await fill_windows(hass, menu["flow_id"], "gas", {"window_minutes": 60})
+    await flow.async_configure(menu["flow_id"], {"next_step_id": "confirm"})
+    await hass.async_block_till_done()
+
+    assert gas.options == {"window_minutes": 60}
     assert power.options == {}
     await hass.config_entries.async_unload(power.entry_id)
     await hass.config_entries.async_unload(gas.entry_id)

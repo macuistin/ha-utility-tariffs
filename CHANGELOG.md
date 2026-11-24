@@ -7,11 +7,12 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Changed**
 
-- Configure is now a list of pages instead of one long form: Electricity tariff, Gas tariff, Energy meters (or Gas meter),
-  Battery, Bills, Cheap and dear windows and Tariff store. Each page shows what is set now, and
+- Configure is now a list of pages instead of one long form: Electricity tariff, Gas tariff, Energy meters (or
+  Gas meter), Battery and Tariff store. The bill dates, the window length and the cheap rule are on each
+  fuel's tariff page, since they belong to that tariff. Each page shows what is set now, and
   nothing is saved until you choose **Save changes**, which reloads the integration once. Every
-  field is on the page where you would look for it. The window length and cheap rule share a page,
-  the battery meters share a page with the battery size, and the connected load is on Bills.
+  field is on the page where you would look for it. The battery meters share a page with the
+  battery size, and the connected load is with the bill dates.
 - The Electricity tariff and Gas tariff pages change the plan with the same pages as setup,
   including your own rates, then ask for the bill start day and length. The sensors keep their
   entity IDs and history, as with Reconfigure. Either fuel can be changed from either entry.

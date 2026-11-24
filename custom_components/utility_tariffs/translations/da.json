@@ -455,8 +455,6 @@
           "meters": "Energy meters",
           "meters_gas": "Gas meter",
           "battery": "Battery",
-          "bills": "Bills",
-          "windows": "Cheap and dear windows",
           "store": "Tariff store",
           "confirm": "Save changes"
         },
@@ -466,17 +464,17 @@
           "meters": "{meters_summary}",
           "meters_gas": "{meters_summary}",
           "battery": "{battery_summary}",
-          "bills": "{bills_summary}",
-          "windows": "{windows_summary}",
           "store": "{store_summary}",
           "confirm": "{save_note}"
         }
       },
       "tariff": {
         "title": "Tariff",
-        "description": "Followed now: {tariff_summary}. Choosing a different plan keeps your sensors, their names and their history.",
+        "description": "Followed now: {tariff_summary}. Bills: {bills_summary}. Windows: {windows_summary}. Choosing a different plan keeps your sensors, their names and their history.",
         "menu_options": {
           "country": "Choose a different plan",
+          "bills": "Bills",
+          "windows": "Cheap and dear windows",
           "init": "Back"
         }
       },
