@@ -486,14 +486,16 @@
           "export_energy_entity": "Energy exported to the grid",
           "house_energy_entity": "Energy used by the whole home",
           "history_start": "Start of history",
-          "max_meter_kw": "Largest rise a meter can show (kW)"
+          "max_meter_kw": "Largest rise a meter can show (kW)",
+          "backfill_now": "Fill history now"
         },
         "data_description": {
           "import_energy_entity": "Needed for the bill. Read every minute.",
           "export_energy_entity": "Optional. Credits what you export.",
           "house_energy_entity": "Needed for the savings. A meter of all the energy the home used, from the grid, solar and battery.",
           "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year.",
-          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW."
+          "max_meter_kw": "Optional. The most power your home could draw. A meter reading that rises faster than this is left out of the bill. Leave empty for 100 kW.",
+          "backfill_now": "Reads your meters' statistics and fills the half hours nothing was booked for, from the start of history or else the last year. It happens when you save. Needs the import meter."
         }
       },
       "meters_gas": {
@@ -501,11 +503,13 @@
         "description": "A meter is a sensor in kWh that only ever rises, such as your smart meter's gas total. Leave it empty to show prices only.",
         "data": {
           "import_energy_entity": "Gas used",
-          "history_start": "Start of history"
+          "history_start": "Start of history",
+          "backfill_now": "Fill history now"
         },
         "data_description": {
           "import_energy_entity": "Needed for the bill. A sensor in kWh that only rises. Read every minute.",
-          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year."
+          "history_start": "Optional. The first day to fill from your meters' statistics when the plan starts. Leave empty for the last year.",
+          "backfill_now": "Reads your meters' statistics and fills the half hours nothing was booked for, from the start of history or else the last year. It happens when you save. Needs the import meter."
         }
       },
       "battery": {
@@ -723,7 +727,8 @@
       "clear_while_offline": "The store cannot be reached, so deleting the saved files would leave no prices. Try again when it is reachable.",
       "invalid_tariff": "These rates cannot be used. Check the currency code and the values.",
       "empty_period": "The rate must start and end at different times.",
-      "unknown_plan": "Choose a plan from the list."
+      "unknown_plan": "Choose a plan from the list.",
+      "backfill_needs_meter": "Choose the import meter first. The fill reads its statistics."
     },
     "abort": {
       "cannot_connect": "The tariff store could not be read. Check the connection and try again.",

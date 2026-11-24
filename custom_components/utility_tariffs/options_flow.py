@@ -12,6 +12,7 @@ change, a new fuel and the options are applied together in `async_step_confirm`.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -27,9 +28,11 @@ from homeassistant.helpers.selector import (
     SelectSelectorConfig,
 )
 
+from .backfill import async_fill_history
 from .const import (
     CHEAP_BAND,
     CHEAP_RULES,
+    CONF_BACKFILL_NOW,
     CONF_BATTERY_CAPACITY,
     CONF_BATTERY_DISCHARGE_ENERGY,
     CONF_BATTERY_SOC,
@@ -73,6 +76,7 @@ from .options_summary import (
 )
 from .plan_steps import PlanSteps, _schema, entry_data
 
+_LOGGER = logging.getLogger(__name__)
 _INTS = (CONF_WINDOW_MINUTES, CONF_BILL_START_DAY, CONF_BILL_MONTHS, CONF_BILL_START_MONTH)
 _FLOATS = (CONF_BATTERY_CAPACITY, CONF_BATTERY_WEAR, CONF_CONNECTED_LOAD, CONF_MAX_METER_KW)
 
@@ -138,6 +142,7 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         self._adding = False
         self._refresh = False
         self._clear = False
+        self._backfill = False
 
     # -- what the entry is and what would change -------------------------------------------------
 
@@ -161,6 +166,7 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             or self._new_fuel
             or self._refresh
             or self._clear
+            or self._backfill
             or self._effective() != dict(self.config_entry.options)
         )
 
@@ -230,7 +236,8 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
                 "unsaved": "You have unsaved changes.\n\n" if self._dirty() else "",
                 "electricity_summary": self._tariff_line(SERVICE_ELECTRICITY),
                 "gas_summary": self._tariff_line(SERVICE_GAS),
-                "meters_summary": meters_line(options, self._service),
+                "meters_summary": meters_line(options, self._service)
+                + (", history is filled when you save" if self._backfill else ""),
                 "battery_summary": battery_line(options),
                 "windows_summary": windows_line(options),
                 "store_summary": self._store_line(),
@@ -369,13 +376,34 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             if str(key) in _METER_KEYS
         }
         fields[_suggest(CONF_MAX_METER_KW, self._effective())] = _number("kW")
-        return await self._page("meters", fields, (*_METER_KEYS, CONF_MAX_METER_KW), user_input)
+        keys = (*_METER_KEYS, CONF_MAX_METER_KW)
+        return await self._meters_page("meters", fields, keys, user_input)
 
     async def async_step_meters_gas(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         fields = _gas_meter_fields(self._effective())
-        return await self._page("meters_gas", fields, _GAS_METER_KEYS, user_input)
+        return await self._meters_page("meters_gas", fields, _GAS_METER_KEYS, user_input)
+
+    async def _meters_page(
+        self,
+        step_id: str,
+        fields: dict[Any, Any],
+        keys: tuple[str, ...],
+        user_input: dict[str, Any] | None,
+    ) -> ConfigFlowResult:
+        """The meters, with a tick to fill the history from their statistics when you save."""
+        fields[vol.Optional(CONF_BACKFILL_NOW, default=self._backfill)] = bool
+        if user_input is not None and user_input.get(CONF_BACKFILL_NOW):
+            if not user_input.get(CONF_IMPORT_ENERGY):
+                return self.async_show_form(
+                    step_id=step_id,
+                    data_schema=_schema(fields),
+                    errors={"base": "backfill_needs_meter"},
+                )
+        if user_input is not None:
+            self._backfill = bool(user_input.get(CONF_BACKFILL_NOW))
+        return await self._page(step_id, fields, keys, user_input)
 
     async def async_step_battery(
         self, user_input: dict[str, Any] | None = None
@@ -478,11 +506,22 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         self._apply_other_options()
         if (self._refresh or self._clear) and self._own_service() not in self._new_plans:
             await entry.runtime_data.async_refresh_store(clear=self._clear)
+        if self._backfill and not changed:
+            await self._fill_history()  # a reload does it too, so only without one
         if self._new_fuel:
             await self._create_new_fuel(self._new_fuel)
         if changed:
             self.hass.config_entries.async_schedule_reload(entry.entry_id)
         return self.async_create_entry(data=options)
+
+    async def _fill_history(self) -> None:
+        coordinator = self.config_entry.runtime_data
+        if coordinator.accountant is None:
+            return
+        try:
+            await async_fill_history(coordinator, coordinator.accountant)
+        except (OSError, ValueError, KeyError, TypeError) as err:
+            _LOGGER.warning("The meter history could not be filled: %s", err)
 
     def _apply_other_options(self) -> None:
         """The bill dates chosen for the other followed fuel are saved on its own entry."""

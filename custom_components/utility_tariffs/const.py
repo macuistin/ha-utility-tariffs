@@ -51,6 +51,7 @@ MAX_BILL_START_DAY = 28
 # Actions in the options form, never saved: read the store again now, or delete the saved files.
 CONF_REFRESH_NOW = "refresh_now"
 CONF_CLEAR_CACHE = "clear_cache"
+CONF_BACKFILL_NOW = "backfill_now"  # fill the history from the meters' statistics when saved
 
 CONF_WINDOW_MINUTES = "window_minutes"  # length of the cheapest and dearest windows
 DEFAULT_WINDOW_MINUTES = 120

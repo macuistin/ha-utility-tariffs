@@ -10,6 +10,7 @@ from homeassistant.const import Platform
 from homeassistant.util import dt as dt_util
 
 from .accountant import EnergyAccountant, MeterSetup
+from .backfill import async_fill_history
 from .const import (
     CONF_BATTERY_SOC,
     CONF_HISTORY_START,
@@ -93,9 +94,7 @@ def _history_start(entry: TariffConfigEntry) -> date | None:
 async def _async_backfill(coordinator: TariffCoordinator, accountant: EnergyAccountant) -> None:
     """Fill the history from the statistics, then price the plans again over what it now holds."""
     try:
-        result = await accountant.async_backfill()
-        if result.slots and coordinator.ranker is not None:
-            await coordinator.ranker.async_refresh(dt_util.now().date())
+        await async_fill_history(coordinator, accountant)
     except (OSError, ValueError, KeyError, TypeError) as err:
         _LOGGER.warning("The meter history could not be filled: %s", err)
     coordinator.async_update_listeners()
