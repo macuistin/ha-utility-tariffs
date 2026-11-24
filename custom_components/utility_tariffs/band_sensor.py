@@ -15,7 +15,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import slugify
 
-from .const import CONF_ENTITY_KEY, DOMAIN
+from .const import CONF_ENTITY_KEY, DOMAIN, SERVICE_GAS
 from .entity import TariffEntity
 
 if TYPE_CHECKING:
@@ -87,7 +87,8 @@ def async_setup_band_sensors(
 
     @callback
     def sync() -> None:
-        wanted = {(flow, band) for flow in FLOWS for band in band_names(coordinator.data, flow)}
+        flows = ("import",) if coordinator.service == SERVICE_GAS else FLOWS
+        wanted = {(flow, band) for flow in flows for band in band_names(coordinator.data, flow)}
         new = sorted(wanted - added)
         if new:
             added.update(new)

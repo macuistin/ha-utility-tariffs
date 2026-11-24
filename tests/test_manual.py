@@ -36,6 +36,7 @@ async def _step(hass: HomeAssistant, result, user_input):
 
 async def _to_base_form(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    result = await _step(hass, result, {"service": "electricity"})
     result = await _step(hass, result, {"country": "IE"})
     result = await _step(hass, result, {"tariff": "Type in my own rates"})
     assert result["step_id"] == "manual_template"
@@ -127,7 +128,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
     freezer.move_to("2026-11-14 12:00:00+00:00")
     await hass.config.async_set_time_zone("Europe/Dublin")
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    for key, value in (("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
+    for key, value in (("service", "electricity"), ("country", "IE"), ("tariff", "P Energy \u2013 Flat")):
         result = await _step(hass, result, {key: value})
     result = await _step(hass, result, {})
     entry = result["result"]
@@ -178,6 +179,7 @@ async def test_each_template_fills_the_form_and_makes_a_valid_tariff(
     from custom_components.utility_tariffs.manual import problem_with
 
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    result = await _step(hass, result, {"service": "electricity"})
     result = await _step(hass, result, {"country": "IE"})
     result = await _step(hass, result, {"tariff": "Type in my own rates"})
     result = await _step(hass, result, {"template": template})
@@ -207,6 +209,7 @@ async def test_a_template_price_that_cannot_be_used_keeps_the_form(
     hass: HomeAssistant, use_store: Callable[..., Path]
 ) -> None:
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+    result = await _step(hass, result, {"service": "electricity"})
     result = await _step(hass, result, {"country": "IE"})
     result = await _step(hass, result, {"tariff": "Type in my own rates"})
     result = await _step(hass, result, {"template": "day_night"})

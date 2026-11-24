@@ -2,6 +2,16 @@
   "config": {
     "step": {
       "user": {
+        "title": "Choose a service",
+        "description": "Step 1. Each service is followed on its own, so you can add the second one afterwards.",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The kind of tariff to follow."
+        }
+      },
+      "country": {
         "title": "Escolher um país",
         "description": "Passo {step}. Só são listados os países cujos tarifários o repositório aberto contém.",
         "data": {
@@ -499,6 +509,12 @@
       "options": {
         "cheapest_band": "Apenas o escalão mais barato",
         "at_or_below_average": "Qualquer escalão no preço médio do dia ou abaixo"
+      }
+    },
+    "service": {
+      "options": {
+        "electricity": "Electricity",
+        "gas": "Gas"
       }
     }
   },

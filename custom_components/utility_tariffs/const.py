@@ -4,14 +4,31 @@ from __future__ import annotations
 
 DOMAIN = "utility_tariffs"
 
-# The device is always called this, so entity ids read sensor.utility_tariff_<thing>.
+# The service a tariff is for. Electricity is the default, so an entry made before gas was added
+# has no `service` and stays electricity.
+CONF_SERVICE = "service"
+SERVICE_ELECTRICITY = "electricity"
+SERVICE_GAS = "gas"
+SERVICES = (SERVICE_ELECTRICITY, SERVICE_GAS)
+
+# The device is always called this, so entity ids read sensor.utility_tariff_<thing>. Gas gets its
+# own device so the two never share an entity id.
 DEVICE_NAME = "Utility Tariff"
+DEVICE_NAMES = {SERVICE_ELECTRICITY: DEVICE_NAME, SERVICE_GAS: "Gas Tariff"}
 
 # Where the open tariff store is read from: the raw files of its main branch, over https.
-DEFAULT_STORE_URL = (
-    "https://raw.githubusercontent.com/macuistin/utility-tariff-data/main/tariffs/electricity"
-)
+STORE_ROOT_URL = "https://raw.githubusercontent.com/macuistin/utility-tariff-data/main/tariffs"
+DEFAULT_STORE_URL = f"{STORE_ROOT_URL}/{SERVICE_ELECTRICITY}"
 CACHE_FOLDER = f"{DOMAIN}_store"
+# Each service is a complete store of its own, so each has its own address and cache folder.
+STORE_URLS = {
+    SERVICE_ELECTRICITY: DEFAULT_STORE_URL,
+    SERVICE_GAS: f"{STORE_ROOT_URL}/{SERVICE_GAS}",
+}
+CACHE_FOLDERS = {
+    SERVICE_ELECTRICITY: CACHE_FOLDER,
+    SERVICE_GAS: f"{CACHE_FOLDER}_{SERVICE_GAS}",
+}
 # The half-hourly prices of a dynamic tariff, from the store's `prices` branch.
 PRICE_STORE_URL = "https://raw.githubusercontent.com/macuistin/utility-tariff-data/prices"
 PRICE_CACHE_FOLDER = f"{DOMAIN}_prices"

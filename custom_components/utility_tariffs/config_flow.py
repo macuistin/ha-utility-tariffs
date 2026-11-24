@@ -59,6 +59,7 @@ from .const import (
     CONF_NAME,
     CONF_PROVIDER,
     CONF_REFRESH_NOW,
+    CONF_SERVICE,
     CONF_TARIFF,
     CONF_WINDOW_MINUTES,
     DEFAULT_WINDOW_MINUTES,
@@ -66,6 +67,8 @@ from .const import (
     MAX_BILL_START_DAY,
     MAX_WINDOW_MINUTES,
     MIN_WINDOW_MINUTES,
+    SERVICE_ELECTRICITY,
+    SERVICES,
     WINDOW_STEP_MINUTES,
 )
 from .country_reason import reason_for
@@ -141,12 +144,42 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._template: Template = TEMPLATES[BLANK]
         self._defaults = CountryDefaults("GB", "GBP")
         self._pending: tuple[str, str, dict[str, Any]] = ("", "", {})
+        self._service = SERVICE_ELECTRICITY
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """Step 1: the country. Own rates are the first choice on the next page."""
-        if self.source != SOURCE_RECONFIGURE and self._async_current_entries():
+        """Step 1: the service. Reconfigure keeps the entry's own service and starts at the country."""
+        if self.source == SOURCE_RECONFIGURE:
+            self._service = self._get_reconfigure_entry().data.get(CONF_SERVICE, SERVICE_ELECTRICITY)
+            return await self.async_step_country()
+        taken = {
+            entry.data.get(CONF_SERVICE, SERVICE_ELECTRICITY)
+            for entry in self._async_current_entries()
+        }
+        free = [service for service in SERVICES if service not in taken]
+        if not free:
             return self.async_abort(reason="single_instance_allowed")
-        access = store_access(self.hass)
+        if user_input is not None:
+            self._service = user_input[CONF_SERVICE]
+            return await self.async_step_country()
+        return self.async_show_form(
+            step_id="user",
+            data_schema=_schema(
+                {
+                    vol.Required(CONF_SERVICE, default=free[0]): SelectSelector(
+                        SelectSelectorConfig(
+                            options=free,
+                            translation_key="service",
+                            mode=SelectSelectorMode.LIST,
+                        )
+                    )
+                }
+            ),
+            last_step=False,
+        )
+
+    async def async_step_country(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Step 2: the country. Own rates are the first choice on the next page."""
+        access = store_access(self.hass, self._service)
         try:
             held = [code for code, row in (await access.async_countries()).items() if "path" in row]
         except STORE_ERRORS:
@@ -155,9 +188,9 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
             self._chosen[CONF_COUNTRY] = user_input[CONF_COUNTRY]
             return await self.async_step_plan()
         return self.async_show_form(
-            step_id="user",
+            step_id="country",
             data_schema=self._country_schema(held),
-            description_placeholders=_progress(1),
+            description_placeholders=_progress(2),
             last_step=False,
         )
 
@@ -185,7 +218,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         The list allows a typed value so that the frontend shows a search box. The value of a
         choice is its readable name, and anything that is not one of the names is refused.
         """
-        access = store_access(self.hass)
+        access = store_access(self.hass, self._service)
         try:
             plans = await self._plans(access)
             note = await self._country_note(access)
@@ -202,7 +235,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="plan",
             data_schema=_plan_schema(list(choices), user_input),
-            description_placeholders={**_progress(2), "country_note": note},
+            description_placeholders={**_progress(3), "country_note": note},
             errors=errors,
         )
 
@@ -240,7 +273,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_area(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Step 3, only for a plan that is priced by area."""
-        access = store_access(self.hass)
+        access = store_access(self.hass, self._service)
         try:
             areas = await access.async_areas(
                 self._chosen[CONF_COUNTRY],
@@ -257,7 +290,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
                 step_id="area",
                 data_schema=_choice(CONF_AREA, areas),
                 description_placeholders={
-                    **_progress(3),
+                    **_progress(4),
                     "plan": f"{self._names['provider']} {self._names['tariff']}",
                 },
             )
@@ -285,7 +318,7 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         country = self._chosen.get(CONF_COUNTRY) or self.hass.config.country or "GB"
         currency, vat = self.hass.config.currency, None
         try:
-            currency, vat = await store_access(self.hass).async_country_values(
+            currency, vat = await store_access(self.hass, self._service).async_country_values(
                 country, dt_util.now().date()
             )
         except STORE_ERRORS:
@@ -343,7 +376,8 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         title = self._manual[CONF_NAME]
-        return await self._finish("manual", title, {CONF_MANUAL: self._manual})
+        unique = "manual" if self._service == SERVICE_ELECTRICITY else f"{self._service}/manual"
+        return await self._finish(unique, title, {CONF_MANUAL: self._manual})
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
@@ -373,10 +407,16 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         self._pending = (unique, title, plan)
         return await self.async_step_options()
 
+    def _service_data(self) -> dict[str, str]:
+        """The service, written only when it is not the default so older entries read the same."""
+        return {} if self._service == SERVICE_ELECTRICITY else {CONF_SERVICE: self._service}
+
     async def _create(self, title: str) -> ConfigFlowResult:
         unique = "/".join(
             self._chosen[key] for key in (CONF_COUNTRY, CONF_PROVIDER, CONF_TARIFF, CONF_AREA)
         )
+        if self._service != SERVICE_ELECTRICITY:
+            unique = f"{self._service}/{unique}"
         return await self._finish(unique, title, dict(self._chosen))
 
     async def _save(
@@ -392,11 +432,11 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
                 entry,
                 unique_id=unique,
                 title=title,
-                data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: key},
+                data={**plan, **self._service_data(), CONF_NAME: title, CONF_ENTITY_KEY: key},
             )
         return self.async_create_entry(
             title=title,
-            data={**plan, CONF_NAME: title, CONF_ENTITY_KEY: unique},
+            data={**plan, **self._service_data(), CONF_NAME: title, CONF_ENTITY_KEY: unique},
             options=options or {},
         )
 

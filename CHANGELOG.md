@@ -7,12 +7,20 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- **Gas.** Setup now starts by asking which service to follow, electricity or gas. Gas is read from
+  the gas store, sits on its own device called Gas Tariff and has no export prices. You can follow
+  one electricity plan and one gas plan together. Gas prices are per kWh, as the store holds them.
 - A **Tariff status** sensor that says whether your plan is still on offer: current, ending soon,
   no longer offered or withdrawn. It is worked out from the store's end dates and index.
 - A repair issue, "Your plan is no longer offered" or "Your plan has been withdrawn", when the
   store no longer prices or lists the plan you follow. It says to use Reconfigure to follow a plan
   that is on offer, and clears itself when the plan is back or you change plan. The prices already
   held keep working meanwhile.
+
+**Upgrading**
+
+- An existing entry stays electricity and keeps its entity ids. The setup page that asked for a
+  country is now the second page.
 
 ## 1.4.0
 

@@ -2,6 +2,16 @@
   "config": {
     "step": {
       "user": {
+        "title": "Choose a service",
+        "description": "Step 1. Each service is followed on its own, so you can add the second one afterwards.",
+        "data": {
+          "service": "Service"
+        },
+        "data_description": {
+          "service": "The kind of tariff to follow."
+        }
+      },
+      "country": {
         "title": "Choose a country",
         "description": "Step {step}. Only countries whose tariffs the open store holds are listed.",
         "data": {
@@ -499,6 +509,12 @@
       "options": {
         "cheapest_band": "Only the cheapest band",
         "at_or_below_average": "Any band at or below today's average price"
+      }
+    },
+    "service": {
+      "options": {
+        "electricity": "Electricity",
+        "gas": "Gas"
       }
     }
   },

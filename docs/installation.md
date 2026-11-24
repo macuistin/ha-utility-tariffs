@@ -8,7 +8,7 @@
 3. Choose **Pick a plan from the store**: country, supplier, plan and, where the plan has
    different prices by area, your area. Or choose **Type in my own rates**.
 
-Home Assistant needs internet access to read the tariff store. Only one tariff is followed.
+Home Assistant needs internet access to read the tariff store. One electricity tariff and one gas tariff can be followed.
 
 ```mermaid
 flowchart LR
