@@ -54,9 +54,9 @@ async def test_the_export_day_figures_are_off_until_asked_for(
 
     registry = er.async_get(hass)
     for key in ("lowest", "highest", "average"):
-        entity = registry.async_get(f"sensor.utility_tariff_{key}_export_price_today")
+        entity = registry.async_get(f"sensor.electricity_tariff_{key}_export_price_today")
         assert entity is not None and entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
-    assert registry.async_get("sensor.utility_tariff_lowest_import_price_today").disabled_by is None
+    assert registry.async_get("sensor.electricity_tariff_lowest_import_price_today").disabled_by is None
 
 
 async def test_the_rating_places_the_price_in_the_day(
@@ -150,7 +150,7 @@ async def test_get_prices_refuses_an_end_before_the_start(
 def _enable(hass: HomeAssistant, keys: list[str]) -> None:
     registry = er.async_get(hass)
     for key in keys:
-        registry.async_update_entity(f"sensor.utility_tariff_{key}", disabled_by=None)
+        registry.async_update_entity(f"sensor.electricity_tariff_{key}", disabled_by=None)
 
 
 async def test_tomorrows_figures_are_off_until_asked_for(
@@ -162,7 +162,7 @@ async def test_tomorrows_figures_are_off_until_asked_for(
     registry = er.async_get(hass)
     for flow in ("import", "export"):
         for key in ("lowest", "highest", "average"):
-            entity = registry.async_get(f"sensor.utility_tariff_{key}_{flow}_price_tomorrow")
+            entity = registry.async_get(f"sensor.electricity_tariff_{key}_{flow}_price_tomorrow")
             assert entity is not None
             assert entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
 
@@ -196,7 +196,7 @@ async def _setup_with_price_figures(hass: HomeAssistant) -> None:
     await _setup(hass)
     registry = er.async_get(hass)
     for key in PRICE_FIGURES:
-        entity = registry.async_get(f"sensor.utility_tariff_{key}")
+        entity = registry.async_get(f"sensor.electricity_tariff_{key}")
         assert entity is not None and entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION
         registry.async_update_entity(entity.entity_id, disabled_by=None)
     await hass.config_entries.async_reload(hass.config_entries.async_entries(DOMAIN)[0].entry_id)

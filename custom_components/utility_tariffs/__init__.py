@@ -21,7 +21,7 @@ from .const import (
     CONF_MOVED_TO,
     DEFAULT_MAX_METER_KW,
     DOMAIN,
-    HUB_NAME,
+    FUEL_TITLES,
     METER_TARGETS,
     hub_identifier,
 )
@@ -48,11 +48,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: TariffConfigEntry) -> bool:
-    hub = _async_add_hub(hass, entry)
+    _async_tidy(hass, entry)
     coordinators: dict[str, TariffCoordinator] = {}
     for subentry_id in entry.subentries:
         coordinator = TariffCoordinator(hass, entry, subentry_id)
-        coordinator.hub_device_id = hub.id
         await coordinator.async_config_entry_first_refresh()
         coordinators[subentry_id] = coordinator
         await _async_start_accounting(hass, entry, coordinator)
@@ -67,14 +66,16 @@ async def async_unload_entry(hass: HomeAssistant, entry: TariffConfigEntry) -> b
 
 
 @callback
-def _async_add_hub(hass: HomeAssistant, entry: TariffConfigEntry) -> dr.DeviceEntry:
-    """The one device both tariffs sit under, so the integration page shows them together."""
-    return dr.async_get(hass).async_get_or_create(
-        config_entry_id=entry.entry_id,
-        identifiers={(DOMAIN, hub_identifier(entry.entry_id))},
-        name=HUB_NAME,
-        entry_type=dr.DeviceEntryType.SERVICE,
-    )
+def _async_tidy(hass: HomeAssistant, entry: TariffConfigEntry) -> None:
+    """Undo what 1.5.0b4 and b5 added: the hub device, and a plan name as each tariff's title."""
+    devices = dr.async_get(hass)
+    for device in dr.async_entries_for_config_entry(devices, entry.entry_id):
+        if (DOMAIN, hub_identifier(entry.entry_id)) in device.identifiers:
+            devices.async_remove_device(device.id)
+    for subentry in list(entry.subentries.values()):
+        title = FUEL_TITLES.get(subentry.subentry_type)
+        if title and subentry.title != title:
+            hass.config_entries.async_update_subentry(entry, subentry, title=title)
 
 
 async def _async_fuels_changed(hass: HomeAssistant, entry: TariffConfigEntry) -> None:

@@ -13,14 +13,14 @@ from homeassistant.helpers import entity_registry as er
 from utility_tariffs_lib.tariffstore import AsyncMemoryCache, AsyncStore, folder_reader
 
 from custom_components.utility_tariffs import coordinator, plan_steps
-from custom_components.utility_tariffs.const import DOMAIN, hub_identifier
+from custom_components.utility_tariffs.const import DOMAIN
 from custom_components.utility_tariffs.energy_store import storage_key
 from custom_components.utility_tariffs.helper.store_access import TariffStoreAccess
 from tests.helpers import async_reader
 from tests.options_support import open_menu
 from tests.support.building import build_store
 from tests.support.fixtures import flat, write_store
-from tests.test_sensor import DATA, NOON, _coordinator, _options, _setup, _sub
+from tests.test_sensor import DATA, NOON, _options, _setup, _sub
 
 GAS = {**DATA, "service": "gas", "tariff": "flat", "area": "all", "name": "Gas Flat",
        "entity_key": "gas/IE/p/flat/all"}
@@ -59,9 +59,8 @@ async def test_a_gas_entry_reads_the_gas_store_on_its_own_device(
     assert state is not None
     assert state.state == "0.07"
     devices = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
-    tariff_devices = [d for d in devices if d.via_device_id]
-    assert [(d.identifiers, d.name) for d in tariff_devices] == [
-        ({(DOMAIN, "gas/IE/p/flat/all")}, "Gas Tariff")
+    assert [(d.identifiers, d.name) for d in devices] == [
+        ({(DOMAIN, "gas/IE/p/flat/all")}, "Gas tariff")
     ]
     assert _sub(entry, "gas").data["service"] == "gas"
 
@@ -84,7 +83,7 @@ async def test_electricity_and_gas_entries_sit_side_by_side(
     await _setup(hass, {**DATA, "tariff": "flat", "area": "all", "name": "Elec Flat"})
     await _setup(hass, {**GAS, "name": "Gas Flat"})
 
-    power = hass.states.get("sensor.utility_tariff_import_price")
+    power = hass.states.get("sensor.electricity_tariff_import_price")
     gas = hass.states.get("sensor.gas_tariff_gas_price")
     assert power is not None
     assert gas is not None
@@ -103,8 +102,8 @@ async def test_gas_entities_are_named_gas_and_electricity_keeps_its_names(
     gas = [i for i in ids if i.startswith("sensor.gas_tariff_") or i.startswith("binary_sensor.gas_tariff_")]
     assert gas
     assert not [i for i in gas if "import" in i or "electricity" in i or "battery" in i]
-    assert "sensor.utility_tariff_import_price" in ids
-    assert not [i for i in ids if i.startswith("sensor.utility_tariff_gas")]
+    assert "sensor.electricity_tariff_import_price" in ids
+    assert not [i for i in ids if i.startswith("sensor.electricity_tariff_gas")]
 
 
 async def test_each_service_has_its_own_device_and_no_entity_is_on_both(
@@ -122,13 +121,10 @@ async def test_each_service_has_its_own_device_and_no_entity_is_on_both(
         seen.setdefault(entity.config_subentry_id or "", set()).add(entity.device_id)
     elec, gas_id = _sub(power, "electricity").subentry_id, _sub(power, "gas").subentry_id
     assert seen[elec].isdisjoint(seen[gas_id])
-    assert {devices.async_get(d).name for d in seen[elec]} == {"Utility Tariff"}  # type: ignore[union-attr]
-    assert {devices.async_get(d).name for d in seen[gas_id]} == {"Gas Tariff"}  # type: ignore[union-attr]
-    hub = devices.async_get(_coordinator(power).hub_device_id)
-    assert hub is not None
-    assert hub.identifiers == {(DOMAIN, hub_identifier(power.entry_id))}
-    assert {d.via_device_id for d in dr.async_entries_for_config_entry(devices, power.entry_id)
-            if d.id != hub.id} == {hub.id}
+    assert {devices.async_get(d).name for d in seen[elec]} == {"Electricity tariff"}  # type: ignore[union-attr]
+    assert {devices.async_get(d).name for d in seen[gas_id]} == {"Gas tariff"}  # type: ignore[union-attr]
+    assert all(d.via_device_id is None for d in dr.async_entries_for_config_entry(devices, power.entry_id))
+    assert {sub.title for sub in power.subentries.values()} == {"Electricity tariff", "Gas tariff"}
 
 
 async def test_the_gas_options_ask_only_for_gas_things(
@@ -176,14 +172,14 @@ async def test_removing_the_gas_tariff_removes_its_device_and_saved_history(
     key = storage_key(_sub(power, "gas").subentry_id)
     gas_device = next(
         d.id for d in dr.async_entries_for_config_entry(dr.async_get(hass), power.entry_id)
-        if d.name == "Gas Tariff"
+        if d.name == "Gas tariff"
     )
 
     hass.config_entries.async_remove_subentry(power, _sub(power, "gas").subentry_id)
     await hass.async_block_till_done()
 
     assert hass.states.get("sensor.gas_tariff_gas_price") is None
-    assert hass.states.get("sensor.utility_tariff_import_price") is not None
+    assert hass.states.get("sensor.electricity_tariff_import_price") is not None
     assert dr.async_get(hass).async_get(gas_device) is None
     assert key not in hass_storage
 

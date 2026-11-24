@@ -23,8 +23,8 @@ async def test_the_dates_the_prices_apply_are_shown(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    assert hass.states.get("sensor.utility_tariff_prices_valid_from").state == "2026-11-01"
-    assert hass.states.get("sensor.utility_tariff_prices_valid_to").state == "unknown"
+    assert hass.states.get("sensor.electricity_tariff_prices_valid_from").state == "2026-11-01"
+    assert hass.states.get("sensor.electricity_tariff_prices_valid_to").state == "unknown"
 
 
 async def test_the_time_of_the_last_read_is_shown(
@@ -33,7 +33,7 @@ async def test_the_time_of_the_last_read_is_shown(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    assert hass.states.get("sensor.utility_tariff_prices_last_read").state == (
+    assert hass.states.get("sensor.electricity_tariff_prices_last_read").state == (
         "2026-11-14T12:00:00+00:00"
     )
 
@@ -44,7 +44,7 @@ async def test_the_summary_names_the_plan_and_describes_it(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    state = hass.states.get("sensor.utility_tariff_tariff_summary")
+    state = hass.states.get("sensor.electricity_tariff_tariff_summary")
     assert state is not None
     attributes = state.attributes
     assert attributes["provider"] == "P Energy"
@@ -65,8 +65,8 @@ async def test_the_store_is_not_offline_when_it_can_be_read(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    assert hass.states.get("binary_sensor.utility_tariff_tariff_store_offline").state == "off"
-    assert hass.states.get("binary_sensor.utility_tariff_tomorrow_s_prices_available") is None
+    assert hass.states.get("binary_sensor.electricity_tariff_tariff_store_offline").state == "off"
+    assert hass.states.get("binary_sensor.electricity_tariff_tomorrow_s_prices_available") is None
 
 
 async def test_a_plan_that_is_ending_with_nothing_after_it_raises_a_repair(
@@ -111,7 +111,7 @@ async def test_days_without_reaching_the_store_raise_a_repair_that_clears_when_i
     freezer.move_to("2026-11-17 12:00:00+00:00")
     await coordinator.async_refresh_store()
     assert issues.async_get_issue(DOMAIN, issue_id) is not None
-    state = hass.states.get("sensor.utility_tariff_prices_last_read")
+    state = hass.states.get("sensor.electricity_tariff_prices_last_read")
     assert state is not None and state.state == "2026-11-14T12:00:00+00:00"  # the last real read
 
     reader.down = False

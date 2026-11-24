@@ -5,6 +5,21 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Changed**
+
+- The integration page names the tariffs for what they are: **Electricity tariff** and **Gas tariff**,
+  with the supplier and plan shown under the name. They were named after the plan, and the
+  electricity device was called Utility Tariff.
+- The extra Utility Tariffs device that 1.5.0b4 and b5 added is gone, so the integration page no
+  longer shows a group called "Devices that don't belong to a sub-entry". Each tariff is a
+  device of its own. The first start removes the old one.
+
+**Upgrading**
+
+- A new install names its electricity sensors `sensor.electricity_tariff_...`. An install that
+  already has `sensor.utility_tariff_...` keeps those IDs, so nothing in a dashboard or an
+  automation changes.
+
 ## 1.5.0b5
 
 This is a beta. Electricity and gas now sit in one entry, under one Utility Tariffs hub, with one Configure for both. Existing installs move over on the first start, so take a backup first. Tell us if an entity ID, a history, a dashboard or an action call changed, or if the integration page shows the tariffs wrongly.

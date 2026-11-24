@@ -93,7 +93,7 @@ def feed(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
 
 
 def attributes(hass: HomeAssistant, key: str) -> dict:
-    state = hass.states.get(f"sensor.utility_tariff_{key}")
+    state = hass.states.get(f"sensor.electricity_tariff_{key}")
     assert state is not None, key
     return dict(state.attributes)
 
@@ -118,7 +118,7 @@ async def test_a_fixed_tariff_is_forecast_over_a_revision_the_store_already_hold
         {"effective_from": "2026-11-20", "import_prices": {"All day": 0.3}}]
     assert {row["source"] for row in forecast["slots"]} == {"fixed"}
     assert forecast["slots"][-1]["price"] == 0.25  # 48 hours from now is before the change
-    assert hass.states.get("sensor.utility_tariff_price_level") is None  # fixed prices
+    assert hass.states.get("sensor.electricity_tariff_price_level") is None  # fixed prices
 
 
 async def test_the_price_now_follows_the_revision_when_it_starts(
@@ -208,7 +208,7 @@ async def test_changing_a_percentile_moves_what_counts_as_low_with_no_reload(
 
     await hass.services.async_call(
         NUMBER_DOMAIN, SERVICE_SET_VALUE,
-        {"entity_id": "number.utility_tariff_low_price_percentile", "value": 40}, blocking=True,
+        {"entity_id": "number.electricity_tariff_low_price_percentile", "value": 40}, blocking=True,
     )
     await hass.async_block_till_done()
 
@@ -216,7 +216,7 @@ async def test_changing_a_percentile_moves_what_counts_as_low_with_no_reload(
     low = attributes(hass, "next_low_price")
     assert (low["threshold"], low["percentile"]) == (0.25, 40)  # the 40th price known is 0.25
     assert _state(hass, "next_low_price") == "2026-11-14T19:00:00+00:00"  # 0.25 is low enough now
-    assert float(hass.states.get("number.utility_tariff_high_price_percentile").state) == 90
+    assert float(hass.states.get("number.electricity_tariff_high_price_percentile").state) == 90
 
 
 @pytest.mark.parametrize("published", [False, True])
@@ -273,7 +273,7 @@ async def test_tomorrow_available_follows_what_the_feed_has_published(
     freezer.move_to(EVENING)
     await _setup(hass, FEED)
 
-    state = hass.states.get("binary_sensor.utility_tariff_tomorrow_s_prices_available")
+    state = hass.states.get("binary_sensor.electricity_tariff_tomorrow_s_prices_available")
     assert state is not None
     assert state.state == ("on" if published else "off")
 
@@ -328,7 +328,7 @@ async def test_tomorrows_figures_are_unknown_until_tomorrow_is_priced(
     freezer.move_to(EVENING)
     entry = await _setup(hass, FEED)
     registry = er.async_get(hass)
-    registry.async_update_entity("sensor.utility_tariff_lowest_import_price_tomorrow", disabled_by=None)
+    registry.async_update_entity("sensor.electricity_tariff_lowest_import_price_tomorrow", disabled_by=None)
     await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
     assert _state(hass, "lowest_import_price_tomorrow") == "unknown"
@@ -361,7 +361,7 @@ async def test_the_negative_price_sensor_is_on_while_the_price_is_below_zero(
     await _setup(hass, FEED)
 
     assert float(_state(hass, "import_price")) < 0
-    state = hass.states.get("binary_sensor.utility_tariff_negative_price")
+    state = hass.states.get("binary_sensor.electricity_tariff_negative_price")
     assert state is not None
     assert state.state == "on"
 
@@ -369,7 +369,7 @@ async def test_the_negative_price_sensor_is_on_while_the_price_is_below_zero(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    state = hass.states.get("binary_sensor.utility_tariff_negative_price")
+    state = hass.states.get("binary_sensor.electricity_tariff_negative_price")
     assert state is not None
     assert state.state == "off"
 
@@ -380,4 +380,4 @@ async def test_a_fixed_tariff_has_no_negative_price_sensor(
     freezer.move_to(NOON)
     await _setup(hass, FLAT)
 
-    assert hass.states.get("binary_sensor.utility_tariff_negative_price") is None
+    assert hass.states.get("binary_sensor.electricity_tariff_negative_price") is None

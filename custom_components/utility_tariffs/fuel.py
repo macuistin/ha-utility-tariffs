@@ -1,15 +1,15 @@
 """One followed tariff: a subentry of the integration's single config entry.
 
-The entry holds the hub, and each fuel (electricity, gas) is a subentry with its own plan, meters
-and bill dates. `Fuel` reads the subentry fresh each time, so a change saved in Configure is seen
-at once, and it offers what the code used to ask of a config entry of its own.
+The entry is the integration, and each fuel (electricity, gas) is a subentry with its own plan,
+meters and bill dates. `Fuel` reads the subentry fresh each time, so a change saved in Configure
+is seen at once, and it offers what the code used to ask of a config entry of its own.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .const import CONF_ENTITY_KEY, CONF_SERVICE, SERVICE_ELECTRICITY
+from .const import CONF_ENTITY_KEY, CONF_NAME, CONF_SERVICE, SERVICE_ELECTRICITY
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine, Mapping
@@ -44,7 +44,8 @@ class Fuel:
 
     @property
     def title(self) -> str:
-        return self.subentry.title
+        """The plan's name, with its supplier. The subentry's own title is Electricity tariff."""
+        return str(self.data.get(CONF_NAME) or self.subentry.title)
 
     @property
     def unique_id(self) -> str | None:

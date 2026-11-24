@@ -26,8 +26,8 @@ from tests.test_sensor import NOON, _options, _setup, _state
 
 HOUSE = "sensor.house_energy"
 SOC = "sensor.battery_charge"
-SAVING = "sensor.utility_tariff_savings_this_bill_period"
-SHARE = "sensor.utility_tariff_savings_share_this_bill_period"
+SAVING = "sensor.electricity_tariff_savings_this_bill_period"
+SHARE = "sensor.electricity_tariff_savings_share_this_bill_period"
 DUBLIN = ZoneInfo("Europe/Dublin")
 
 

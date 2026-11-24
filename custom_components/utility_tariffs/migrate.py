@@ -22,6 +22,7 @@ from .const import (
     CONF_MOVED_TO,
     CONF_SERVICE,
     DOMAIN,
+    FUEL_TITLES,
     HUB_NAME,
     SERVICE_ELECTRICITY,
 )
@@ -99,7 +100,7 @@ def _add_subentry(
     subentry = ConfigSubentry(
         data=MappingProxyType(settings),
         subentry_type=_service(entry),
-        title=entry.title,
+        title=FUEL_TITLES[_service(entry)],
         unique_id=entry.unique_id or str(settings[CONF_ENTITY_KEY]),
     )
     hass.config_entries.async_add_subentry(parent, subentry)

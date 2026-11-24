@@ -61,13 +61,17 @@ Gas tariff page in Configure), and pick another country, supplier, plan or area.
 dashboard and your automations, and the saved energy history is priced again under the new plan.
 ## One integration, two tariffs
 
-Utility Tariffs is one integration entry. It holds one device, **Utility Tariffs**, and under it a
-device for each fuel you follow, so the integration page shows both tariffs together. Add the
-second fuel from Configure. Removing a tariff from the integration page removes its device,
-sensors and saved history. One tariff of each service is followed. The electricity device is always called Utility Tariff and the gas device Gas Tariff, and the plan
-is its model, so sensors read `sensor.utility_tariff_import_price` or `sensor.gas_tariff_import_price`
-whatever the plan. Installs from before the single entry keep their entity IDs, history and saved
-energy history: the first start moves each existing tariff under the one entry.
+Utility Tariffs is one integration entry. Under it sit the tariffs you follow: an **Electricity
+tariff** and a **Gas tariff**, each with its own device. The device row shows the supplier and plan.
+Add the second fuel from Configure. Removing a tariff from the integration page removes its
+device, sensors and saved history. One tariff of each service is followed.
+
+The electricity device is always called Electricity tariff and the gas device Gas tariff, whatever
+the plan, so new sensors read `sensor.electricity_tariff_import_price` or
+`sensor.gas_tariff_import_price`. An install that was set up before 1.5.0b6 keeps the entity IDs it
+already has, such as `sensor.utility_tariff_import_price`. Installs from before the single entry
+keep their entity IDs, history and saved energy history: the first start moves each existing tariff
+under the one entry.
 
 Actions such as `find_window` take the integration's entry and an optional `service` (`electricity`
 by default, or `gas`) that says which tariff to use.

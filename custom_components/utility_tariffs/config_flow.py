@@ -28,6 +28,7 @@ from .const import (
     CONF_ENTITY_KEY,
     CONF_SERVICE,
     DOMAIN,
+    FUEL_TITLES,
     HUB_NAME,
     SERVICE_ELECTRICITY,
     SERVICE_GAS,
@@ -175,7 +176,10 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
             data={},
             subentries=[
                 ConfigSubentryData(
-                    data=data, subentry_type=self._service, title=title, unique_id=unique
+                    data=data,
+                    subentry_type=self._service,
+                    title=FUEL_TITLES[self._service],
+                    unique_id=unique,
                 )
             ],
         )
@@ -190,7 +194,7 @@ class UtilityTariffsConfigFlow(PlanSteps, ConfigFlow, domain=DOMAIN):
             entry,
             subentry,
             data={**kept, **entry_data(plan, self._service, title, str(key))},
-            title=title,
+            title=FUEL_TITLES[self._service],
             unique_id=unique,
         )
         self.hass.config_entries.async_schedule_reload(entry.entry_id)

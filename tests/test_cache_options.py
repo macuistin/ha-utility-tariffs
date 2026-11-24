@@ -112,5 +112,5 @@ async def test_clear_is_refused_while_the_store_is_unreachable(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "store"
     assert result["errors"] == {"base": "clear_while_offline"}
-    assert hass.states.get("sensor.utility_tariff_import_price").state == "0.3"
+    assert hass.states.get("sensor.electricity_tariff_import_price").state == "0.3"
     await _finish(hass, entry.entry_id)

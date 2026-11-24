@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
 from functools import partial
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DEVICE_NAMES, DOMAIN, SERVICE_GAS, hub_identifier
+from .const import DOMAIN, FUEL_TITLES, SERVICE_GAS
 from .coordinator import TariffConfigEntry, TariffCoordinator
 
 if TYPE_CHECKING:
@@ -54,16 +54,6 @@ GAS_NAMES = frozenset(
 )
 
 
-def _via_hub(coordinator: TariffCoordinator) -> dict[str, Any]:
-    """Link the tariff's device to the hub. Home Assistant 2026.5 names the hub by its identifier,
-    later releases by its device id, and each rejects the other's key."""
-    if coordinator.hub_device_id is None:
-        return {}
-    if "via_device_id" in DeviceInfo.__annotations__:
-        return {"via_device_id": coordinator.hub_device_id}
-    return {"via_device": (DOMAIN, hub_identifier(coordinator.config_entry.entry_id))}
-
-
 class TariffEntity(CoordinatorEntity[TariffCoordinator]):
     """Base of the tariff's entities."""
 
@@ -77,12 +67,11 @@ class TariffEntity(CoordinatorEntity[TariffCoordinator]):
         self._attr_unique_id = f"{stable}_{key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, stable)},
-            name=DEVICE_NAMES[coordinator.service],
+            name=FUEL_TITLES[coordinator.service],
             manufacturer=coordinator.data.definition.provider.name,
-            model=coordinator.data.definition.name,
+            model=coordinator.fuel.title,
             entry_type=DeviceEntryType.SERVICE,
         )
-        self._attr_device_info.update(_via_hub(coordinator))  # type: ignore[typeddict-item]
 
     @property
     def translation_key(self) -> str | None:

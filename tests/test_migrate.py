@@ -86,7 +86,7 @@ async def test_two_entries_become_one_with_a_subentry_each(
     assert hass.states.get("sensor.utility_tariff_import_price").state == "0.25"
 
 
-async def test_the_devices_sit_under_one_hub_after_the_move(
+async def test_the_tariffs_are_named_for_their_fuel_and_have_no_hub_after_the_move(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, stores: list[str],  # noqa: F811
 ) -> None:
     freezer.move_to(NOON)
@@ -103,13 +103,37 @@ async def test_the_devices_sit_under_one_hub_after_the_move(
 
     [entry] = hass.config_entries.async_entries(DOMAIN)
     devices = dr.async_get(hass)
-    hub = devices.async_get(_coordinator(entry).hub_device_id)
-    assert hub is not None
-    assert hub.identifiers == {(DOMAIN, hub_identifier(entry.entry_id))}
-    tariff_devices = [d for d in dr.async_entries_for_config_entry(devices, entry.entry_id)
-                      if d.id != hub.id]
-    assert {d.name for d in tariff_devices} == {"Utility Tariff", "Gas Tariff"}
-    assert {d.via_device_id for d in tariff_devices} == {hub.id}
+    found = dr.async_entries_for_config_entry(devices, entry.entry_id)
+    assert {d.name for d in found} == {"Electricity tariff", "Gas tariff"}
+    assert all(d.via_device_id is None for d in found)
+    assert {sub.title for sub in entry.subentries.values()} == {"Electricity tariff", "Gas tariff"}
+
+
+async def test_a_beta_5_install_loses_its_hub_and_gets_plain_titles(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, stores: list[str],  # noqa: F811
+) -> None:
+    freezer.move_to(NOON)
+    await hass.config.async_set_time_zone("Europe/Dublin")
+    power = _old_entry(POWER, {}, "IE/p/flat/all", "power-id")
+    power.add_to_hass(hass)
+    assert await async_setup_component(hass, DOMAIN, {})
+    await hass.async_block_till_done()
+    [entry] = hass.config_entries.async_entries(DOMAIN)
+    [sub] = entry.subentries.values()
+    hass.config_entries.async_update_subentry(entry, sub, title="Some Supplier Plan")
+    devices = dr.async_get(hass)
+    devices.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, hub_identifier(entry.entry_id))},
+        name="Utility Tariffs",
+    )
+
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert not [d for d in dr.async_entries_for_config_entry(devices, entry.entry_id)
+                if (DOMAIN, hub_identifier(entry.entry_id)) in d.identifiers]
+    assert [s.title for s in entry.subentries.values()] == ["Electricity tariff"]
 
 
 async def test_one_electricity_entry_alone_keeps_its_entities(

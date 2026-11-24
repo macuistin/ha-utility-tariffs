@@ -58,12 +58,12 @@ async def test_a_two_band_tariff_shows_both_prices_at_any_time_of_day(
     freezer.move_to(NOON)  # the day band is in force, and the night price is still shown
     await _setup(hass, _data("grow"))
 
-    day = hass.states.get("sensor.utility_tariff_import_price_day")
-    night = hass.states.get("sensor.utility_tariff_import_price_night")
+    day = hass.states.get("sensor.electricity_tariff_import_price_day")
+    night = hass.states.get("sensor.electricity_tariff_import_price_night")
     assert day is not None
     assert night is not None
     assert (day.state, night.state) == ("0.3", "0.1")
-    assert hass.states.get("sensor.utility_tariff_import_price").state == "0.3"  # type: ignore[union-attr]
+    assert hass.states.get("sensor.electricity_tariff_import_price").state == "0.3"  # type: ignore[union-attr]
 
 
 async def test_a_three_band_tariff_shows_every_band(
@@ -73,7 +73,7 @@ async def test_a_three_band_tariff_shows_every_band(
     await _setup(hass, _data("three"))
 
     for band, price in {"day": "0.3", "night": "0.1", "peak": "0.4"}.items():
-        state = hass.states.get(f"sensor.utility_tariff_import_price_{band}")
+        state = hass.states.get(f"sensor.electricity_tariff_import_price_{band}")
         assert state is not None, band
         assert state.state == price
         assert state.attributes["unit_of_measurement"] == "EUR/kWh"
@@ -85,7 +85,7 @@ async def test_a_flat_tariff_has_one_band_price(
     freezer.move_to(NOON)
     await _setup(hass, _data("flat"))
 
-    state = hass.states.get("sensor.utility_tariff_import_price_all_day")
+    state = hass.states.get("sensor.electricity_tariff_import_price_all_day")
     assert state is not None
     assert state.state == "0.25"
 
@@ -103,7 +103,7 @@ async def test_more_than_three_bands_start_disabled(
     ]
     assert len(band_entries) == 4
     assert all(e.disabled_by is er.RegistryEntryDisabler.INTEGRATION for e in band_entries)
-    assert hass.states.get("sensor.utility_tariff_import_price_boost") is None
+    assert hass.states.get("sensor.electricity_tariff_import_price_boost") is None
 
 
 async def test_a_revision_that_adds_a_band_adds_its_sensor_without_a_reload(
@@ -111,13 +111,13 @@ async def test_a_revision_that_adds_a_band_adds_its_sensor_without_a_reload(
 ) -> None:
     freezer.move_to("2026-11-19 23:59:00+00:00")
     await _setup(hass, _data("grow"))
-    assert hass.states.get("sensor.utility_tariff_import_price_peak") is None
+    assert hass.states.get("sensor.electricity_tariff_import_price_peak") is None
 
     freezer.move_to("2026-11-20 00:06:00+00:00")  # after the nightly read
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    state = hass.states.get("sensor.utility_tariff_import_price_peak")
+    state = hass.states.get("sensor.electricity_tariff_import_price_peak")
     assert state is not None
     assert state.state == "0.4"
 
@@ -127,16 +127,16 @@ async def test_a_revision_that_drops_a_band_removes_its_sensor(
 ) -> None:
     freezer.move_to("2026-11-19 23:59:00+00:00")
     entry = await _setup(hass, _data("shrink"))
-    assert hass.states.get("sensor.utility_tariff_import_price_peak") is not None
+    assert hass.states.get("sensor.electricity_tariff_import_price_peak") is not None
 
     freezer.move_to("2026-11-20 00:06:00+00:00")
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
     registry = er.async_get(hass)
-    assert hass.states.get("sensor.utility_tariff_import_price_peak") is None
+    assert hass.states.get("sensor.electricity_tariff_import_price_peak") is None
     assert not [
         e for e in er.async_entries_for_config_entry(registry, entry.entry_id)
         if (e.unique_id or "").endswith("_import_band_price_peak")
     ]
-    assert hass.states.get("sensor.utility_tariff_import_price_night") is not None
+    assert hass.states.get("sensor.electricity_tariff_import_price_night") is not None
