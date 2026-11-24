@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DEVICE_NAMES, DOMAIN, SERVICE_GAS
+from .const import DEVICE_NAMES, DOMAIN, SERVICE_GAS, hub_identifier
 from .coordinator import TariffConfigEntry, TariffCoordinator
 
 if TYPE_CHECKING:
@@ -54,6 +54,16 @@ GAS_NAMES = frozenset(
 )
 
 
+def _via_hub(coordinator: TariffCoordinator) -> dict[str, Any]:
+    """Link the tariff's device to the hub. Home Assistant 2026.5 names the hub by its identifier,
+    later releases by its device id, and each rejects the other's key."""
+    if coordinator.hub_device_id is None:
+        return {}
+    if "via_device_id" in DeviceInfo.__annotations__:
+        return {"via_device_id": coordinator.hub_device_id}
+    return {"via_device": (DOMAIN, hub_identifier(coordinator.config_entry.entry_id))}
+
+
 class TariffEntity(CoordinatorEntity[TariffCoordinator]):
     """Base of the tariff's entities."""
 
@@ -72,8 +82,7 @@ class TariffEntity(CoordinatorEntity[TariffCoordinator]):
             model=coordinator.data.definition.name,
             entry_type=DeviceEntryType.SERVICE,
         )
-        if coordinator.hub_device_id is not None:
-            self._attr_device_info["via_device_id"] = coordinator.hub_device_id
+        self._attr_device_info.update(_via_hub(coordinator))  # type: ignore[typeddict-item]
 
     @property
     def translation_key(self) -> str | None:
