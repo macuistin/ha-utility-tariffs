@@ -137,7 +137,7 @@ async def test_the_gas_options_ask_only_for_gas_things(
         menu["flow_id"], {"next_step_id": "meters_gas"}
     )
     fields = {str(key) for key in page["data_schema"].schema}
-    assert fields == {"import_energy_entity", "history_start"}
+    assert fields == {"import_energy_entity", "history_start", "backfill_now"}
     page = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"import_energy_entity": "sensor.gas_kwh"}
     )

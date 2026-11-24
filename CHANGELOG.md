@@ -19,6 +19,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 **Added**
 
+- **Fill history now** on the Energy meters (Gas meter) page of Configure. When you save, it fills
+  the half-hourly history from your meters' long-term statistics, from the start of history or else
+  the last year, so the bill and sensors catch up without calling the `backfill` action. It needs
+  the import meter.
 - Add gas or electricity from Configure: a fuel that is not followed yet shows "not followed yet"
   on its tariff row. Choosing a plan there makes its entry when you save, with its meters and bill
   dates asked on the way.
