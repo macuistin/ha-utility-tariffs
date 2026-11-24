@@ -29,7 +29,9 @@ def stores(hass: HomeAssistant, monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
     asked: list[str] = []
     accesses = {}
     for service, price in (("electricity", "0.25"), ("gas", "0.07")):
-        folder = write_store(tmp_path / service, {"p/flat/1.json": flat(price)})
+        # A gas tariff file says so, and the library only accepts that from the release that added gas.
+        extra = {"service": "gas"} if service == "gas" else {}
+        folder = write_store(tmp_path / service, {"p/flat/1.json": flat(price, **extra)})
         build_store(folder)
         store = AsyncStore(async_reader(folder_reader(folder)), AsyncMemoryCache())
         accesses[service] = TariffStoreAccess(hass, store)
