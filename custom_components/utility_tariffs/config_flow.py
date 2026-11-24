@@ -68,11 +68,12 @@ from .const import (
     MAX_WINDOW_MINUTES,
     MIN_WINDOW_MINUTES,
     SERVICE_ELECTRICITY,
+    SERVICE_GAS,
     SERVICES,
     WINDOW_STEP_MINUTES,
 )
 from .country_reason import reason_for
-from .energy_suggest import energy_dashboard_meters
+from .energy_suggest import energy_dashboard_meters, gas_dashboard_meter
 from .helper.store_access import TariffStoreAccess
 from .manual import CountryDefaults, problem_with
 from .manual_templates import BLANK, TEMPLATES, Template, timed_periods
@@ -392,11 +393,26 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
 
         The meters are suggested from the Energy dashboard, so most homes only confirm them.
         """
+        return await self._options_page("options", user_input)
+
+    async def async_step_options_gas(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """The same page for gas: one meter and the bill dates, with gas wording."""
+        return await self._options_page("options_gas", user_input)
+
+    async def _options_page(
+        self, step_id: str, user_input: dict[str, Any] | None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             return await self._save(*self._pending, options=_saved_setup(user_input))
-        suggested = await energy_dashboard_meters(self.hass)
-        fields = {**_meter_fields(suggested), **_bill_fields(suggested)}
-        return self.async_show_form(step_id="options", data_schema=_schema(fields))
+        if self._service == SERVICE_GAS:
+            suggested = await gas_dashboard_meter(self.hass)
+            fields = {**_gas_meter_fields(suggested), **_bill_fields(suggested)}
+        else:
+            suggested = await energy_dashboard_meters(self.hass)
+            fields = {**_meter_fields(suggested), **_bill_fields(suggested)}
+        return self.async_show_form(step_id=step_id, data_schema=_schema(fields))
 
     async def _finish(self, unique: str, title: str, plan: dict[str, Any]) -> ConfigFlowResult:
         """Ask for the options when making a new entry. A plan change keeps what is set."""
@@ -405,6 +421,8 @@ class UtilityTariffsConfigFlow(ConfigFlow, domain=DOMAIN):
         await self.async_set_unique_id(unique)
         self._abort_if_unique_id_configured()
         self._pending = (unique, title, plan)
+        if self._service == SERVICE_GAS:
+            return await self.async_step_options_gas()
         return await self.async_step_options()
 
     def _service_data(self) -> dict[str, str]:
@@ -527,12 +545,23 @@ class TariffOptionsFlow(OptionsFlowWithReload):
     """The window length, the energy meters to follow and the battery. Saving reloads the entry."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        return await self._page("init", user_input)
+
+    async def async_step_init_gas(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """The same page for gas, which has no export, battery or connected load."""
+        return await self._page("init_gas", user_input)
+
+    async def _page(self, step_id: str, user_input: dict[str, Any] | None) -> ConfigFlowResult:
+        if self.config_entry.data.get(CONF_SERVICE) == SERVICE_GAS:
+            step_id = "init_gas"
         if user_input is not None:
             problem = await self._store_action(user_input)
             if problem is None:
                 return self.async_create_entry(data=_saved(user_input))
-            return self._form(self.config_entry.options, {"base": problem})
-        return self._form(self.config_entry.options, {})
+            return self._form(step_id, self.config_entry.options, {"base": problem})
+        return self._form(step_id, self.config_entry.options, {})
 
     async def _store_action(self, user_input: dict[str, Any]) -> str | None:
         """Refresh or clear what was read from the store, if asked. Returns the error, if any."""
@@ -545,7 +574,7 @@ class TariffOptionsFlow(OptionsFlowWithReload):
         await coordinator.async_refresh_store(clear=clear)
         return None
 
-    def _form(self, options: Any, errors: dict[str, str]) -> ConfigFlowResult:
+    def _form(self, step_id: str, options: Any, errors: dict[str, str]) -> ConfigFlowResult:
         current = options.get(CONF_WINDOW_MINUTES, DEFAULT_WINDOW_MINUTES)
         fields: dict[Any, Any] = {
             vol.Required(CONF_WINDOW_MINUTES, default=current): NumberSelector(
@@ -563,9 +592,11 @@ class TariffOptionsFlow(OptionsFlowWithReload):
                 SelectSelectorConfig(options=list(CHEAP_RULES), translation_key="cheap_rule")
             )
         )
-        fields.update(_meter_fields(options))
+        fields.update(
+            _gas_meter_fields(options) if step_id == "init_gas" else _meter_fields(options)
+        )
         fields.update(_bill_fields(options))
-        for key, unit in _NUMBERS.items():
+        for key, unit in ({} if step_id == "init_gas" else _NUMBERS).items():
             config = NumberSelectorConfig(min=0, step="any", mode=NumberSelectorMode.BOX)
             if unit:
                 config["unit_of_measurement"] = unit
@@ -576,8 +607,21 @@ class TariffOptionsFlow(OptionsFlowWithReload):
             fields[vol.Optional(CONF_REFRESH_NOW, default=False)] = bool
             fields[vol.Optional(CONF_CLEAR_CACHE, default=False)] = bool
         return self.async_show_form(
-            step_id="init", data_schema=_schema(fields), errors=errors
+            step_id=step_id, data_schema=_schema(fields), errors=errors
         )
+
+
+def _gas_meter_fields(options: Any) -> dict[Any, Any]:
+    """Gas has one meter, what the home used, and no battery."""
+    meter = EntitySelector(EntitySelectorConfig(domain="sensor", device_class="energy"))
+    return {
+        vol.Optional(
+            CONF_IMPORT_ENERGY, description={"suggested_value": options.get(CONF_IMPORT_ENERGY)}
+        ): meter,
+        vol.Optional(
+            CONF_HISTORY_START, description={"suggested_value": options.get(CONF_HISTORY_START)}
+        ): DateSelector(),
+    }
 
 
 def _meter_fields(options: Any) -> dict[Any, Any]:

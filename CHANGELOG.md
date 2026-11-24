@@ -5,6 +5,19 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Changed**
+
+- A gas entry now says gas. Its sensors are named "Gas price", "Next gas price", "Gas used this bill
+  period" and so on, instead of import price and electricity. Its setup and options pages ask only
+  for the gas meter, the start of history and the bill dates, with no export, whole home or battery
+  fields. The gas meter is suggested from the Energy dashboard when it counts in kWh. The English
+  text is used in other languages for now.
+
+**Upgrading**
+
+- A gas entry made in 1.5.0b1 or 1.5.0b2 keeps its existing entity ids. Entities added after the
+  upgrade, or a gas entry made again, use the new gas names in their ids. Electricity is unchanged.
+
 ## 1.5.0b2
 
 This is a beta. It fixes adding a gas tariff, which failed in 1.5.0b1. Gas tariffs, the Tariff status sensor and the repair issue for a plan that is no longer offered are described under 1.5.0b1. Tell us if setup or the gas sensors misbehave.
