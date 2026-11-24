@@ -5,6 +5,11 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Fixes**
+
+- Adding a gas tariff in 1.5.0b1 failed with "The tariff store could not be read", because the
+  tariff library it used could not read gas plans. It now uses a library release that can.
+
 ## 1.5.0b1
 
 This is a beta. It adds gas tariffs and a tariff status sensor. Tell us if setup or the new sensors misbehave.
