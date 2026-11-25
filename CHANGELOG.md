@@ -5,20 +5,69 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.0
+
+This release adds gas tariffs and brings electricity and gas into one entry. It rebuilds Configure as a list of pages. Existing installs move over on the first start, so take a backup first. Tell us if an entity ID, a history, a dashboard or an action call changed, or if the integration page shows the tariffs wrongly.
+
+**Added**
+
+- **Gas.** Setup now starts by asking which service to follow, electricity or gas. Gas is read from
+  the gas store and has no export prices. You can follow one electricity plan and one gas plan
+  together. Gas prices are per kWh, as the store holds them. A gas tariff says gas: its sensors are
+  named "Gas price", "Next gas price", "Gas used this bill period" and so on, and its setup and
+  options pages ask only for the gas meter, the start of history and the bill dates.
+- A **Tariff status** sensor that says whether your plan is still on offer: current, ending soon,
+  no longer offered or withdrawn. It is worked out from the store's end dates and index.
+- A repair issue, "Your plan is no longer offered" or "Your plan has been withdrawn", when the
+  store no longer prices or lists the plan you follow. It says to use Reconfigure to follow a plan
+  that is on offer, and clears itself when the plan is back or you change plan. The prices already
+  held keep working meanwhile.
+- **Fill history now** on the Energy meters (Gas meter) page of Configure. When you save, it fills
+  the half-hourly history from your meters' long-term statistics, from the start of history or else
+  the last year, so the bill and sensors catch up without calling the `backfill` action. It needs
+  the import meter.
+- Add gas or electricity from Configure: a fuel that is not followed yet shows "not followed yet"
+  on its tariff row. Choosing a plan there adds it to the entry when you save, with its meters and
+  bill dates asked on the way.
+
 **Changed**
 
-- The integration page names the tariffs for what they are: **Electricity tariff** and **Gas tariff**,
-  with the supplier and plan shown under the name. They were named after the plan, and the
-  electricity device was called Utility Tariff.
-- The extra Utility Tariffs device that 1.5.0b4 and b5 added is gone, so the integration page no
-  longer shows a group called "Devices that don't belong to a sub-entry". Each tariff is a
-  device of its own. The first start removes the old one.
+- Electricity and gas are now two tariffs inside one integration entry, not two entries. Each is a
+  device of its own, named **Electricity tariff** and **Gas tariff**, with the supplier and plan
+  shown under the name. There is no extra hub device, so the integration page no longer shows a
+  group called "Devices that don't belong to a sub-entry".
+- Configure is one flow for both tariffs and is a list of pages: Electricity tariff, Gas tariff,
+  Energy meters (or Gas meter), Battery and Tariff store. The bill dates, the window length and the
+  cheap rule are on each fuel's tariff page, since they belong to that tariff. Each page shows what
+  is set now, and nothing is saved until you choose **Save changes**, which reloads the integration
+  once. Bills and windows are opened from the tariff page they belong to.
+- The Electricity tariff and Gas tariff pages change the plan with the same pages as setup,
+  including your own rates, then ask for the bill start day and length. The sensors keep their
+  entity IDs and history, as with Reconfigure.
+- The service actions (`find_window`, `get_prices`, `bill_summary`, `backfill`) take an optional
+  `service` field, `electricity` by default or `gas`, to pick the tariff.
+- The diagnostics report lists each followed tariff under `fuels`, with its settings and what it
+  holds, instead of one `entry` and one `coordinator`.
+
+**Fixes**
+
+- Adding a gas tariff failed with "The tariff store could not be read", because the tariff library
+  could not read gas plans. It now uses a library release that can.
+- Entities now link to their device correctly on Home Assistant 2026.5 as well as later releases.
 
 **Upgrading**
 
+- Existing installs move over on the first start. Each existing entry becomes a tariff inside the
+  one entry. Entity IDs, history, dashboards, the Energy dashboard and the saved energy history are
+  kept. The gas entry's own entry ID goes, so an automation or script that calls an action with it
+  should use the one entry's ID and `service: gas`. Repair issues are raised again where they
+  still apply.
 - A new install names its electricity sensors `sensor.electricity_tariff_...`. An install that
   already has `sensor.utility_tariff_...` keeps those IDs, so nothing in a dashboard or an
   automation changes.
+- A gas entry made in 1.5.0b1 or 1.5.0b2 keeps its existing entity ids. Entities added after the
+  upgrade, or a gas entry made again, use the new gas names in their ids. Electricity is unchanged.
+- Saved options are unchanged and read the same.
 
 ## 1.5.0b5
 
