@@ -164,7 +164,6 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
             hass, _LOGGER, config_entry=entry, name=DOMAIN, update_interval=None
         )
         self.fuel = Fuel(entry, subentry_id)
-        self.hub_device_id: str | None = None  # the device both tariffs sit under
         self._access = access if access is not None else store_access(hass, self.fuel.service)
         self._prices = prices if prices is not None else price_access(hass)
         # Set at start-up when the user has chosen an energy meter. None means no bill is kept.

@@ -54,6 +54,7 @@ from .const import (
     CONF_REFRESH_NOW,
     CONF_WINDOW_MINUTES,
     DEFAULT_WINDOW_MINUTES,
+    FUEL_TITLES,
     MAX_WINDOW_MINUTES,
     MIN_WINDOW_MINUTES,
     SERVICE_ELECTRICITY,
@@ -186,7 +187,8 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
                 return f"{self._new_fuel.plan.title} is added when you save"
             return f"not followed yet, choose a {service} plan"
         staged = self._new_plans.get(service)
-        line = tariff_line(sub.title, sub.data, staged.title if staged else None)
+        name = Fuel(self.config_entry, sub.subentry_id).title
+        line = tariff_line(name, sub.data, staged.title if staged else None)
         options = self._options_of(service)
         if options.get(CONF_BILL_START_DAY) or options.get(CONF_BILL_MONTHS):
             line += f", {bills_line(options)}"
@@ -502,14 +504,14 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
         """Move a fuel to its staged plan and settings. Its entity key stays, so its entities do."""
         settings = self._options_of(service)
         plan = self._new_plans.get(service)
-        title, unique = sub.title, sub.unique_id
+        unique = sub.unique_id
         if plan is not None:
             key = Fuel(self.config_entry, sub.subentry_id).key
             kept = {k: v for k, v in settings.items() if k not in PLAN_KEYS}
             settings = {**kept, **entry_data(plan.data, service, plan.title, key)}
-            title, unique = plan.title, plan.unique
+            unique = plan.unique
         self.hass.config_entries.async_update_subentry(
-            self.config_entry, sub, data=settings, title=title, unique_id=unique
+            self.config_entry, sub, data=settings, title=FUEL_TITLES[service], unique_id=unique
         )
 
     async def _fill_history(self, service: str) -> None:
@@ -530,7 +532,7 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             ConfigSubentry(
                 data=MappingProxyType(data),
                 subentry_type=fuel.service,
-                title=fuel.plan.title,
+                title=FUEL_TITLES[fuel.service],
                 unique_id=fuel.plan.unique,
             ),
         )

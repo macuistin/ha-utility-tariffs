@@ -22,9 +22,9 @@ from tests.options_support import configure
 from tests.test_sensor import DATA, NOON, _coordinator, _options, _setup
 
 METER = "sensor.meter_in"
-DAY = "sensor.utility_tariff_cheap_electricity_used_today"
-PERIOD = "sensor.utility_tariff_cheap_electricity_used_this_bill_period"
-THIRTY = "sensor.utility_tariff_cheap_electricity_used_last_30_days"
+DAY = "sensor.electricity_tariff_cheap_electricity_used_today"
+PERIOD = "sensor.electricity_tariff_cheap_electricity_used_this_bill_period"
+THIRTY = "sensor.electricity_tariff_cheap_electricity_used_last_30_days"
 
 
 def _at(hour: int, day: int = 14) -> datetime:
@@ -159,7 +159,7 @@ async def test_the_band_edges_follow_the_tariff(
     assert float(state.state) == 100.0  # 07:00 and 23:00 are both in the night band
 
 
-RATING = "sensor.utility_tariff_cheap_electricity_rating_today"
+RATING = "sensor.electricity_tariff_cheap_electricity_rating_today"
 
 
 async def test_the_rating_labels_todays_share_and_is_unknown_on_an_empty_day(

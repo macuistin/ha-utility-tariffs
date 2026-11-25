@@ -54,7 +54,7 @@ async def test_no_bill_sensors_without_a_meter(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    assert hass.states.get("sensor.utility_tariff_bill_so_far") is None
+    assert hass.states.get("sensor.electricity_tariff_bill_so_far") is None
 
 
 async def test_the_import_the_meter_counts_is_priced_into_the_bill(
@@ -100,7 +100,7 @@ async def test_the_unit_and_period_are_on_the_bill(
 ) -> None:
     await _setup_with_meters(hass, freezer)
 
-    state = hass.states.get("sensor.utility_tariff_bill_so_far")
+    state = hass.states.get("sensor.electricity_tariff_bill_so_far")
 
     assert state is not None
     assert state.attributes["unit_of_measurement"] == "EUR"
@@ -182,7 +182,7 @@ async def test_the_bill_dates_the_user_sets_replace_the_tariffs(
         },
     )
 
-    attributes = hass.states.get("sensor.utility_tariff_bill_so_far").attributes
+    attributes = hass.states.get("sensor.electricity_tariff_bill_so_far").attributes
     assert attributes["period_start"] == "2026-11-10"
     assert attributes["next_period_start"] == "2027-01-10"
     assert attributes["days_in_period"] == 61
@@ -195,7 +195,7 @@ async def test_without_set_dates_the_tariffs_own_apply(
     _set(hass, METER, 100.0)
     await _setup(hass, options={CONF_IMPORT_ENERGY: METER})
 
-    attributes = hass.states.get("sensor.utility_tariff_bill_so_far").attributes
+    attributes = hass.states.get("sensor.electricity_tariff_bill_so_far").attributes
     assert attributes["period_start"] == "2026-11-01"
     assert attributes["next_period_start"] == "2026-12-01"
 

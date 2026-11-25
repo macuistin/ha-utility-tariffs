@@ -56,7 +56,7 @@ header:
   show: true
   title: Import price
 series:
-  - entity: sensor.utility_tariff_price_forecast
+  - entity: sensor.electricity_tariff_price_forecast
     type: line
     curve: stepline
     data_generator: |

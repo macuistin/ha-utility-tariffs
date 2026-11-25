@@ -44,7 +44,7 @@ async def test_no_ranking_sensors_without_a_meter(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    assert hass.states.get("sensor.utility_tariff_plan_rank") is None
+    assert hass.states.get("sensor.electricity_tariff_plan_rank") is None
 
 
 async def test_no_rank_until_a_bill_is_recorded(
@@ -68,13 +68,13 @@ async def test_a_cheaper_plan_is_ranked_first_and_suggested(
 
     assert _state(hass, "plan_rank") == "2"
     assert float(_state(hass, "cheapest_plan_saving")) > 0
-    attributes = hass.states.get("sensor.utility_tariff_plan_rank").attributes
+    attributes = hass.states.get("sensor.electricity_tariff_plan_rank").attributes
     assert attributes["plans_compared"] == 2
     assert attributes["top_plans"][0]["plan"] == "P Energy Flat"
     assert attributes["top_plans"][1]["yours"] is True
     issue = ir.async_get(hass).async_get_issue(DOMAIN, "cheaper_plan")
     assert issue is not None
-    saving = hass.states.get("sensor.utility_tariff_cheapest_plan_saving").attributes
+    saving = hass.states.get("sensor.electricity_tariff_cheapest_plan_saving").attributes
     ranking = coordinator.ranker.ranking
     assert saving["days_recorded"] == ranking.days_recorded > 0
     assert saving["period_start"] == ranking.first_day.isoformat()

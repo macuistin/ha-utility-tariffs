@@ -48,7 +48,8 @@ async def test_a_plan_with_areas_is_chosen_in_three_pages(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Utility Tariffs"
     assert result["data"] == {}
-    assert _sub(result["result"]).title == "P Energy Plan (Urban)"
+    assert _sub(result["result"]).data["name"] == "P Energy Plan (Urban)"
+    assert _sub(result["result"]).title == "Electricity tariff"
     assert dict(_sub(result["result"]).data) == {
         "country": "IE",
         "provider": "p",
@@ -187,7 +188,7 @@ async def test_a_plan_with_one_price_skips_the_area_step(
     result = await _skip_options(hass, result)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert _sub(result["result"]).title == "P Energy Flat"
+    assert _sub(result["result"]).data["name"] == "P Energy Flat"
     assert _sub(result["result"]).data["area"] == "all"
 
 
@@ -331,7 +332,7 @@ async def test_changing_plan_keeps_the_entities_and_their_ids(
     assert result["reason"] == "reconfigure_successful"
     assert _sub(entry).unique_id == "IE/p/flat/all"
     assert _sub(entry).data["tariff"] == "flat"
-    assert _sub(entry).title == "P Energy Flat"
+    assert _sub(entry).data["name"] == "P Energy Flat"
     after = {
         e.unique_id: e.entity_id
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)

@@ -20,8 +20,8 @@ def _enable_custom_integrations(recorder_mock: object, enable_custom_integration
     """Start the recorder before `hass`, which the Energy dashboard needs."""
 
 
-IMPORT = "sensor.utility_tariff_import_price"
-EXPORT = "sensor.utility_tariff_export_price"
+IMPORT = "sensor.electricity_tariff_import_price"
+EXPORT = "sensor.electricity_tariff_export_price"
 BAD = "sensor.price_without_kwh"
 
 

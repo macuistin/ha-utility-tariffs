@@ -17,7 +17,7 @@ from tests.support.building import build_store
 from tests.support.fixtures import flat, tariff, write_store
 from tests.test_sensor import DATA, NOON, _coordinator, _setup, _sub_id
 
-STATUS = "sensor.utility_tariff_tariff_status"
+STATUS = "sensor.electricity_tariff_tariff_status"
 
 
 class Swap:
@@ -88,7 +88,7 @@ async def test_a_plan_whose_prices_have_ended_is_marked_and_a_repair_is_raised(
     state = hass.states.get(STATUS)
     assert state is not None and state.state == "ended"
     assert state.attributes["needs_attention"] is True
-    assert hass.states.get("sensor.utility_tariff_import_price").state == "0.3"  # type: ignore[union-attr]
+    assert hass.states.get("sensor.electricity_tariff_import_price").state == "0.3"  # type: ignore[union-attr]
     issue = _issue(hass, "plan_ended", entry)
     assert issue is not None
     assert issue.translation_placeholders == {"tariff": DATA["name"]}

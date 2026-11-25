@@ -66,12 +66,12 @@ async def test_own_rates_make_an_entry_that_prices_the_day(
     result = await _make(hass)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert _sub(result["result"]).title == "My plan"
+    assert _sub(result["result"]).data["name"] == "My plan"
     assert _sub(result["result"]).data["manual"]["periods"][0]["name"] == "Night"
     assert _sub(result["result"]).data["entity_key"] == "manual"
-    assert hass.states.get("sensor.utility_tariff_import_price").state == "0.327"
-    assert hass.states.get("sensor.utility_tariff_export_price").state == "0.19"
-    assert hass.states.get("sensor.utility_tariff_import_rate_band").state == "Day"
+    assert hass.states.get("sensor.electricity_tariff_import_price").state == "0.327"
+    assert hass.states.get("sensor.electricity_tariff_export_price").state == "0.19"
+    assert hass.states.get("sensor.electricity_tariff_import_rate_band").state == "Day"
 
 
 async def test_the_timed_rate_applies_at_night(
@@ -80,8 +80,8 @@ async def test_the_timed_rate_applies_at_night(
     freezer.move_to("2026-11-14 23:30:00+00:00")
     await _make(hass)
 
-    assert hass.states.get("sensor.utility_tariff_import_price").state == "0.1308"
-    assert hass.states.get("sensor.utility_tariff_import_rate_band").state == "Night"
+    assert hass.states.get("sensor.electricity_tariff_import_price").state == "0.1308"
+    assert hass.states.get("sensor.electricity_tariff_import_rate_band").state == "Night"
 
 
 async def test_a_bad_currency_is_refused_with_the_form_kept(
@@ -157,7 +157,7 @@ async def test_a_store_plan_can_be_swapped_for_own_rates_and_keep_its_entities(
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
     }
     assert without_bands(after) == without_bands(before)
-    assert hass.states.get("sensor.utility_tariff_import_price").state == "0.327"
+    assert hass.states.get("sensor.electricity_tariff_import_price").state == "0.327"
 
 
 @pytest.mark.parametrize(

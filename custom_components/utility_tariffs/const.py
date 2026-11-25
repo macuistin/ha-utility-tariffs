@@ -11,10 +11,9 @@ SERVICE_ELECTRICITY = "electricity"
 SERVICE_GAS = "gas"
 SERVICES = (SERVICE_ELECTRICITY, SERVICE_GAS)
 
-# The device is always called this, so entity ids read sensor.utility_tariff_<thing>. Gas gets its
-# own device so the two never share an entity id.
-DEVICE_NAME = "Utility Tariff"
-DEVICE_NAMES = {SERVICE_ELECTRICITY: DEVICE_NAME, SERVICE_GAS: "Gas Tariff"}
+# What each fuel's device and its row on the integration page are called. The device name is part
+# of the entity ids (sensor.electricity_tariff_<thing>), and gas has its own so they never clash.
+FUEL_TITLES = {SERVICE_ELECTRICITY: "Electricity tariff", SERVICE_GAS: "Gas tariff"}
 
 
 
@@ -23,7 +22,7 @@ CONF_MOVED_TO = "moved_to"  # set on an old entry whose fuel moved into the sing
 
 
 def hub_identifier(entry_id: str) -> str:
-    """The identifier of the hub device both tariffs sit under."""
+    """The identifier of the hub device that 1.5.0b4 and b5 added. It is removed on start."""
     return f"hub_{entry_id}"
 
 

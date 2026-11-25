@@ -120,7 +120,7 @@ async def test_the_tariff_changes_in_configure_and_keeps_the_entities(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert _sub(entry).data["tariff"] == "flat"
     assert _options(entry) == {"bill_start_day": 16, "bill_months": 2}
-    assert _sub(entry).title == "P Energy Flat"
+    assert _sub(entry).data["name"] == "P Energy Flat"
     assert _sub(entry).unique_id == "IE/p/flat/all"
     after = {
         e.unique_id: e.entity_id
@@ -159,7 +159,7 @@ async def test_the_own_rates_pages_work_from_configure(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert _sub(entry).data["manual"]["base_rate"] == 0.3
-    assert _sub(entry).title == "Mine"
+    assert _sub(entry).data["name"] == "Mine"
     assert _sub(entry).data["entity_key"] == "IE/p/plan/urban"
     await hass.config_entries.async_unload(entry.entry_id)
 

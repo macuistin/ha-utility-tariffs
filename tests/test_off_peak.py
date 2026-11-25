@@ -73,7 +73,7 @@ async def test_the_sensor_is_off_by_day_with_the_next_night_as_attributes(
     freezer.move_to(NOON)
     await _setup(hass)
 
-    state = hass.states.get("binary_sensor.utility_tariff_off_peak")
+    state = hass.states.get("binary_sensor.electricity_tariff_off_peak")
 
     assert state is not None
     assert state.state == "off"
@@ -88,7 +88,7 @@ async def test_the_sensor_is_on_at_night_with_the_current_stretch(
     freezer.move_to("2026-11-14 23:30:00+00:00")
     await _setup(hass)
 
-    state = hass.states.get("binary_sensor.utility_tariff_off_peak")
+    state = hass.states.get("binary_sensor.electricity_tariff_off_peak")
 
     assert state is not None
     assert state.state == "on"
@@ -103,7 +103,7 @@ async def test_a_flat_tariff_is_unavailable_not_off(
     flat = {**DATA, "tariff": "flat", "area": "all", "name": "Flat"}
     await _setup(hass, flat)
 
-    state = hass.states.get("binary_sensor.utility_tariff_off_peak")
+    state = hass.states.get("binary_sensor.electricity_tariff_off_peak")
 
     assert state is not None
     assert state.state == "unavailable"
