@@ -40,21 +40,29 @@ views:
               So far. Day {{ done }} of {{ total }}, from {{ start }}.
               {% if saved not in ['unknown', 'unavailable'] and without is not none %}
 
-              **Solar and battery saved {{ saved | float | round(2) }} {{ unit }}**
+              <ha-alert alert-type="success">Solar and battery saved <b>{{ '%.2f' | format(saved | float) }} {{ unit }}</b></ha-alert>
 
               {% set top = [without | float, 0.01] | max %}
               {% set with_bar = ((bill | float) / top * 20) | round(0) | int %}
-              | | | |
+              | Bill | | {{ unit }} |
               | --- | --- | ---: |
-              | With them | {{ '█' * with_bar }} | {{ '%.2f' | format(bill | float) }} |
-              | Without | {{ '█' * 20 }} | {{ '%.2f' | format(without | float) }} |
+              | With them | <font color="#1e88e5">{{ '█' * with_bar }}</font> | {{ '%.2f' | format(bill | float) }} |
+              | Without | <font color="#fb8c00">{{ '█' * 20 }}</font> | {{ '%.2f' | format(without | float) }} |
               {% endif %}
               {% endif %}
-          - type: tile
+          - type: gauge
             entity: sensor.electricity_tariff_savings_share_this_bill_period
             name: Share of the bill saved
-            icon: mdi:piggy-bank-outline
-            color: green
+            min: 0
+            max: 100
+            needle: true
+            segments:
+              - from: 0
+                color: "#e53935"
+              - from: 10
+                color: "#fb8c00"
+              - from: 25
+                color: "#43a047"
           - type: tile
             entity: sensor.electricity_tariff_import_this_bill_period
             name: Imported this bill period
@@ -74,12 +82,12 @@ views:
               {% if plans is none %}
               The comparison is not available yet. It needs an import meter and a whole bill of recorded energy.
               {% else %}
-              {{ state_attr(rank, 'summary') }}
+              <ha-alert alert-type="{{ 'success' if states(rank) == '1' else 'warning' }}">{{ state_attr(rank, 'summary') }}</ha-alert>
 
               | # | Plan | Bill |
               | ---: | --- | ---: |
               {% for p in plans -%}
-              | {{ p.rank }} | {{ '**' ~ p.plan ~ ' (yours)**' if p.yours else p.plan }} | {{ '%.2f' | format(p.bill) }} {{ unit }} |
+              | {{ p.rank }} | {{ '<font color="#43a047"><b>' ~ p.plan ~ ' (yours)</b></font>' if p.yours else p.plan }} | {{ '%.2f' | format(p.bill) }} {{ unit }} |
               {% endfor %}
 
               {{ state_attr(rank, 'plans_compared') }} plans compared over {{ state_attr(rank, 'period_start') }} to {{ state_attr(rank, 'period_end') }}, {{ state_attr(rank, 'days_recorded') }} days recorded.
@@ -114,9 +122,9 @@ views:
               | Line | You paid | Would have paid | Saved |
               | --- | ---: | ---: | ---: |
               {% for l in lines if not l.included -%}
-              | {{ l.line }} | {{ '%.2f' | format(l.paid) }} | {{ '%.2f' | format(l.would_have_paid) }} | {{ '%+.2f' | format(l.saved) if l.saved | abs >= 0.005 else '' }} |
+              | {{ l.line }} | {{ '%.2f' | format(l.paid) }} | {{ '%.2f' | format(l.would_have_paid) }} | {% if l.saved | abs >= 0.005 %}<font color="{{ '#43a047' if l.saved > 0 else '#e53935' }}">{{ '%+.2f' | format(l.saved) }}</font>{% endif %} |
               {% endfor -%}
-              | **Total ({{ unit }})** | **{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}** | **{{ '%+.2f' | format(state_attr(e, 'bill_difference')) }}** |
+              | **Total ({{ unit }})** | **{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}** | <font color="#43a047"><b>{{ '%+.2f' | format(state_attr(e, 'bill_difference')) }}</b></font> |
               {% for l in lines if l.included %}
               {{ l.line }} is already inside the lines above: {{ '%.2f' | format(l.paid) }} paid, {{ '%.2f' | format(l.would_have_paid) }} without.
               {% endfor %}
@@ -132,13 +140,13 @@ views:
               No days are priced yet.
               {% else %}
               {% set top = [days | map(attribute='would_have_paid') | max | float, 0.01] | max %}
-              Newest first. The dark bar is what you paid and the light bar is the extra it would have cost.
+              Newest first. <font color="#1e88e5">█</font> is what you paid and <font color="#43a047">█</font> is what solar and battery saved.
 
-              | Day | Paid | Would have paid | Saved | |
+              | Day | Paid | Would have paid | Saved | Paid and saved |
               | --- | ---: | ---: | ---: | --- |
               {% for d in days | reverse -%}
               {% set paid = ((d.paid / top) * 16) | round(0) | int -%}
               {% set more = [((d.would_have_paid / top) * 16) | round(0) | int - paid, 0] | max -%}
-              | {{ (d.date | as_datetime).strftime('%a %d %b') }} | {{ '%.2f' | format(d.paid) }} | {{ '%.2f' | format(d.would_have_paid) }} | {{ '%+.2f' | format(d.saved) }} | {{ '█' * paid }}{{ '░' * more }} |
+              | {{ (d.date | as_datetime).strftime('%a %d %b') }} | {{ '%.2f' | format(d.paid) }} | {{ '%.2f' | format(d.would_have_paid) }} | <font color="{{ '#43a047' if d.saved >= 0 else '#e53935' }}">{{ '%+.2f' | format(d.saved) }}</font> | <font color="#1e88e5">{{ '█' * paid }}</font><font color="#43a047">{{ '█' * more }}</font> |
               {% endfor %}
               {% endif %}

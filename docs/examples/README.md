@@ -1,8 +1,9 @@
 # Example dashboard: bill, savings and plan ranking
 
 [`bill-dashboard.yaml`](bill-dashboard.yaml) is a dashboard view you can paste into your own
-dashboard. It uses only standard cards (markdown, tile, heading and history graph), so nothing
-extra needs installing.
+dashboard. It uses only standard cards (markdown, tile, gauge and heading), so nothing extra
+needs installing. The colour comes from what the markdown card already allows: `<font color>`
+and Home Assistant's own `<ha-alert>` banner.
 
 ## Use it
 
