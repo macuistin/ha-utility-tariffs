@@ -5,13 +5,27 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.6.0
+
+This release adds the bill by line and by day, a bill projection and an example dashboard, and corrects **Price forecast** on a fixed tariff.
+
+**Added**
+
+- **Bill so far** has a `lines` attribute: each line of the bill (energy by band, standing charge, levy, VAT, export credit) with the amount paid.
+- **Bill so far** has a `projected_bill` attribute: the bill for the whole period if the days left cost what the last seven whole days did on average, and `days_left`. It is a pace, not a forecast, so it knows nothing of the weather, a holiday or a price change still to come. It is unknown until one whole day before today is recorded.
+- **Savings this bill period** has a `lines` attribute that sets each line beside what it would have cost with the whole house load bought from the grid (`paid`, `would_have_paid`, `saved`), and a `daily` attribute with the same three figures for each recent day (up to 62). Each day is priced on its own, so a standing charge is shared by the days priced. The days do not split the battery's stored energy or wear, so a day's `saved` is the bill difference. A day with no recorded house load is left out.
+- A line with `included: true` is a tax already inside the prices, such as VAT. It is part of the other lines, so leave it out of a sum.
+- None of these big attributes is kept in the history.
+- An example dashboard of the bill so far, what solar and a battery saved, and the cheapest plans, in `docs/examples/`.
+
 **Fixes**
 
 - **Price forecast** on a fixed tariff showed a date about two weeks ahead, which was only how far the integration priced, not how long the prices hold. It now shows the start of the next revision the store holds, or unknown when there is none, and has a `prices_fixed` attribute. A tariff on a price feed is unchanged.
 
 **Upgrading**
 
-- An automation that read the old fixed-tariff date as "prices known until" now sees unknown when no later revision exists. Check `prices_fixed` first.
+- An automation that read the old fixed-tariff **Price forecast** date as "prices known until" now sees unknown when no later revision exists. Check `prices_fixed` first.
+- Nothing else to do. No entity is added or renamed.
 
 ## 1.6.0b2
 
