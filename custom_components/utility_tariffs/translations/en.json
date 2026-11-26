@@ -459,7 +459,7 @@
     "step": {
       "init": {
         "title": "Configure",
-        "description": "{unsaved}Pick a page to change. Nothing is saved until you choose **Save changes**.",
+        "description": "{saved}Pick a page to change. Each change is saved when you come back to this screen. Choose **Done** when you have finished.",
         "menu_options": {
           "tariff_electricity": "Electricity tariff",
           "tariff_gas": "Gas tariff",
@@ -467,7 +467,7 @@
           "meters_gas": "Gas meter",
           "battery": "Battery",
           "store": "Tariff store",
-          "confirm": "Save changes"
+          "done": "Done"
         },
         "menu_option_descriptions": {
           "tariff_electricity": "{electricity_summary}",
@@ -476,7 +476,7 @@
           "meters_gas": "{meters_gas_summary}",
           "battery": "{battery_summary}",
           "store": "{store_summary}",
-          "confirm": "{save_note}"
+          "done": "Close Configure. Everything shown here is already saved."
         }
       },
       "tariff": {

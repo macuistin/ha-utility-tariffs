@@ -1,14 +1,14 @@
 """Configure: a menu of pages, each opened, changed and returned from, and saved together.
 
   init        the menu: Electricity tariff, Gas tariff, the meters of each, Battery, Tariff store,
-              each with a line on what is set now, and Save changes once something has changed
+              each with a line on what is set now, and Done. Coming back to it saves
   tariff      choose a different plan for a fuel, through the same pages as setup (country, plan,
               area or own rates), or change its bills or windows. A fuel not followed yet is added
   meters, battery, store    one topic each, and gas has its own meters page
 
-One entry holds both fuels, so this one flow changes either. Nothing is written until Save
-changes. The pages keep their answers on the flow, and the plans, a new fuel and the settings of
-each fuel are applied together in `async_step_confirm`.
+One entry holds both fuels, so this one flow changes either. A page keeps its answers on the flow
+until the menu opens again. Then the plans, a new fuel and the settings of each fuel are applied
+together in `_apply`, and the entry reloads once. Done only closes the flow.
 """
 
 from __future__ import annotations
@@ -133,7 +133,7 @@ def _suggest(key: str, options: Any) -> Any:
 
 
 class TariffOptionsFlow(PlanSteps, OptionsFlow):
-    """The pages for both fuels. Saving reloads the entry once, whatever was changed."""
+    """The pages for both fuels. Each return to the menu saves, and reloads the entry once."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -211,20 +211,19 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             pages.append("meters_gas")
         if self._has_store():
             pages.append("store")
-        if self._dirty():
-            pages.append("confirm")
+        saved = await self._apply() if self._dirty() else False
+        pages.append("done")
         return self.async_show_menu(
             step_id="init",
             menu_options=pages,
             description_placeholders={
-                "unsaved": "You have unsaved changes.\n\n" if self._dirty() else "",
+                "saved": "Your changes are saved.\n\n" if saved else "",
                 "electricity_summary": self._tariff_line(SERVICE_ELECTRICITY),
                 "gas_summary": self._tariff_line(SERVICE_GAS),
                 "meters_summary": self._meters_line(SERVICE_ELECTRICITY),
                 "meters_gas_summary": self._meters_line(SERVICE_GAS),
                 "battery_summary": battery_line(self._options_of(SERVICE_ELECTRICITY)),
                 "store_summary": self._store_line(),
-                "save_note": "Applies every change on the other pages and reloads the entry.",
             },
         )
 
@@ -471,9 +470,13 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
 
     # -- save ------------------------------------------------------------------------------------
 
-    async def async_step_confirm(
+    async def async_step_done(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        """Close Configure. Every change was saved when the menu last opened."""
+        return self.async_create_entry(data={})
+
+    async def _apply(self) -> bool:
         """Write the plans, the settings and the new fuel together, and reload the entry once."""
         entry = self.config_entry
         changed = self._write_fuels()
@@ -487,7 +490,17 @@ class TariffOptionsFlow(PlanSteps, OptionsFlow):
             self._add_fuel(self._new_fuel)  # adding a fuel reloads the entry by itself
         elif changed or self._refresh or self._clear:
             self.hass.config_entries.async_schedule_reload(entry.entry_id)
-        return self.async_create_entry(data={})
+        self._forget_staged()
+        return True
+
+    def _forget_staged(self) -> None:
+        """What was written is now the saved state, so the next page starts from it."""
+        self._changes.clear()
+        self._new_plans.clear()
+        self._new_fuel = None
+        self._refresh = False
+        self._clear = False
+        self._backfill.clear()
 
     def _write_fuels(self) -> set[str]:
         """Save each fuel that has a staged plan or changed settings. Returns the fuels changed."""
