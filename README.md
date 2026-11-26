@@ -79,6 +79,7 @@ Home Assistant needs internet access to read the tariff store. One electricity t
 | [Configuration](docs/configuration.md) | Options, bill dates, your own rates, changing plan |
 | [Features](docs/features.md) | Bill so far, savings, cheaper plans, Energy dashboard, bill summary |
 | [Entities and actions](docs/entities.md) | Every sensor, the price forecast and the actions |
+| [Example dashboard](docs/examples/README.md) | A bill, savings and cheapest plans view to paste in, using standard cards |
 | [The tariff store](docs/tariff-store.md) | Where prices come from, how tariffs are kept current, the file format |
 | [Troubleshooting](docs/troubleshooting.md) | Common problems, known limitations, reporting a bug |
 

@@ -1,0 +1,104 @@
+# Example dashboard view: the bill so far, what solar and a battery saved, and the cheapest plans.
+#
+# How to use it: open the dashboard, choose Edit, then the three dots, Raw configuration editor,
+# and paste this under `views:`. Or paste each card into a manual card.
+#
+# Before you paste, replace `electricity_tariff` in every entity id with the name of your
+# tariff's device (Settings, Devices & services, Utility Tariffs). Only standard cards are used.
+#
+# What needs a setup option:
+#   Bill so far, Savings and the plan sensors need an import meter in the options.
+#   Savings also needs a house consumption meter. Without it those sensors stay unknown.
+title: Bill
+path: bill
+type: sections
+max_columns: 2
+sections:
+  - type: grid
+    cards:
+      - type: heading
+        heading: This bill period
+        icon: mdi:receipt-text-outline
+      - type: markdown
+        content: >-
+          {% set bill = states('sensor.electricity_tariff_bill_so_far') %}
+          {% set unit = state_attr('sensor.electricity_tariff_bill_so_far', 'unit_of_measurement') %}
+          {% set saved = states('sensor.electricity_tariff_savings_this_bill_period') %}
+          {% set without = state_attr('sensor.electricity_tariff_savings_this_bill_period', 'bill_without_system') %}
+          {% set start = state_attr('sensor.electricity_tariff_bill_so_far', 'period_start') %}
+          {% set done = state_attr('sensor.electricity_tariff_bill_so_far', 'days_priced') %}
+          {% set total = state_attr('sensor.electricity_tariff_bill_so_far', 'days_in_period') %}
+          {% if bill in ['unknown', 'unavailable'] %}
+          The bill is not available yet. Set an import meter in the options.
+          {% else %}
+          ## {{ bill | float | round(2) }} {{ unit }} so far
+
+          Day {{ done }} of {{ total }}, from {{ start }}.
+          {% if saved not in ['unknown', 'unavailable'] and without is not none %}
+
+          **Saved by solar and battery: {{ saved | float | round(2) }} {{ unit }}**
+          {% set scale = 20 %}
+          {% set top = [without | float, 0.01] | max %}
+          {% set with_bar = ((bill | float) / top * scale) | round(0) | int %}
+          {% set without_bar = scale %}
+
+          With them `{{ '█' * with_bar }}` {{ bill | float | round(2) }} {{ unit }}
+
+          Without `{{ '█' * without_bar }}` {{ without | float | round(2) }} {{ unit }}
+          {% endif %}
+          {% endif %}
+      - type: tile
+        entity: sensor.electricity_tariff_savings_share_this_bill_period
+        name: Share of the bill saved
+      - type: tile
+        entity: sensor.electricity_tariff_import_this_bill_period
+        name: Imported this bill period
+  - type: grid
+    cards:
+      - type: heading
+        heading: Cheapest plans
+        icon: mdi:scale-balance
+      - type: markdown
+        content: >-
+          {% set rank = 'sensor.electricity_tariff_plan_rank' %}
+          {% set plans = state_attr(rank, 'top_plans') %}
+          {% set saving = states('sensor.electricity_tariff_cheapest_plan_saving') %}
+          {% set unit = state_attr('sensor.electricity_tariff_cheapest_plan_saving', 'unit_of_measurement') %}
+          {% if plans is none %}
+          The comparison is not available yet. Set an import meter in the options.
+          {% else %}
+          {{ state_attr(rank, 'summary') }}
+
+          | # | Plan | Bill |
+          | ---: | --- | ---: |
+          {% for p in plans -%}
+          | {{ p.rank }} | {{ '**' ~ p.plan ~ ' (yours)**' if p.yours else p.plan }} | {{ '%.2f' | format(p.bill) }} {{ unit }} |
+          {% endfor %}
+          Compared {{ state_attr(rank, 'plans_compared') }} plans over
+          {{ state_attr(rank, 'period_start') }} to {{ state_attr(rank, 'period_end') }}
+          ({{ state_attr(rank, 'days_recorded') }} days recorded).
+          {% if saving not in ['unknown', 'unavailable'] and saving | float > 0 %}
+          The cheapest plan would have saved {{ saving | float | round(2) }} {{ unit }}.
+          {% endif %}
+          {% endif %}
+      - type: tile
+        entity: sensor.electricity_tariff_plan_rank
+        name: Your plan's rank
+      - type: tile
+        entity: sensor.electricity_tariff_cheapest_plan_saving
+        name: Cheapest plan saving
+  - type: grid
+    column_span: 2
+    cards:
+      - type: heading
+        heading: Over the period
+        icon: mdi:chart-line
+      # There is no per-day bill sensor, so this draws the running totals. See the notes in
+      # docs/examples/README.md.
+      - type: history-graph
+        hours_to_show: 720
+        entities:
+          - entity: sensor.electricity_tariff_bill_so_far
+            name: Bill so far
+          - entity: sensor.electricity_tariff_savings_this_bill_period
+            name: Saved
