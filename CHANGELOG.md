@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Changed**
+
+- Configure saves each change when you come back to its list of pages, and says "Your changes are saved". The **Save changes** option is gone. Choose **Done** to close Configure. Saved options are unchanged and read the same.
+
 ## 1.5.0
 
 This release adds gas tariffs and brings electricity and gas into one entry. It rebuilds Configure as a list of pages. Existing installs move over on the first start, so take a backup first. Tell us if an entity ID, a history, a dashboard or an action call changed, or if the integration page shows the tariffs wrongly.

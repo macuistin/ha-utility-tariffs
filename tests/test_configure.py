@@ -1,4 +1,4 @@
-"""Configure: pages that change nothing until Save changes, the tariff change and the second fuel."""
+"""Configure: pages that save when the menu opens again, the tariff change and the second fuel."""
 
 from __future__ import annotations
 
@@ -42,19 +42,19 @@ async def test_the_menu_says_what_each_page_holds_now(
     menu = await open_menu(hass, entry.entry_id)
 
     assert menu["menu_options"] == [
-        "tariff_electricity", "tariff_gas", "meters", "battery", "store"
+        "tariff_electricity", "tariff_gas", "meters", "battery", "store", "done"
     ]
     lines = menu["description_placeholders"]
     assert lines["electricity_summary"] == "P Energy Plan (Urban) (IE)"
     assert lines["gas_summary"] == "not followed yet, choose a gas plan"
     assert lines["meters_summary"] == "import sensor.grid_in"
     assert lines["battery_summary"] == "no battery set"
-    assert lines["unsaved"] == ""
+    assert lines["saved"] == ""
     hass.config_entries.options.async_abort(menu["flow_id"])
     await hass.config_entries.async_unload(entry.entry_id)
 
 
-async def test_nothing_is_saved_until_save_changes(
+async def test_changes_are_saved_when_the_menu_opens_again(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
 ) -> None:
     freezer.move_to(NOON)
@@ -63,11 +63,11 @@ async def test_nothing_is_saved_until_save_changes(
 
     menu = await fill_windows(hass, menu["flow_id"], "electricity", {"window_minutes": 240})
 
-    assert _options(entry) == {}
-    assert "confirm" in menu["menu_options"]
-    assert menu["description_placeholders"]["unsaved"].startswith("You have unsaved changes")
+    assert _options(entry) == {"window_minutes": 240}
+    assert "done" in menu["menu_options"]
+    assert menu["description_placeholders"]["saved"].startswith("Your changes are saved")
     result = await hass.config_entries.options.async_configure(
-        menu["flow_id"], {"next_step_id": "confirm"}
+        menu["flow_id"], {"next_step_id": "done"}
     )
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -108,12 +108,13 @@ async def test_the_tariff_changes_in_configure_and_keeps_the_entities(
     )
 
     assert menu["step_id"] == "init"
+    await hass.async_block_till_done()
     assert menu["description_placeholders"]["electricity_summary"] == (
-        "changes to P Energy Flat when you save, bill starts on day 16, 2 months a bill"
+        "P Energy Flat (IE), bill starts on day 16, 2 months a bill"
     )
-    assert _sub(entry).data["tariff"] == "plan"  # not saved yet
+    assert _sub(entry).data["tariff"] == "flat"  # saved on return to the menu
     result = await hass.config_entries.options.async_configure(
-        menu["flow_id"], {"next_step_id": "confirm"}
+        menu["flow_id"], {"next_step_id": "done"}
     )
     await hass.async_block_till_done()
 
@@ -154,7 +155,7 @@ async def test_the_own_rates_pages_work_from_configure(
     assert page["step_id"] == "plan_bills"
     menu = await flow.async_configure(flow_id, {})
     assert menu["step_id"] == "init"
-    result = await flow.async_configure(flow_id, {"next_step_id": "confirm"})
+    result = await flow.async_configure(flow_id, {"next_step_id": "done"})
     await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -199,9 +200,10 @@ async def test_gas_is_added_from_configure_and_made_when_saved(
     menu = await flow.async_configure(flow_id, {"import_energy_entity": "sensor.gas_kwh"})
 
     assert menu["step_id"] == "init"
-    assert menu["description_placeholders"]["gas_summary"] == "P Energy Flat is added when you save"
-    assert "gas" not in {s.subentry_type for s in entry.subentries.values()}  # not saved yet
-    await flow.async_configure(flow_id, {"next_step_id": "confirm"})
+    await hass.async_block_till_done()
+    assert menu["description_placeholders"]["gas_summary"] == "P Energy Flat (IE)"
+    assert "gas" in {s.subentry_type for s in entry.subentries.values()}  # saved on return
+    await flow.async_configure(flow_id, {"next_step_id": "done"})
     await hass.async_block_till_done()
 
     assert len(hass.config_entries.async_entries(DOMAIN)) == 1  # the same entry holds both
@@ -230,9 +232,10 @@ async def test_the_other_fuel_is_changed_from_the_same_menu_with_its_bill_dates(
         menu["flow_id"], {"bill_start_day": 5}
     )
 
-    assert _options(power) == {} and _options(power, "gas") == {}  # nothing saved yet
+    await hass.async_block_till_done()
+    assert _options(power) == {} and _options(power, "gas") == {"bill_start_day": 5}
     await hass.config_entries.options.async_configure(
-        menu["flow_id"], {"next_step_id": "confirm"}
+        menu["flow_id"], {"next_step_id": "done"}
     )
     await hass.async_block_till_done()
     assert _sub(power, "gas").unique_id == "gas/IE/p/flat/all"  # the store's own gas plan id
@@ -258,7 +261,7 @@ async def test_the_window_settings_are_on_the_tariff_page_of_each_fuel(
     await flow.async_configure(menu["flow_id"], {"next_step_id": "init"})
 
     await fill_windows(hass, menu["flow_id"], "gas", {"window_minutes": 60})
-    await flow.async_configure(menu["flow_id"], {"next_step_id": "confirm"})
+    await flow.async_configure(menu["flow_id"], {"next_step_id": "done"})
     await hass.async_block_till_done()
 
     assert _options(power, "gas") == {"window_minutes": 60}

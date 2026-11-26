@@ -87,7 +87,7 @@ async def test_nothing_is_read_again_when_neither_is_asked(
     menu = await open_menu(hass, entry.entry_id)
     menu = await fill_page(hass, menu["flow_id"], "store", {})
 
-    assert "confirm" not in menu["menu_options"]  # nothing to save
+    assert menu["description_placeholders"]["saved"] == ""  # nothing was saved
     assert len(reader.reads) == before
     await _finish(hass, entry.entry_id)
 

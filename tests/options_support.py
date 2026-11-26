@@ -53,7 +53,7 @@ async def fill_windows(
 async def configure(
     hass: HomeAssistant, entry_id: str, service: str = "electricity", **pages: dict[str, Any]
 ) -> dict[str, Any]:
-    """Fill each named page, then choose Save changes. Returns the result of the save."""
+    """Fill each named page, then choose Done. Returns the result of closing."""
     flow = await open_menu(hass, entry_id)
     for page, user_input in pages.items():
         if page == "bills":
@@ -63,5 +63,5 @@ async def configure(
         else:
             flow = await fill_page(hass, flow["flow_id"], page, user_input)
     return await hass.config_entries.options.async_configure(
-        flow["flow_id"], {"next_step_id": "confirm"}
+        flow["flow_id"], {"next_step_id": "done"}
     )

@@ -136,7 +136,7 @@ async def test_the_gas_options_ask_only_for_gas_things(
     menu = await open_menu(hass, entry.entry_id)
 
     assert menu["menu_options"] == [
-        "tariff_electricity", "tariff_gas", "meters_gas", "store"
+        "tariff_electricity", "tariff_gas", "meters_gas", "store", "done"
     ]  # no electricity meters or battery: only gas is followed
     page = await hass.config_entries.options.async_configure(
         menu["flow_id"], {"next_step_id": "meters_gas"}
@@ -153,7 +153,7 @@ async def test_the_gas_options_ask_only_for_gas_things(
     assert "connected_load_kw" not in {str(key) for key in page["data_schema"].schema}
     page = await hass.config_entries.options.async_configure(page["flow_id"], {})
     saved = await hass.config_entries.options.async_configure(
-        page["flow_id"], {"next_step_id": "confirm"}
+        page["flow_id"], {"next_step_id": "done"}
     )
     assert saved["type"] == "create_entry"
     assert _options(entry, "gas")["import_energy_entity"] == "sensor.gas_kwh"
