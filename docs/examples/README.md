@@ -7,7 +7,7 @@ extra needs installing.
 ## Use it
 
 1. Open your dashboard, choose **Edit**, then the three dots, then **Raw configuration editor**.
-2. Paste the file's contents under `views:`.
+2. Replace the whole contents with this file. To keep your other views, paste the part from `- title: Bill` down as one more item under your own `views:`.
 3. Replace `electricity_tariff` in each entity id with your tariff's device name.
 
 Set an import meter in the options first. The saving needs a house consumption meter too.
