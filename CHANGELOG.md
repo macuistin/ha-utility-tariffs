@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.6.0b2
+
+This is a beta. It adds a bill projection to **Bill so far**. Tell us if the projected figure looks wrong against your bill.
+
 **Added**
 
 - **Bill so far** has a `projected_bill` attribute: the bill for the whole period if the days left cost what the last seven whole days did on average, and `days_left`. It is a pace, not a forecast, so it knows nothing of the weather, a holiday or a price change still to come. It is unknown until one whole day before today is recorded.
