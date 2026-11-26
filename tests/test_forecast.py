@@ -107,7 +107,8 @@ async def test_a_fixed_tariff_is_forecast_over_a_revision_the_store_already_hold
     freezer.move_to(NOON)
     await _setup(hass, FLAT)
 
-    assert _state(hass, "price_forecast") == "2026-11-28T00:00:00+00:00"
+    assert _state(hass, "price_forecast") == "2026-11-20T00:00:00+00:00"  # prices hold until then
+    assert attributes(hass, "price_forecast")["prices_fixed"] is True
     assert _state(hass, "next_tariff_change") == "2026-11-20T00:00:00+00:00"
     change = attributes(hass, "next_tariff_change")
     assert change["import_prices_before"] == {"All day": 0.25}
@@ -133,6 +134,7 @@ async def test_the_price_now_follows_the_revision_when_it_starts(
     await hass.async_block_till_done()
     assert _state(hass, "import_price") == "0.3"
     assert _state(hass, "next_tariff_change") == "unknown"
+    assert _state(hass, "price_forecast") == "unknown"  # nothing later: fixed until further notice
 
 
 async def test_a_feed_tariff_shows_the_published_prices_and_where_they_stop(

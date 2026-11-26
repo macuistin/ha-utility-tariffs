@@ -16,7 +16,7 @@ from .const import (
     DEFAULT_HIGH_PERCENTILE,
     DEFAULT_LOW_PERCENTILE,
 )
-from .coordinator import TariffCoordinator
+from .coordinator import TariffCoordinator, TariffData
 from .entity import TariffEntity
 from .forecast import (
     Percents,
@@ -46,6 +46,17 @@ class PercentSensor(TariffEntity, SensorEntity):
         )
 
 
+def next_revision(data: TariffData, now: datetime) -> tuple[datetime, Revision] | None:
+    """The first revision the store holds that starts after *now*, with its start."""
+    for revision in data.revisions:
+        start = datetime.combine(
+            revision.first_day, datetime.min.time(), revision.definition.timezone
+        )
+        if start > now:
+            return start, revision
+    return None
+
+
 class PriceForecastSensor(PercentSensor):
     """When the prices are known until, with the slots, the changes ahead and the percentiles."""
 
@@ -63,7 +74,13 @@ class PriceForecastSensor(PercentSensor):
 
     @property
     def native_value(self) -> datetime | None:
-        return self.coordinator.data.known_until(dt_util.now())
+        data, now = self.coordinator.data, dt_util.now()
+        if data.on_a_feed:
+            return data.known_until(now)
+        # A fixed tariff is priced a set time ahead, which says nothing about how long its
+        # prices hold. They hold until the next revision, if the store has one.
+        later = next_revision(data, now)
+        return None if later is None else later[0]
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any]:
@@ -72,6 +89,7 @@ class PriceForecastSensor(PercentSensor):
         history = history_points(data, now, percents)
         return {
             "unit": f"{data.definition.currency}/kWh",
+            "prices_fixed": not data.on_a_feed,
             "complete": known is not None and known >= (data.horizon_end or known),
             "slots": slot_rows(data, now),
             "import_rates": rate_rows(data, now, "import"),
@@ -96,14 +114,7 @@ class NextTariffChangeSensor(TariffEntity, SensorEntity):
         super().__init__(coordinator, "next_tariff_change")
 
     def _later(self) -> tuple[datetime, Revision] | None:
-        now = dt_util.now()
-        for revision in self.coordinator.data.revisions:
-            start = datetime.combine(
-                revision.first_day, datetime.min.time(), revision.definition.timezone
-            )
-            if start > now:
-                return start, revision
-        return None
+        return next_revision(self.coordinator.data, dt_util.now())
 
     @property
     def native_value(self) -> datetime | None:

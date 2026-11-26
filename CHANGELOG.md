@@ -5,6 +5,14 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Fixes**
+
+- **Price forecast** on a fixed tariff showed a date about two weeks ahead, which was only how far the integration priced, not how long the prices hold. It now shows the start of the next revision the store holds, or unknown when there is none, and has a `prices_fixed` attribute. A tariff on a price feed is unchanged.
+
+**Upgrading**
+
+- An automation that read the old fixed-tariff date as "prices known until" now sees unknown when no later revision exists. Check `prices_fixed` first.
+
 ## 1.6.0b2
 
 This is a beta. It adds a bill projection to **Bill so far**. Tell us if the projected figure looks wrong against your bill.
