@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.6.0b1
+
+This is a beta. It adds the bill by line and by day to two sensors. Tell us if a line or a day looks wrong against your bill.
+
 **Added**
 
 - **Bill so far** has a `lines` attribute: each line of the bill (energy by band, standing charge, levy, VAT, export credit) with the amount paid.
