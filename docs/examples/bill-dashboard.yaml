@@ -5,7 +5,7 @@
 # To add it to a dashboard you already have, paste the part from `- title: Bill` down as one
 # more item under that dashboard's `views:`.
 #
-# Before you paste, replace `electricity_tariff` in every entity id with the name of your
+# Before you paste, replace `service_electricity_tariff` in every entity id with the name of your
 # tariff's device (Settings, Devices & services, Utility Tariffs). Only standard cards are used.
 # Days are priced on their own, so a standing charge is shared by the days priced.
 #
@@ -25,13 +25,13 @@ views:
             icon: mdi:receipt-text-outline
           - type: markdown
             content: |-
-              {% set bill = states('sensor.electricity_tariff_bill_so_far') %}
-              {% set unit = state_attr('sensor.electricity_tariff_bill_so_far', 'unit_of_measurement') %}
-              {% set saved = states('sensor.electricity_tariff_savings_this_bill_period') %}
-              {% set without = state_attr('sensor.electricity_tariff_savings_this_bill_period', 'bill_without_system') %}
-              {% set start = state_attr('sensor.electricity_tariff_bill_so_far', 'period_start') %}
-              {% set done = state_attr('sensor.electricity_tariff_bill_so_far', 'days_priced') %}
-              {% set total = state_attr('sensor.electricity_tariff_bill_so_far', 'days_in_period') %}
+              {% set bill = states('sensor.service_electricity_tariff_bill_so_far') %}
+              {% set unit = state_attr('sensor.service_electricity_tariff_bill_so_far', 'unit_of_measurement') %}
+              {% set saved = states('sensor.service_electricity_tariff_savings_this_bill_period') %}
+              {% set without = state_attr('sensor.service_electricity_tariff_savings_this_bill_period', 'bill_without_system') %}
+              {% set start = state_attr('sensor.service_electricity_tariff_bill_so_far', 'period_start') %}
+              {% set done = state_attr('sensor.service_electricity_tariff_bill_so_far', 'days_priced') %}
+              {% set total = state_attr('sensor.service_electricity_tariff_bill_so_far', 'days_in_period') %}
               {% if bill in ['unknown', 'unavailable'] %}
               The bill is not available yet. Set an import meter in the options.
               {% else %}
@@ -51,7 +51,7 @@ views:
               {% endif %}
               {% endif %}
           - type: gauge
-            entity: sensor.electricity_tariff_savings_share_this_bill_period
+            entity: sensor.service_electricity_tariff_savings_share_this_bill_period
             name: Share of the bill saved
             min: 0
             max: 100
@@ -64,7 +64,7 @@ views:
               - from: 25
                 color: "#43a047"
           - type: tile
-            entity: sensor.electricity_tariff_import_this_bill_period
+            entity: sensor.service_electricity_tariff_import_this_bill_period
             name: Imported this bill period
             icon: mdi:transmission-tower-import
             color: blue
@@ -75,10 +75,10 @@ views:
             icon: mdi:scale-balance
           - type: markdown
             content: |-
-              {% set rank = 'sensor.electricity_tariff_plan_rank' %}
+              {% set rank = 'sensor.service_electricity_tariff_plan_rank' %}
               {% set plans = state_attr(rank, 'top_plans') %}
-              {% set saving = states('sensor.electricity_tariff_cheapest_plan_saving') %}
-              {% set unit = state_attr('sensor.electricity_tariff_cheapest_plan_saving', 'unit_of_measurement') %}
+              {% set saving = states('sensor.service_electricity_tariff_cheapest_plan_saving') %}
+              {% set unit = state_attr('sensor.service_electricity_tariff_cheapest_plan_saving', 'unit_of_measurement') %}
               {% if plans is none %}
               The comparison is not available yet. It needs an import meter and a whole bill of recorded energy.
               {% else %}
@@ -96,12 +96,12 @@ views:
               {% endif %}
               {% endif %}
           - type: tile
-            entity: sensor.electricity_tariff_plan_rank
+            entity: sensor.service_electricity_tariff_plan_rank
             name: Your plan's rank
             icon: mdi:podium
             color: amber
           - type: tile
-            entity: sensor.electricity_tariff_cheapest_plan_saving
+            entity: sensor.service_electricity_tariff_cheapest_plan_saving
             name: Cheapest plan saving
             icon: mdi:cash-check
             color: green
@@ -113,7 +113,7 @@ views:
             icon: mdi:format-list-bulleted
           - type: markdown
             content: |-
-              {% set e = 'sensor.electricity_tariff_savings_this_bill_period' %}
+              {% set e = 'sensor.service_electricity_tariff_savings_this_bill_period' %}
               {% set unit = state_attr(e, 'unit_of_measurement') %}
               {% set lines = state_attr(e, 'lines') %}
               {% if lines is none %}
@@ -134,7 +134,7 @@ views:
             icon: mdi:chart-bar
           - type: markdown
             content: |-
-              {% set e = 'sensor.electricity_tariff_savings_this_bill_period' %}
+              {% set e = 'sensor.service_electricity_tariff_savings_this_bill_period' %}
               {% set days = state_attr(e, 'daily') %}
               {% if not days %}
               No days are priced yet.

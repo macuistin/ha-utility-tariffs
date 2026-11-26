@@ -21,8 +21,15 @@ EXAMPLE = ROOT / "docs" / "examples" / "bill-dashboard.yaml"
 HOUSE = "sensor.house_energy"
 
 
+def _text() -> str:
+    """The file with the device name the test setup gives (the example uses a service prefix)."""
+    return EXAMPLE.read_text(encoding="utf-8").replace(
+        "service_electricity_tariff", "electricity_tariff"
+    )
+
+
 def _cards() -> list[dict[str, Any]]:
-    config = yaml.safe_load(EXAMPLE.read_text(encoding="utf-8"))
+    config = yaml.safe_load(_text())
     return [c for s in config["views"][0]["sections"] for c in s["cards"]]
 
 
@@ -49,7 +56,7 @@ async def test_every_entity_exists_and_every_card_renders(
     for card in cards:
         if card["type"] == "tile":
             assert hass.states.get(card["entity"]) is not None, card["entity"]
-    text = EXAMPLE.read_text(encoding="utf-8")
+    text = _text()
     for entity_id in set(re.findall(r"sensor\.electricity_tariff_\w+", text)):
         assert hass.states.get(entity_id) is not None, entity_id
 
