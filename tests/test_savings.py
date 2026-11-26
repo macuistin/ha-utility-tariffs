@@ -174,3 +174,55 @@ async def test_the_options_flow_keeps_the_battery_settings(
         CONF_BATTERY_WEAR: 0.0,
     }
     assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_the_lines_compare_what_was_paid_with_what_the_grid_would_have_charged(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    _set(hass, HOUSE, 50.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER, CONF_HOUSE_ENERGY: HOUSE})
+    _set(hass, METER, 100.5)
+    _set(hass, HOUSE, 51.0)
+    await _minute(hass, freezer)
+
+    attributes = hass.states.get(SAVING).attributes  # type: ignore[union-attr]
+    lines = attributes["lines"]
+
+    assert lines
+    for line in lines:
+        assert line["saved"] == pytest.approx(line["would_have_paid"] - line["paid"])
+    added = [line for line in lines if not line["included"]]
+    assert any(line["included"] for line in lines)  # the plan's prices include VAT
+    assert sum(line["paid"] for line in added) == pytest.approx(attributes["bill_so_far"])
+    assert sum(line["would_have_paid"] for line in added) == pytest.approx(
+        attributes["bill_without_system"]
+    )
+
+
+async def test_the_daily_series_prices_each_day_on_its_own(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    _set(hass, HOUSE, 50.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER, CONF_HOUSE_ENERGY: HOUSE})
+    _set(hass, METER, 100.5)
+    _set(hass, HOUSE, 51.0)
+    await _minute(hass, freezer)
+
+    attributes = hass.states.get(SAVING).attributes  # type: ignore[union-attr]
+    (today,) = attributes["daily"]
+
+    assert today["date"] == "2026-11-14"
+    assert today["saved"] == pytest.approx(attributes["bill_difference"])
+    assert today["would_have_paid"] - today["paid"] == pytest.approx(today["saved"])
+
+
+async def test_the_lines_and_days_are_not_kept_in_the_history(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    from custom_components.utility_tariffs.savings_sensor import SavingsSensor
+
+    assert {"lines", "daily"} <= SavingsSensor._unrecorded_attributes

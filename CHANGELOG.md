@@ -5,6 +5,17 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- **Bill so far** has a `lines` attribute: each line of the bill (energy by band, standing charge, levy, VAT, export credit) with the amount paid.
+- **Savings this bill period** has a `lines` attribute that sets each line beside what it would have cost with the whole house load bought from the grid (`paid`, `would_have_paid`, `saved`), and a `daily` attribute with the same three figures for each recent day (up to 62). Each day is priced on its own, so a standing charge is shared by the days priced. The days do not split the battery's stored energy or wear, so a day's `saved` is the bill difference. A day with no recorded house load is left out.
+- A line with `included: true` is a tax already inside the prices, such as VAT. It is part of the other lines, so leave it out of a sum.
+- Neither attribute is kept in the history.
+
+**Upgrading**
+
+- Nothing to do. No entity is added or renamed.
+
 ## 1.5.1
 
 This release changes how Configure saves. Tell us if a change you made in Configure is not kept.

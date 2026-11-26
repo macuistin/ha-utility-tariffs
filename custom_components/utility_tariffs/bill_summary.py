@@ -30,28 +30,31 @@ def _label(key: str, line: Line) -> str:
     return line.name or key.replace("_", " ").capitalize()
 
 
-def _statement(key: str, line: Line) -> list[tuple[str, Decimal]]:
+def statement(key: str, line: Line) -> list[tuple[str, Decimal, bool]]:
     """The lines of a bill as a supplier lists them, flat and in the order they are worked out.
 
     A wrapper (a sum, or the tree around a saving or a tax) adds no line of its own. A saving
-    shows the amount it took off, and a tax the tax it reported, so the lines add up to the total.
+    shows the amount it took off, and a tax the tax it reported. The flag is true for a tax
+    already inside the price, which is part of the other lines and not added to them.
     """
     if line.kind == "sum":
-        return [row for k, child in line.children.items() for row in _statement(k, child)]
+        return [row for k, child in line.children.items() for row in statement(k, child)]
     if line.kind in {"adjust", "tax"}:
-        inner = _statement("of", line.children["of"])
+        inner_line = line.children["of"]
+        inner = statement("of", inner_line)
         change = line.tax if line.tax is not None else line.amount
-        return [*inner, (_label(key, line), change)]
+        included = line.kind == "tax" and line.amount == inner_line.amount
+        return [*inner, (_label(key, line), change, included)]
     if line.children and line.kind in {"energy_by_band", "tiered_energy", "export_credit"}:
         prefix = "Export " if line.kind == "export_credit" else ""
-        return [(f"{prefix}{name}", child.amount) for name, child in line.children.items()]
-    return [(_label(key, line), line.amount)]
+        return [(f"{prefix}{name}", child.amount, False) for name, child in line.children.items()]
+    return [(_label(key, line), line.amount, False)]
 
 
-def _rows(lines: list[tuple[str, Decimal]], currency: str) -> list[str]:
+def _rows(lines: list[tuple[str, Decimal, bool]], currency: str) -> list[str]:
     return [
         f'<tr><td>{escape(label)}</td><td class="n">{escape(_money(amount, currency))}</td></tr>'
-        for label, amount in lines
+        for label, amount, _included in lines
     ]
 
 
@@ -70,7 +73,7 @@ def render_bill_html(bill: PeriodBill, definition: TariffDefinition, title: str)
     """The bill so far, with the energy used in each band and every line of the bill."""
     currency = definition.currency
     through = bill.through
-    lines = _statement("bill", bill.priced.root)
+    lines = statement("bill", bill.priced.root)
     parts = [
         f"<h1>{escape(title)}</h1>",
         f"<p>Bill period {_when(bill.first_day)} to {_when(bill.next_first_day)}. "

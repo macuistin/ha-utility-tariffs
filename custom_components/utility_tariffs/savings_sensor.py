@@ -9,6 +9,7 @@ from homeassistant.const import PERCENTAGE
 from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import DefinitionSavings
 
+from .bill_lines import compared_lines, daily_series
 from .coordinator import TariffCoordinator
 from .entity import TariffEntity
 from .savings import saving_so_far
@@ -36,6 +37,7 @@ class SavingsSensor(_SavingsEntity):
     _attr_translation_key = "savings_this_period"
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_suggested_display_precision = 2
+    _unrecorded_attributes = frozenset({"lines", "daily"})
 
     def __init__(self, coordinator: TariffCoordinator) -> None:
         super().__init__(coordinator, "savings_this_period")
@@ -58,7 +60,17 @@ class SavingsSensor(_SavingsEntity):
             "stored_energy_value": float(saving.stored_energy_value),
             "battery_wear": float(saving.battery_wear),
             "coverage": round(saving.coverage, 3),
+            "lines": compared_lines(saving),
+            "daily": self._daily(saving),
         }
+
+    def _daily(self, saving: DefinitionSavings) -> list[dict[str, Any]]:
+        accountant = self.coordinator.accountant
+        if accountant is None:
+            return []
+        return daily_series(
+            accountant.store.history, self.coordinator.data, self.coordinator.fuel.options, saving
+        )
 
 
 class SavingsShareSensor(_SavingsEntity):
