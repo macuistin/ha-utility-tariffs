@@ -6,7 +6,8 @@
 # more item under that dashboard's `views:`.
 #
 # Before you paste, replace `service_electricity_tariff` in every entity id with the name of your
-# tariff's device (Settings, Devices & services, Utility Tariffs). Only standard cards are used.
+# tariff's device (Settings, Devices & services, Utility Tariffs). One card, the daily chart, is
+# `custom:apexcharts-card` from HACS. Every other card is a standard one.
 # Days are priced on their own, so a standing charge is shared by the days priced.
 #
 # What needs a setup option:
@@ -19,134 +20,179 @@ views:
     max_columns: 2
     sections:
       - type: grid
+        column_span: 2
         cards:
           - type: heading
             heading: This bill period
-            icon: mdi:receipt-text-outline
+            icon: mdi:receipt-text
           - type: markdown
+            grid_options:
+              columns: 12
             content: |-
-              {% set bill = states('sensor.service_electricity_tariff_bill_so_far') %}
-              {% set unit = state_attr('sensor.service_electricity_tariff_bill_so_far', 'unit_of_measurement') %}
-              {% set saved = states('sensor.service_electricity_tariff_savings_this_bill_period') %}
-              {% set without = state_attr('sensor.service_electricity_tariff_savings_this_bill_period', 'bill_without_system') %}
-              {% set start = state_attr('sensor.service_electricity_tariff_bill_so_far', 'period_start') %}
-              {% set done = state_attr('sensor.service_electricity_tariff_bill_so_far', 'days_priced') %}
-              {% set total = state_attr('sensor.service_electricity_tariff_bill_so_far', 'days_in_period') %}
-              {% if bill in ['unknown', 'unavailable'] %}
+              {% macro bar(pct, hex) -%}<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Crect width='100' height='8' rx='1.2' ry='4' fill='%23888' fill-opacity='0.18'/%3E%3Crect width='{{ pct }}' height='8' rx='1.2' ry='4' fill='%23{{ hex }}'/%3E%3C/svg%3E" width="100%" height="10" alt="">{%- endmacro %}
+              {% set bill_id = 'sensor.service_electricity_tariff_bill_so_far' %}
+              {% set save_id = 'sensor.service_electricity_tariff_savings_this_bill_period' %}
+              {% set paid = states(bill_id) | float(0) %}
+              {% set unit = state_attr(bill_id, 'unit_of_measurement') %}
+              {% set without = state_attr(save_id, 'bill_without_system') | float(0) %}
+              {% if not has_value(bill_id) %}
               The bill is not available yet. Set an import meter in the options.
               {% else %}
-              ## {{ '%.2f' | format(bill | float) }} {{ unit }}
+              <font size='6'><b>{{ '%.2f' | format(paid) }} {{ unit }}</b></font> &nbsp;<font color='grey'>so far</font>
 
-              So far. Day {{ done }} of {{ total }}, from {{ start }}.
-              {% if saved not in ['unknown', 'unavailable'] and without is not none %}
+              <font color='grey'>Day {{ state_attr(bill_id, 'days_priced') }} of {{ state_attr(bill_id, 'days_in_period') }}, from {{ state_attr(bill_id, 'period_start') }}.</font>
+              {% if has_value(save_id) %}
 
-              <ha-alert alert-type="success">Solar and battery saved <b>{{ '%.2f' | format(saved | float) }} {{ unit }}</b></ha-alert>
+              <font color='#43a047'><b>{{ '%.2f' | format(states(save_id) | float(0)) }} {{ unit }} saved</b></font> by solar and the battery so far
 
-              {% set top = [without | float, 0.01] | max %}
-              {% set with_bar = ((bill | float) / top * 20) | round(0) | int %}
-              | Bill | | {{ unit }} |
-              | --- | --- | ---: |
-              | With them | <font color="#1e88e5">{{ '█' * with_bar }}</font> | {{ '%.2f' | format(bill | float) }} |
-              | Without | <font color="#fb8c00">{{ '█' * 20 }}</font> | {{ '%.2f' | format(without | float) }} |
+              {% set top = [paid, without, 0.01] | max %}
+              With them {{ '%.2f' | format(paid) }} {{ unit }}
+              {{ bar((100 * paid / top) | round(1), '7e57c2') }}
+
+              Without them {{ '%.2f' | format(without) }} {{ unit }}
+              {{ bar((100 * without / top) | round(1), 'ffa000') }}
               {% endif %}
               {% endif %}
-          - type: gauge
+          - type: custom:apexcharts-card
+            grid_options:
+              columns: 12
+            graph_span: 14d
+            span:
+              end: day
+            header:
+              show: false
+            chart_type: bar
+            all_series_config:
+              type: column
+              show:
+                legend_value: false
+            apex_config:
+              chart:
+                height: 240
+              legend:
+                show: true
+              plotOptions:
+                bar:
+                  columnWidth: 70%
+              dataLabels:
+                enabled: false
+            yaxis:
+              - min: 0
+                decimals: 0
+            series:
+              - entity: sensor.service_electricity_tariff_savings_this_bill_period
+                name: You paid
+                color: "#7e57c2"
+                data_generator: |
+                  return (entity.attributes.daily || []).map((d) => [new Date(d.date).getTime(), d.paid]);
+              - entity: sensor.service_electricity_tariff_savings_this_bill_period
+                name: Would have paid
+                color: "#ffa000"
+                data_generator: |
+                  return (entity.attributes.daily || []).map((d) => [new Date(d.date).getTime(), d.would_have_paid]);
+          - type: tile
             entity: sensor.service_electricity_tariff_savings_share_this_bill_period
             name: Share of the bill saved
-            min: 0
-            max: 100
-            needle: true
-            segments:
-              - from: 0
-                color: "#e53935"
-              - from: 10
-                color: "#fb8c00"
-              - from: 25
-                color: "#43a047"
+            icon: mdi:piggy-bank-outline
+            color: green
+            grid_options:
+              columns: 6
           - type: tile
             entity: sensor.service_electricity_tariff_import_this_bill_period
             name: Imported this bill period
             icon: mdi:transmission-tower-import
             color: blue
-      - type: grid
-        cards:
-          - type: heading
-            heading: Cheapest plans
-            icon: mdi:scale-balance
-          - type: markdown
-            content: |-
-              {% set rank = 'sensor.service_electricity_tariff_plan_rank' %}
-              {% set plans = state_attr(rank, 'top_plans') %}
-              {% set saving = states('sensor.service_electricity_tariff_cheapest_plan_saving') %}
-              {% set unit = state_attr('sensor.service_electricity_tariff_cheapest_plan_saving', 'unit_of_measurement') %}
-              {% if plans is none %}
-              The comparison is not available yet. It needs an import meter and a whole bill of recorded energy.
-              {% else %}
-              <ha-alert alert-type="{{ 'success' if states(rank) == '1' else 'warning' }}">{{ state_attr(rank, 'summary') }}</ha-alert>
-
-              | # | Plan | Bill |
-              | ---: | --- | ---: |
-              {% for p in plans -%}
-              | {{ p.rank }} | {{ '<font color="#43a047"><b>' ~ p.plan ~ ' (yours)</b></font>' if p.yours else p.plan }} | {{ '%.2f' | format(p.bill) }} {{ unit }} |
-              {% endfor %}
-
-              {{ state_attr(rank, 'plans_compared') }} plans compared over {{ state_attr(rank, 'period_start') }} to {{ state_attr(rank, 'period_end') }}, {{ state_attr(rank, 'days_recorded') }} days recorded.
-              {% if saving not in ['unknown', 'unavailable'] and saving | float(0) != 0 %}
-              The cheapest plan would have saved {{ saving | float | round(2) }} {{ unit }}.
-              {% endif %}
-              {% endif %}
+            grid_options:
+              columns: 6
           - type: tile
             entity: sensor.service_electricity_tariff_plan_rank
             name: Your plan's rank
             icon: mdi:podium
             color: amber
+            grid_options:
+              columns: 6
           - type: tile
             entity: sensor.service_electricity_tariff_cheapest_plan_saving
             name: Cheapest plan saving
             icon: mdi:cash-check
-            color: green
+            color: purple
+            grid_options:
+              columns: 6
+      - type: grid
+        cards:
+          - type: heading
+            heading: This bill, line by line
+            icon: mdi:receipt-text-outline
+          - type: markdown
+            grid_options:
+              columns: 12
+            content: |-
+              {% set e = 'sensor.service_electricity_tariff_savings_this_bill_period' %}
+              {% set lines = state_attr(e, 'lines') %}
+              {% set unit = state_attr(e, 'unit_of_measurement') %}
+              {% if lines is none %}
+              The lines are not available yet. They need a house consumption meter.
+              {% else %}
+              <table width="100%"><thead><tr><td><b>{{ unit }}</b></td><td align="right"><b>You paid</b></td><td align="right"><b>Would have paid</b></td><td align="right"><b>Saved</b></td></tr></thead><tbody>
+              {%- for l in lines if not l.included %}
+              <tr><td>{{ l.line }}</td><td align="right">{{ '%.2f' | format(l.paid) }}</td><td align="right">{{ '%.2f' | format(l.would_have_paid) }}</td><td align="right">{% if l.saved | abs >= 0.005 %}<font color="{{ '#43a047' if l.saved > 0 else '#e53935' }}">{{ '%+.2f' | format(l.saved) }}</font>{% endif %}</td></tr>
+              {%- endfor %}
+              <tr><td><b>Total</b></td><td align="right"><b>{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}</b></td><td align="right"><b>{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}</b></td><td align="right"><font color="#43a047"><b>{{ '%+.2f' | format(state_attr(e, 'bill_difference')) }}</b></font></td></tr>
+              </tbody></table>
+              {% for l in lines if l.included %}
+
+              <font color='grey'>{{ l.line }} is already inside the lines above: {{ '%.2f' | format(l.paid) }} paid, {{ '%.2f' | format(l.would_have_paid) }} without.</font>
+              {% endfor %}
+
+              <font color='grey'>Would have paid is the same energy priced as if solar and the battery were not there.</font>
+              {% endif %}
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cheapest plans
+            icon: mdi:podium
+          - type: markdown
+            grid_options:
+              columns: 12
+            content: |-
+              {% macro bar(pct, hex) -%}<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Crect width='100' height='8' rx='1.2' ry='4' fill='%23888' fill-opacity='0.18'/%3E%3Crect width='{{ pct }}' height='8' rx='1.2' ry='4' fill='%23{{ hex }}'/%3E%3C/svg%3E" width="100%" height="10" alt="">{%- endmacro %}
+              {% set rank = 'sensor.service_electricity_tariff_plan_rank' %}
+              {% set rows = state_attr(rank, 'top_plans') %}
+              {% if not rows %}
+              Plans are compared once a whole bill of energy is recorded. The ranking shows here after that.
+              {% else %}
+              ### {{ state_attr(rank, 'summary') }}
+              {% set top = [rows | map(attribute='bill') | max, 0.01] | max %}
+              {% set unit = state_attr('sensor.service_electricity_tariff_cheapest_plan_saving', 'unit_of_measurement') %}
+              {% for r in rows %}
+              {{ r.rank }}. <b>{{ 'Your plan' if r.yours else r.plan | e }}</b> {{ '%.2f' | format(r.bill) }} {{ unit }}
+              {{ bar((100 * r.bill / top) | round(1), '7e57c2' if r.yours else '43a047') }}
+
+              {% endfor %}
+              {{ state_attr(rank, 'plans_compared') }} plans in the store, priced over {{ state_attr(rank, 'period_start') }} to {{ state_attr(rank, 'period_end') }} ({{ state_attr(rank, 'days_recorded') }} days recorded). Your usage re-priced, not a bill.
+              {% endif %}
       - type: grid
         column_span: 2
         cards:
           - type: heading
-            heading: Line by line
-            icon: mdi:format-list-bulleted
+            heading: Each day
+            icon: mdi:calendar-month-outline
           - type: markdown
-            content: |-
-              {% set e = 'sensor.service_electricity_tariff_savings_this_bill_period' %}
-              {% set unit = state_attr(e, 'unit_of_measurement') %}
-              {% set lines = state_attr(e, 'lines') %}
-              {% if lines is none %}
-              The lines are not available yet.
-              {% else %}
-              | Line | You paid | Would have paid | Saved |
-              | --- | ---: | ---: | ---: |
-              {% for l in lines if not l.included -%}
-              | {{ l.line }} | {{ '%.2f' | format(l.paid) }} | {{ '%.2f' | format(l.would_have_paid) }} | {% if l.saved | abs >= 0.005 %}<font color="{{ '#43a047' if l.saved > 0 else '#e53935' }}">{{ '%+.2f' | format(l.saved) }}</font>{% endif %} |
-              {% endfor -%}
-              | **Total ({{ unit }})** | **{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}** | <font color="#43a047"><b>{{ '%+.2f' | format(state_attr(e, 'bill_difference')) }}</b></font> |
-              {% for l in lines if l.included %}
-              {{ l.line }} is already inside the lines above: {{ '%.2f' | format(l.paid) }} paid, {{ '%.2f' | format(l.would_have_paid) }} without.
-              {% endfor %}
-              {% endif %}
-          - type: heading
-            heading: Day by day
-            icon: mdi:chart-bar
-          - type: markdown
+            grid_options:
+              columns: 24
             content: |-
               {% set e = 'sensor.service_electricity_tariff_savings_this_bill_period' %}
               {% set days = state_attr(e, 'daily') %}
               {% if not days %}
               No days are priced yet.
               {% else %}
-              {% set top = [days | map(attribute='would_have_paid') | max | float, 0.01] | max %}
-              Newest first. <font color="#1e88e5">█</font> is what you paid and <font color="#43a047">█</font> is what solar and battery saved.
+              <details><summary>Show every day of this bill period</summary>
 
-              | Day | Paid | Would have paid | Saved | Paid and saved |
-              | --- | ---: | ---: | ---: | --- |
-              {% for d in days | reverse -%}
-              {% set paid = ((d.paid / top) * 16) | round(0) | int -%}
-              {% set more = [((d.would_have_paid / top) * 16) | round(0) | int - paid, 0] | max -%}
-              | {{ (d.date | as_datetime).strftime('%a %d %b') }} | {{ '%.2f' | format(d.paid) }} | {{ '%.2f' | format(d.would_have_paid) }} | <font color="{{ '#43a047' if d.saved >= 0 else '#e53935' }}">{{ '%+.2f' | format(d.saved) }}</font> | <font color="#1e88e5">{{ '█' * paid }}</font><font color="#43a047">{{ '█' * more }}</font> |
-              {% endfor %}
+              <table width="100%"><thead><tr><td><b>Day</b></td><td align="right"><b>You paid</b></td><td align="right"><b>Would have paid</b></td><td align="right"><b>Saved</b></td></tr></thead><tbody>
+              {%- for d in days | reverse %}
+              <tr><td>{{ (d.date | as_datetime).strftime('%a %d %b') }}</td><td align="right">{{ '%.2f' | format(d.paid) }}</td><td align="right">{{ '%.2f' | format(d.would_have_paid) }}</td><td align="right"><font color="{{ '#43a047' if d.saved >= 0 else '#e53935' }}">{{ '%+.2f' | format(d.saved) }}</font></td></tr>
+              {%- endfor %}
+              </tbody></table>
+
+              </details>
               {% endif %}

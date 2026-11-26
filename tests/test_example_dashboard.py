@@ -51,6 +51,21 @@ async def test_every_entity_exists_and_every_card_renders(
     _set(hass, METER, 100.5)
     _set(hass, HOUSE, 51.0)
     await _minute(hass, freezer)
+    hass.states.async_set(
+        "sensor.electricity_tariff_plan_rank",
+        "1",
+        {
+            "summary": "Your plan is the cheapest of the 2 compared.",
+            "plans_compared": 2,
+            "period_start": "2026-10-16",
+            "period_end": "2026-11-15",
+            "days_recorded": 31,
+            "top_plans": [
+                {"rank": 1, "plan": "Mine", "bill": 100.0, "yours": True},
+                {"rank": 2, "plan": "Other <b>plan</b>", "bill": 120.0, "yours": False},
+            ],
+        },
+    )
     cards = _cards()
 
     for card in cards:
@@ -66,10 +81,12 @@ async def test_every_entity_exists_and_every_card_renders(
         if card["type"] == "markdown"
     ]
     everything = "\n".join(rendered)
-    assert "So far" in everything  # the bill card
-    assert "| Standing |" in everything  # the line table, with paid, would have paid and saved
+    assert "so far" in everything  # the bill card
+    assert "<td>Standing</td>" in everything  # the line table, with paid, would have paid and saved
     assert "Sat 14 Nov" in everything  # one row for today, with its bar
-    assert "█" in everything
+    assert "<img src=\"data:image/svg+xml," in everything  # the bars
+    assert "Your plan</b> 100.00" in everything  # the ranking, with its own plan named
+    assert "Other &lt;b&gt;plan&lt;/b&gt;" in everything  # a plan name is escaped
     assert "The bill is not available" not in everything
     assert "The lines are not available" not in everything
     assert "No days are priced" not in everything
