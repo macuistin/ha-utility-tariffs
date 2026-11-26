@@ -16,7 +16,7 @@ from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import PeriodBill
 
 from .bill import bill_so_far
-from .bill_lines import paid_lines
+from .bill_lines import paid_lines, projected_total
 from .coordinator import TariffCoordinator
 from .entity import TariffEntity
 
@@ -100,5 +100,15 @@ class BillSensor(TariffEntity, SensorEntity):
             "next_period_start": bill.next_first_day.isoformat(),
             "days_priced": bill.days,
             "days_in_period": bill.period_days,
+            "days_left": bill.period_days - bill.days,
+            "projected_bill": self._projection(bill),
             "lines": paid_lines(bill),
         }
+
+    def _projection(self, bill: PeriodBill) -> float | None:
+        accountant = self.coordinator.accountant
+        if accountant is None:
+            return None
+        return projected_total(
+            accountant.store.history, self.coordinator.data, self.coordinator.fuel.options, bill
+        )
