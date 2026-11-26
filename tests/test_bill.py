@@ -285,3 +285,20 @@ async def test_diagnostics_list_what_was_left_out(
     [row] = report["fuels"]["electricity"]["coordinator"]["meter_readings_left_out"]
     assert (row["meter"], row["reason"], row["kwh"]) == (CONF_IMPORT_ENERGY, "too_large", 4900.0)
     assert METER not in str(report)
+
+
+async def test_the_bill_lists_each_line_it_paid(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to(NOON)
+    _set(hass, METER, 100.0)
+    await _setup(hass, options={CONF_IMPORT_ENERGY: METER})
+    _set(hass, METER, 112.0)
+    await _minute(hass, freezer)
+
+    state = hass.states.get("sensor.electricity_tariff_bill_so_far")
+
+    assert state is not None
+    lines = state.attributes["lines"]
+    assert lines
+    assert sum(line["paid"] for line in lines if not line["included"]) == pytest.approx(float(state.state), abs=0.01)

@@ -69,6 +69,20 @@ bill would have been without it. It has `days_covered`, `days_in_period` and `co
 so a new plan with a short history does not look like a full period. It is unknown when the bill
 without the saving is zero.
 
+### The bill line by line, and day by day
+
+The bill and savings sensors hold the detail as attributes, so a card needs no template engine
+beyond reading them. **Bill so far** has `lines`, a list of `line`, `paid` and `included`.
+**Savings this bill period** has `lines` (each with `paid`, `would_have_paid` and `saved`) and
+`daily` (each recent day, up to 62, with `date`, `paid`, `would_have_paid` and `saved`).
+
+- A line with `included: true` is a tax already in the prices. It is part of the other lines, so
+  leave it out when you add them up.
+- Each day is priced on its own, so a standing charge is shared by the days priced. A day's
+  `saved` is the bill difference, without the battery's stored energy or wear.
+- A day with no recorded house load is left out.
+- These attributes are not kept in the history.
+
 ## Cheaper plans
 
 When an import meter is set, the integration prices your last whole bill under every other plan of

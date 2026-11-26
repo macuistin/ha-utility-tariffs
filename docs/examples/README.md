@@ -20,22 +20,17 @@ Set an import meter in the options first. The saving needs a house consumption m
 | Saved by solar and battery, with and without bars | **Savings this bill period** and its `bill_without_system` attribute |
 | Share saved, energy imported | **Savings share this bill period**, **Import this bill period** |
 | Cheapest plans table | **Plan rank** and its `summary`, `top_plans`, `plans_compared`, `period_start`, `period_end` and `days_recorded` attributes, plus **Cheapest plan saving** |
-| Over the period | History of **Bill so far** and **Savings this bill period** |
+| Line by line: paid, would have paid, saved | The `lines` attribute of **Savings this bill period**, and its `bill_so_far`, `bill_without_system` and `bill_difference` attributes |
+| Day by day bars | The `daily` attribute of **Savings this bill period** |
 
 Gas has its own bill and plan sensors under the gas subentry. Copy the view and use those entity ids.
 
-## What the integration does not expose as entities
+## Reading the attributes
 
-These are not in the example, because there is no entity to read. Nothing here is invented.
+The line table and the daily bars read attributes that hold lists. A line with `included: true`
+is a tax already inside the prices, so the table leaves it out of the rows and the total and
+shows it underneath. A day with no recorded house load is left out of the bars. See the
+[features page](../features.md) for what each attribute holds.
 
-- **Line by line table** (energy, supplier discount, standing charge, levy, VAT, export credit,
-  each with paid, would have paid and saved). The lines exist only in the HTML returned by the
-  `utility_tariffs.bill_summary` action, and only for the bill as paid. There is no "would have
-  paid" per line.
-- **Daily bars of paid against would have paid.** No sensor holds a per-day bill. **Bill so far**
-  and **Savings this bill period** have no state class, so they have no long-term statistics
-  either. The history graph at the bottom shows the running totals instead.
-- **Without them bar by component.** Only the total without a system is held
-  (`bill_without_system`), not its lines.
-
-A line table and a daily series would need new sensors or attributes in the integration.
+Without a house consumption meter there is no **Savings this bill period**, so these two cards
+show a message. **Bill so far** has a `lines` attribute with `paid` only.

@@ -16,6 +16,7 @@ from homeassistant.util import dt as dt_util
 from utility_tariffs_lib.tariff import PeriodBill
 
 from .bill import bill_so_far
+from .bill_lines import paid_lines
 from .coordinator import TariffCoordinator
 from .entity import TariffEntity
 
@@ -64,6 +65,8 @@ class BillSensor(TariffEntity, SensorEntity):
     """One figure of the bill so far in the current bill period."""
 
     entity_description: BillSensorDescription
+    # The lines change every minute and are not worth keeping in the history.
+    _unrecorded_attributes = frozenset({"lines"})
 
     def __init__(self, coordinator: TariffCoordinator, description: BillSensorDescription) -> None:
         super().__init__(coordinator, description.key)
@@ -97,4 +100,5 @@ class BillSensor(TariffEntity, SensorEntity):
             "next_period_start": bill.next_first_day.isoformat(),
             "days_priced": bill.days,
             "days_in_period": bill.period_days,
+            "lines": paid_lines(bill),
         }

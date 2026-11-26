@@ -5,6 +5,7 @@
 #
 # Before you paste, replace `electricity_tariff` in every entity id with the name of your
 # tariff's device (Settings, Devices & services, Utility Tariffs). Only standard cards are used.
+# Days are priced on their own, so a standing charge is shared by the days priced.
 #
 # What needs a setup option:
 #   Bill so far, Savings and the plan sensors need an import meter in the options.
@@ -20,7 +21,7 @@ sections:
         heading: This bill period
         icon: mdi:receipt-text-outline
       - type: markdown
-        content: >-
+        content: |-
           {% set bill = states('sensor.electricity_tariff_bill_so_far') %}
           {% set unit = state_attr('sensor.electricity_tariff_bill_so_far', 'unit_of_measurement') %}
           {% set saved = states('sensor.electricity_tariff_savings_this_bill_period') %}
@@ -59,7 +60,7 @@ sections:
         heading: Cheapest plans
         icon: mdi:scale-balance
       - type: markdown
-        content: >-
+        content: |-
           {% set rank = 'sensor.electricity_tariff_plan_rank' %}
           {% set plans = state_attr(rank, 'top_plans') %}
           {% set saving = states('sensor.electricity_tariff_cheapest_plan_saving') %}
@@ -91,14 +92,45 @@ sections:
     column_span: 2
     cards:
       - type: heading
-        heading: Over the period
-        icon: mdi:chart-line
-      # There is no per-day bill sensor, so this draws the running totals. See the notes in
-      # docs/examples/README.md.
-      - type: history-graph
-        hours_to_show: 720
-        entities:
-          - entity: sensor.electricity_tariff_bill_so_far
-            name: Bill so far
-          - entity: sensor.electricity_tariff_savings_this_bill_period
-            name: Saved
+        heading: Line by line
+        icon: mdi:format-list-bulleted
+      - type: markdown
+        content: |-
+          {% set e = 'sensor.electricity_tariff_savings_this_bill_period' %}
+          {% set unit = state_attr(e, 'unit_of_measurement') %}
+          {% set lines = state_attr(e, 'lines') %}
+          {% if lines is none %}
+          The lines are not available yet.
+          {% else %}
+          | Line | You paid | Would have paid | Saved |
+          | --- | ---: | ---: | ---: |
+          {% for l in lines if not l.included -%}
+          | {{ l.line }} | {{ '%.2f' | format(l.paid) }} | {{ '%.2f' | format(l.would_have_paid) }} | {{ '%.2f' | format(l.saved) }} |
+          {% endfor -%}
+          | **Total** | **{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_difference')) }}** |
+          {% for l in lines if l.included %}
+          Of which {{ l.line }}: {{ '%.2f' | format(l.paid) }} paid, {{ '%.2f' | format(l.would_have_paid) }} without ({{ unit }}). It is already in the prices above.
+          {% endfor %}
+          {% endif %}
+      - type: heading
+        heading: Day by day
+        icon: mdi:chart-bar
+      - type: markdown
+        content: |-
+          {% set e = 'sensor.electricity_tariff_savings_this_bill_period' %}
+          {% set unit = state_attr(e, 'unit_of_measurement') %}
+          {% set days = state_attr(e, 'daily') %}
+          {% if not days %}
+          No days are priced yet.
+          {% else %}
+          {% set top = days | map(attribute='would_have_paid') | max | float %}
+          {% set top = [top, 0.01] | max %}
+          Each bar is one day. `#` is what you paid, `-` is the extra it would have cost.
+
+          {% for d in days -%}
+          {% set paid = ((d.paid / top) * 20) | round(0) | int -%}
+          {% set more = ((d.would_have_paid / top) * 20) | round(0) | int - paid -%}
+          `{{ d.date[5:] }}` `{{ '#' * paid }}{{ '-' * ([more, 0] | max) }}` {{ '%.2f' | format(d.paid) }} of {{ '%.2f' | format(d.would_have_paid) }} {{ unit }}
+
+          {% endfor %}
+          {% endif %}
