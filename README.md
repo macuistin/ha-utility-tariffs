@@ -24,9 +24,14 @@
 > That is why this integration lets you type in your own rates for your own use. To ask for a
 > supplier or to give feedback, [suggest a source](https://github.com/macuistin/ha-utility-tariffs/issues/new?template=tariff-source.md).
 
-A Home Assistant integration that knows your tariff. It prices every half hour from the open
-tariff store, and works out the cheapest and dearest windows, the bill so far and, with your own
-energy sensors, what solar and a battery save and which plan would have cost least.
+A Home Assistant integration that knows your tariff, for electricity and gas. It prices every half
+hour from the open tariff store, and works out the cheapest and dearest windows, the bill so far and,
+with your own energy sensors, what solar and a battery save and which plan would have cost least.
+
+It handles the tariff types people actually have: a flat rate, time-of-use bands (day and night,
+peak and off-peak, weekday and weekend), and dynamic tariffs priced every half hour from a published
+price feed, such as Agile Octopus. It adds standing charges, taxes and export prices where the plan
+has them. You pick a published plan, or type in your own rates.
 
 ```mermaid
 flowchart LR
@@ -42,6 +47,8 @@ flowchart LR
 | | |
 | --- | --- |
 | **Prices** | Import and export price now, rate band, next change, rating from very low to very high |
+| **Dynamic tariffs** | Plans on a half-hourly price feed, such as Agile Octopus, are priced from the published prices. Tomorrow's prices appear when they are published, and nothing is guessed for the part not yet published |
+| **Gas** | Follow one gas plan beside your electricity plan, with its own price, bill and device |
 | **Windows** | Cheapest and dearest stretch of a length you choose, and a `find_window` action for a load of a given power |
 | **Forecast** | Prices known for the next 48 hours, upcoming revisions, low and high price alerts |
 | **Bill** | The bill so far from your own meters, lined up with your supplier's bill dates, and an HTML bill summary |
@@ -61,7 +68,7 @@ flowchart LR
 2. Open Settings, Devices & services, Add integration, and choose **Utility Tariffs**.
 3. Pick your country, supplier, plan and area, or type in your own rates.
 
-Home Assistant needs internet access to read the tariff store. One electricity tariff and one gas tariff can be followed.
+Home Assistant needs internet access to read the tariff store. One electricity plan and one gas plan can be followed at the same time.
 
 ## Examples
 
@@ -87,7 +94,8 @@ Home Assistant needs internet access to read the tariff store. One electricity t
 
 All tariff, price, window, ranking, savings and billing code lives in
 the [`utility-tariffs-lib`](https://pypi.org/project/utility-tariffs-lib/) package, installed as one
-pinned release. This repository is the Home Assistant glue around it. Electricity only to start.
+pinned release. This repository is the Home Assistant glue around it. Electricity and gas are supported.
+Water and heating oil are not yet.
 
 ## Licence
 
