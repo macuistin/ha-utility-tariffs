@@ -83,6 +83,12 @@ beyond reading them. **Bill so far** has `lines`, a list of `line`, `paid` and `
 - A day with no recorded house load is left out.
 - These attributes are not kept in the history.
 
+**Bill so far** also has `projected_bill` and `days_left`. The projection is the bill so far plus the
+days left, each at the average cost of the last seven whole days before today. Each of those days
+is priced on its own, so a standing charge is shared by the days priced. It is a pace, not a
+forecast: it knows nothing of the weather, a holiday or a price change still to come. It is
+unknown until one whole day before today is recorded, and it equals the bill once the period ends.
+
 ## Cheaper plans
 
 When an import meter is set, the integration prices your last whole bill under every other plan of

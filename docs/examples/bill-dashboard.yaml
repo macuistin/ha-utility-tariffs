@@ -41,6 +41,11 @@ views:
               <font size='6'><b>{{ '%.2f' | format(paid) }} {{ unit }}</b></font> &nbsp;<font color='grey'>so far</font>
 
               <font color='grey'>Day {{ state_attr(bill_id, 'days_priced') }} of {{ state_attr(bill_id, 'days_in_period') }}, from {{ state_attr(bill_id, 'period_start') }}.</font>
+              {% set projected = state_attr(bill_id, 'projected_bill') %}
+              {% if projected is not none %}
+
+              <font color='grey'>Heading for {{ '%.2f' | format(projected) }} {{ unit }} at the recent pace, {{ state_attr(bill_id, 'days_left') }} days left in this bill period.</font>
+              {% endif %}
               {% if has_value(save_id) %}
 
               <font color='#43a047'><b>{{ '%.2f' | format(states(save_id) | float(0)) }} {{ unit }} saved</b></font> by solar and the battery so far

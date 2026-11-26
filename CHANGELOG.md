@@ -5,6 +5,14 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- **Bill so far** has a `projected_bill` attribute: the bill for the whole period if the days left cost what the last seven whole days did on average, and `days_left`. It is a pace, not a forecast, so it knows nothing of the weather, a holiday or a price change still to come. It is unknown until one whole day before today is recorded.
+
+**Upgrading**
+
+- Nothing to do. No entity is added or renamed.
+
 ## 1.6.0b1
 
 This is a beta. It adds the bill by line and by day to two sensors. Tell us if a line or a day looks wrong against your bill.

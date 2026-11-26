@@ -14,12 +14,14 @@ from utility_tariffs_lib.tariff import (
     SavingsOptions,
     SlotHistory,
     definition_savings,
+    price_period,
 )
 
 from .bill_period import period_rules
 from .bill_summary import statement
 from .coordinator import TariffData
 
+PROJECTION_DAYS = 7  # the recent whole days whose average sets the pace of the projection
 DAILY_DAYS = 62  # the most recent days listed, so a long bill period keeps the attribute small
 
 
@@ -103,3 +105,36 @@ def daily_series(
                 }
             )
     return series
+
+
+def _day_total(
+    history: SlotHistory, data: TariffData, options: Mapping[str, Any], day: date
+) -> Decimal:
+    """What one day cost on its own, with a period charge shared by the days priced."""
+    rules = replace(period_rules(options, data.is_holiday), since=day)
+    return price_period(history, data.definition, day, rules).priced.total
+
+
+def projected_total(
+    history: SlotHistory, data: TariffData, options: Mapping[str, Any], bill: PeriodBill
+) -> float | None:
+    """The bill for the whole period if the rest of it costs what the recent days did.
+
+    It adds the days left, each at the average of the last whole days the history holds, to the
+    bill so far. It is a pace, not a forecast: it knows nothing of the weather, a holiday or a
+    price change still to come. None while no whole day before today is recorded.
+    """
+    days_left = bill.period_days - bill.days
+    if days_left <= 0:
+        return float(bill.priced.total)
+    first = bill.priced_from or bill.first_day
+    recent = [
+        day.day
+        for day in history.between(first, bill.through - timedelta(days=1))
+        if day.coverage > 0
+    ][-PROJECTION_DAYS:]
+    if not recent:
+        return None
+    total = sum((_day_total(history, data, options, d) for d in recent), Decimal(0))
+    average = total / len(recent)
+    return float(bill.priced.total + average * days_left)

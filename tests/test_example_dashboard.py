@@ -82,6 +82,7 @@ async def test_every_entity_exists_and_every_card_renders(
     ]
     everything = "\n".join(rendered)
     assert "so far" in everything  # the bill card
+    assert "Heading for" not in everything  # no whole day is recorded yet, so no projection
     assert "<td>Standing</td>" in everything  # the line table, with paid, would have paid and saved
     assert "Sat 14 Nov" in everything  # one row for today, with its bar
     assert "<img src=\"data:image/svg+xml," in everything  # the bars

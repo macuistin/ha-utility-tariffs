@@ -21,7 +21,7 @@ Set an import meter in the options first. The saving needs a house consumption m
 
 | Card | Entities and attributes it reads |
 | --- | --- |
-| This bill period: spend so far, days priced | **Bill so far** and its `period_start`, `days_priced` and `days_in_period` attributes |
+| This bill period: spend so far, days priced, projection | **Bill so far** and its `period_start`, `days_priced`, `days_in_period`, `days_left` and `projected_bill` attributes |
 | Saved by solar and battery, with and without bars | **Savings this bill period** and its `bill_without_system` attribute |
 | Four tiles | **Savings share this bill period**, **Import this bill period**, **Plan rank**, **Cheapest plan saving** |
 | Cheapest plans, each a bar on the scale of the dearest | **Plan rank** and its `summary`, `top_plans`, `plans_compared`, `period_start`, `period_end` and `days_recorded` attributes, plus **Cheapest plan saving** |

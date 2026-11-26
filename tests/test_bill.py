@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import timedelta
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +12,7 @@ from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
+from utility_tariffs_lib.tariff import PeriodRules, price_period
 
 from custom_components.utility_tariffs.const import (
     CONF_EXPORT_ENERGY,
@@ -22,6 +23,7 @@ from custom_components.utility_tariffs.const import (
 from custom_components.utility_tariffs.diagnostics import async_get_config_entry_diagnostics
 from custom_components.utility_tariffs.energy_store import storage_key
 from tests.options_support import configure
+from tests.test_cheap_share import _book, _coordinator, _meter_setup
 from tests.test_sensor import NOON, _options, _setup, _state, _sub_id
 
 METER = "sensor.meter_in"
@@ -302,3 +304,38 @@ async def test_the_bill_lists_each_line_it_paid(
     lines = state.attributes["lines"]
     assert lines
     assert sum(line["paid"] for line in lines if not line["included"]) == pytest.approx(float(state.state), abs=0.01)
+
+
+async def test_the_projection_is_the_bill_so_far_plus_the_recent_pace_for_the_days_left(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    entry, accountant = await _meter_setup(hass, freezer)
+    for day in (12, 13):
+        _book(accountant, 5.0, 10, day=day)  # two whole days at the same pace
+    _book(accountant, 2.0, 10, day=14)  # today, not yet whole
+    _coordinator(entry).async_update_listeners()
+    await hass.async_block_till_done()
+
+    state = hass.states.get("sensor.electricity_tariff_bill_so_far")
+
+    assert state is not None
+    assert state.attributes["days_left"] == 16
+    history = accountant.store.history
+    definition = _coordinator(entry).data.definition
+    one_day = price_period(history, definition, date(2026, 11, 12), PeriodRules(since=date(2026, 11, 12)))
+    expected = float(state.state) + 16 * float(one_day.priced.total)
+    assert state.attributes["projected_bill"] == pytest.approx(expected, abs=0.01)
+
+
+async def test_there_is_no_projection_before_a_whole_day_is_recorded(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    entry, accountant = await _meter_setup(hass, freezer)
+    _book(accountant, 2.0, 10, day=14)  # only today
+    _coordinator(entry).async_update_listeners()
+    await hass.async_block_till_done()
+
+    state = hass.states.get("sensor.electricity_tariff_bill_so_far")
+
+    assert state is not None
+    assert state.attributes["projected_bill"] is None
