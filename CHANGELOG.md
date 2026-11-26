@@ -5,9 +5,17 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+## 1.5.1
+
+This release changes how Configure saves. Tell us if a change you made in Configure is not kept.
+
 **Changed**
 
 - Configure saves each change when you come back to its list of pages, and says "Your changes are saved". The **Save changes** option is gone. Choose **Done** to close Configure. Saved options are unchanged and read the same.
+
+**Upgrading**
+
+- Nothing to do. Saved options are unchanged.
 
 ## 1.5.0
 
