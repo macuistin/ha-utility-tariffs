@@ -90,3 +90,13 @@ async def test_every_entity_exists_and_every_card_renders(
     assert "The bill is not available" not in everything
     assert "The lines are not available" not in everything
     assert "No days are priced" not in everything
+
+
+def test_the_chart_card_uses_only_chart_types_the_card_accepts() -> None:
+    allowed = {"line", "scatter", "pie", "donut", "radialBar"}  # apexcharts-card 2.2
+    charts = [c for c in _cards() if c["type"] == "custom:apexcharts-card"]
+
+    assert charts
+    for chart in charts:
+        assert chart.get("chart_type", "line") in allowed
+        assert chart["all_series_config"]["type"] == "column"  # bars are a series type

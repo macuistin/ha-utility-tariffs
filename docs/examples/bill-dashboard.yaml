@@ -61,7 +61,6 @@ views:
               end: day
             header:
               show: false
-            chart_type: bar
             all_series_config:
               type: column
               show:
