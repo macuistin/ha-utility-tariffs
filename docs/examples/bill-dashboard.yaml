@@ -35,28 +35,31 @@ views:
               {% if bill in ['unknown', 'unavailable'] %}
               The bill is not available yet. Set an import meter in the options.
               {% else %}
-              ## {{ bill | float | round(2) }} {{ unit }} so far
+              ## {{ '%.2f' | format(bill | float) }} {{ unit }}
 
-              Day {{ done }} of {{ total }}, from {{ start }}.
+              So far. Day {{ done }} of {{ total }}, from {{ start }}.
               {% if saved not in ['unknown', 'unavailable'] and without is not none %}
 
-              **Saved by solar and battery: {{ saved | float | round(2) }} {{ unit }}**
-              {% set scale = 20 %}
+              **Solar and battery saved {{ saved | float | round(2) }} {{ unit }}**
+
               {% set top = [without | float, 0.01] | max %}
-              {% set with_bar = ((bill | float) / top * scale) | round(0) | int %}
-              {% set without_bar = scale %}
-
-              With them `{{ '█' * with_bar }}` {{ bill | float | round(2) }} {{ unit }}
-
-              Without `{{ '█' * without_bar }}` {{ without | float | round(2) }} {{ unit }}
+              {% set with_bar = ((bill | float) / top * 20) | round(0) | int %}
+              | | | |
+              | --- | --- | ---: |
+              | With them | {{ '█' * with_bar }} | {{ '%.2f' | format(bill | float) }} |
+              | Without | {{ '█' * 20 }} | {{ '%.2f' | format(without | float) }} |
               {% endif %}
               {% endif %}
           - type: tile
             entity: sensor.electricity_tariff_savings_share_this_bill_period
             name: Share of the bill saved
+            icon: mdi:piggy-bank-outline
+            color: green
           - type: tile
             entity: sensor.electricity_tariff_import_this_bill_period
             name: Imported this bill period
+            icon: mdi:transmission-tower-import
+            color: blue
       - type: grid
         cards:
           - type: heading
@@ -78,9 +81,8 @@ views:
               {% for p in plans -%}
               | {{ p.rank }} | {{ '**' ~ p.plan ~ ' (yours)**' if p.yours else p.plan }} | {{ '%.2f' | format(p.bill) }} {{ unit }} |
               {% endfor %}
-              Compared {{ state_attr(rank, 'plans_compared') }} plans over
-              {{ state_attr(rank, 'period_start') }} to {{ state_attr(rank, 'period_end') }}
-              ({{ state_attr(rank, 'days_recorded') }} days recorded).
+
+              {{ state_attr(rank, 'plans_compared') }} plans compared over {{ state_attr(rank, 'period_start') }} to {{ state_attr(rank, 'period_end') }}, {{ state_attr(rank, 'days_recorded') }} days recorded.
               {% if saving not in ['unknown', 'unavailable'] and saving | float(0) != 0 %}
               The cheapest plan would have saved {{ saving | float | round(2) }} {{ unit }}.
               {% endif %}
@@ -88,9 +90,13 @@ views:
           - type: tile
             entity: sensor.electricity_tariff_plan_rank
             name: Your plan's rank
+            icon: mdi:podium
+            color: amber
           - type: tile
             entity: sensor.electricity_tariff_cheapest_plan_saving
             name: Cheapest plan saving
+            icon: mdi:cash-check
+            color: green
       - type: grid
         column_span: 2
         cards:
@@ -108,11 +114,11 @@ views:
               | Line | You paid | Would have paid | Saved |
               | --- | ---: | ---: | ---: |
               {% for l in lines if not l.included -%}
-              | {{ l.line }} | {{ '%.2f' | format(l.paid) }} | {{ '%.2f' | format(l.would_have_paid) }} | {{ '%.2f' | format(l.saved) }} |
+              | {{ l.line }} | {{ '%.2f' | format(l.paid) }} | {{ '%.2f' | format(l.would_have_paid) }} | {{ '%+.2f' | format(l.saved) if l.saved | abs >= 0.005 else '' }} |
               {% endfor -%}
-              | **Total** | **{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_difference')) }}** |
+              | **Total ({{ unit }})** | **{{ '%.2f' | format(state_attr(e, 'bill_so_far')) }}** | **{{ '%.2f' | format(state_attr(e, 'bill_without_system')) }}** | **{{ '%+.2f' | format(state_attr(e, 'bill_difference')) }}** |
               {% for l in lines if l.included %}
-              Of which {{ l.line }}: {{ '%.2f' | format(l.paid) }} paid, {{ '%.2f' | format(l.would_have_paid) }} without ({{ unit }}). It is already in the prices above.
+              {{ l.line }} is already inside the lines above: {{ '%.2f' | format(l.paid) }} paid, {{ '%.2f' | format(l.would_have_paid) }} without.
               {% endfor %}
               {% endif %}
           - type: heading
@@ -121,19 +127,18 @@ views:
           - type: markdown
             content: |-
               {% set e = 'sensor.electricity_tariff_savings_this_bill_period' %}
-              {% set unit = state_attr(e, 'unit_of_measurement') %}
               {% set days = state_attr(e, 'daily') %}
               {% if not days %}
               No days are priced yet.
               {% else %}
-              {% set top = days | map(attribute='would_have_paid') | max | float %}
-              {% set top = [top, 0.01] | max %}
-              Each bar is one day. `#` is what you paid, `-` is the extra it would have cost.
+              {% set top = [days | map(attribute='would_have_paid') | max | float, 0.01] | max %}
+              Newest first. The dark bar is what you paid and the light bar is the extra it would have cost.
 
-              {% for d in days -%}
-              {% set paid = ((d.paid / top) * 20) | round(0) | int -%}
-              {% set more = ((d.would_have_paid / top) * 20) | round(0) | int - paid -%}
-              `{{ d.date[5:] }}` `{{ '#' * paid }}{{ '-' * ([more, 0] | max) }}` {{ '%.2f' | format(d.paid) }} of {{ '%.2f' | format(d.would_have_paid) }} {{ unit }}
-
+              | Day | Paid | Would have paid | Saved | |
+              | --- | ---: | ---: | ---: | --- |
+              {% for d in days | reverse -%}
+              {% set paid = ((d.paid / top) * 16) | round(0) | int -%}
+              {% set more = [((d.would_have_paid / top) * 16) | round(0) | int - paid, 0] | max -%}
+              | {{ (d.date | as_datetime).strftime('%a %d %b') }} | {{ '%.2f' | format(d.paid) }} | {{ '%.2f' | format(d.would_have_paid) }} | {{ '%+.2f' | format(d.saved) }} | {{ '█' * paid }}{{ '░' * more }} |
               {% endfor %}
               {% endif %}

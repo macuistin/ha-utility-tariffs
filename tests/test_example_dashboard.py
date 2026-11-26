@@ -59,9 +59,10 @@ async def test_every_entity_exists_and_every_card_renders(
         if card["type"] == "markdown"
     ]
     everything = "\n".join(rendered)
-    assert "so far" in everything  # the bill card
+    assert "So far" in everything  # the bill card
     assert "| Standing |" in everything  # the line table, with paid, would have paid and saved
-    assert "`11-14`" in everything  # one bar for today
+    assert "Sat 14 Nov" in everything  # one row for today, with its bar
+    assert "█" in everything
     assert "The bill is not available" not in everything
     assert "The lines are not available" not in everything
     assert "No days are priced" not in everything
