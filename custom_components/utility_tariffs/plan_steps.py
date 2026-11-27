@@ -39,7 +39,7 @@ from .const import (
 )
 from .country_reason import reason_for
 from .helper.store_access import TariffStoreAccess
-from .manual import CountryDefaults, problem_with
+from .manual import HOLIDAY_RULES, WEEKDAYS, CountryDefaults, problem_with
 from .manual_templates import BLANK, TEMPLATES, Template, timed_periods
 from .store import store_access
 
@@ -320,7 +320,7 @@ class PlanSteps(FlowHandler[ConfigFlowContext, ConfigFlowResult, str]):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
-            period = {k: user_input[k] for k in ("name", "rate", "start", "end")}
+            period = {k: v for k, v in user_input.items() if v not in ("", [], None)}
             trial = {**self._manual, "periods": [*self._manual["periods"], period]}
             if user_input["start"] == user_input["end"]:
                 errors["base"] = "empty_period"
@@ -413,5 +413,17 @@ def _period_schema(previous: dict[str, Any] | None) -> Any:
             ),
             vol.Required("start", default=given.get("start", "23:00:00")): TimeSelector(),
             vol.Required("end", default=given.get("end", "08:00:00")): TimeSelector(),
+            vol.Optional("days", default=given.get("days", [])): SelectSelector(
+                SelectSelectorConfig(
+                    options=list(WEEKDAYS), multiple=True, translation_key="weekday",
+                    mode=SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            vol.Required("holidays", default=given.get("holidays", "normal")): SelectSelector(
+                SelectSelectorConfig(
+                    options=list(HOLIDAY_RULES), translation_key="holiday_rule",
+                    mode=SelectSelectorMode.DROPDOWN,
+                )
+            ),
         }
     )

@@ -30,6 +30,8 @@ class CountryDefaults:
     vat_percent: float = 0.0
 
 
+WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+HOLIDAY_RULES = ("normal", "weekend", "sunday")
 OPEN_SINCE = date(2000, 1, 1)  # a typed tariff has no start date, so it has always applied
 
 
@@ -41,7 +43,10 @@ def config_from(rates: dict[str, Any]) -> TariffConfig:
     """The saved rates as the tariff configuration the bill maths reads."""
     return TariffConfig(
         rate_periods=[
-            RatePeriod(p["name"], float(p["rate"]), _time(p["start"]), _time(p["end"]))
+            RatePeriod(
+                p["name"], float(p["rate"]), _time(p["start"]), _time(p["end"]),
+                days=tuple(p.get("days", ())), holidays=p.get("holidays", "normal"),
+            )
             for p in rates.get("periods", [])
         ],
         base_rate=float(rates["base_rate"]),
@@ -69,3 +74,8 @@ def problem_with(rates: dict[str, Any], name: str) -> str | None:
     except (DefinitionError, ValueError, KeyError) as err:
         return str(err)
     return None
+
+
+def uses_holidays(rates: dict[str, Any]) -> bool:
+    """Whether any timed rate treats a public holiday as a weekend day or a Sunday."""
+    return any(p.get("holidays", "normal") != "normal" for p in rates.get("periods", []))

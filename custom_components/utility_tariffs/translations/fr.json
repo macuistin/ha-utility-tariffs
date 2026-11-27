@@ -99,13 +99,17 @@
           "name": "Nom",
           "rate": "Tarif",
           "start": "De",
-          "end": "À"
+          "end": "À",
+          "days": "Jours",
+          "holidays": "Jours fériés"
         },
         "data_description": {
           "name": "Un nom pour ce tarif horaire, comme Nuit.",
           "rate": "Le prix d'un kWh tant que ce tarif s'applique.",
           "start": "L'heure à laquelle ce tarif commence chaque jour.",
-          "end": "L'heure à laquelle ce tarif se termine. Elle peut précéder le début, pour un tarif qui court pendant la nuit."
+          "end": "L'heure à laquelle ce tarif se termine. Elle peut précéder le début, pour un tarif qui court pendant la nuit.",
+          "days": "Les jours où ce tarif s'applique. Laissez vide pour tous les jours.",
+          "holidays": "Comment un jour férié est facturé : comme un jour de week-end ou comme un dimanche. Les jours fériés viennent du calendrier du dépôt pour votre pays."
         }
       },
       "options": {
@@ -664,13 +668,17 @@
           "name": "Nom",
           "rate": "Tarif",
           "start": "De",
-          "end": "À"
+          "end": "À",
+          "days": "Jours",
+          "holidays": "Jours fériés"
         },
         "data_description": {
           "name": "Un nom pour ce tarif horaire, comme Nuit.",
           "rate": "Le prix d'un kWh tant que ce tarif s'applique.",
           "start": "L'heure à laquelle ce tarif commence chaque jour.",
-          "end": "L'heure à laquelle ce tarif se termine. Elle peut précéder le début, pour un tarif qui court pendant la nuit."
+          "end": "L'heure à laquelle ce tarif se termine. Elle peut précéder le début, pour un tarif qui court pendant la nuit.",
+          "days": "Les jours où ce tarif s'applique. Laissez vide pour tous les jours.",
+          "holidays": "Comment un jour férié est facturé : comme un jour de week-end ou comme un dimanche. Les jours fériés viennent du calendrier du dépôt pour votre pays."
         }
       },
       "new_options": {
@@ -873,6 +881,24 @@
       "options": {
         "electricity": "Electricity",
         "gas": "Gas"
+      }
+    },
+    "weekday": {
+      "options": {
+        "mon": "Lundi",
+        "tue": "Mardi",
+        "wed": "Mercredi",
+        "thu": "Jeudi",
+        "fri": "Vendredi",
+        "sat": "Samedi",
+        "sun": "Dimanche"
+      }
+    },
+    "holiday_rule": {
+      "options": {
+        "normal": "Comme un autre jour",
+        "weekend": "Comme un jour de week-end",
+        "sunday": "Comme un dimanche"
       }
     }
   },

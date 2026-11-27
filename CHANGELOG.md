@@ -5,6 +5,10 @@ Each release has a section here. The release workflow publishes the section for 
 
 ## Unreleased
 
+**Added**
+
+- A timed rate you type in can now apply on chosen days only, such as weekends, and can say how a public holiday is priced: as any other day, as a weekend day or as a Sunday. The holidays come from the store's calendar for your country. If the store has none for the year, the rate is priced on the days alone and the holiday rule is not applied.
+
 ## 1.6.0
 
 This release adds the bill by line and by day, a bill projection and an example dashboard, and corrects **Price forecast** on a fixed tariff.

@@ -55,7 +55,7 @@ from .const import (
 from .country_reason import reason_for
 from .freshness import STATUS_CURRENT, days_unreached, plan_ending, plan_status
 from .fuel import Fuel
-from .manual import definition_from
+from .manual import definition_from, uses_holidays
 from .store import price_access, store_access
 
 if TYPE_CHECKING:
@@ -327,9 +327,15 @@ class TariffCoordinator(DataUpdateCoordinator[TariffData]):
         entry = self.fuel.data
         holidays_known = True
         is_holiday: Callable[[date], bool]
-        if CONF_MANUAL in entry:  # the household's own rates: no store, and no public holidays
-            definition = definition_from(entry[CONF_MANUAL], entry[CONF_NAME])
+        if CONF_MANUAL in entry:  # the household's own rates: priced here, holidays from the store
+            rates = entry[CONF_MANUAL]
+            definition = definition_from(rates, entry[CONF_NAME])
             is_holiday = no_holidays
+            if uses_holidays(rates):
+                try:
+                    is_holiday = await self._access.async_is_holiday(rates["country"], None)
+                except STORE_ERRORS:
+                    holidays_known = False
             revisions = [Revision(today, definition)]
         else:
             definition = await self._access.async_definition(

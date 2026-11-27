@@ -99,13 +99,17 @@
           "name": "Nome",
           "rate": "Preço",
           "start": "Das",
-          "end": "Às"
+          "end": "Às",
+          "days": "Dias",
+          "holidays": "Feriados"
         },
         "data_description": {
           "name": "Um nome para este preço por horário, como Noite.",
           "rate": "O preço de um kWh enquanto este preço se aplica.",
           "start": "A hora a que este preço começa todos os dias.",
-          "end": "A hora a que este preço termina. Pode ser anterior ao início, para um preço que se prolonga pela noite."
+          "end": "A hora a que este preço termina. Pode ser anterior ao início, para um preço que se prolonga pela noite.",
+          "days": "Os dias em que esta tarifa se aplica. Deixe vazio para todos os dias.",
+          "holidays": "Como um feriado é cobrado: como um dia de fim de semana ou como um domingo. Os feriados vêm do calendário do repositório para o seu país."
         }
       },
       "options": {
@@ -664,13 +668,17 @@
           "name": "Nome",
           "rate": "Preço",
           "start": "Das",
-          "end": "Às"
+          "end": "Às",
+          "days": "Dias",
+          "holidays": "Feriados"
         },
         "data_description": {
           "name": "Um nome para este preço por horário, como Noite.",
           "rate": "O preço de um kWh enquanto este preço se aplica.",
           "start": "A hora a que este preço começa todos os dias.",
-          "end": "A hora a que este preço termina. Pode ser anterior ao início, para um preço que se prolonga pela noite."
+          "end": "A hora a que este preço termina. Pode ser anterior ao início, para um preço que se prolonga pela noite.",
+          "days": "Os dias em que esta tarifa se aplica. Deixe vazio para todos os dias.",
+          "holidays": "Como um feriado é cobrado: como um dia de fim de semana ou como um domingo. Os feriados vêm do calendário do repositório para o seu país."
         }
       },
       "new_options": {
@@ -873,6 +881,24 @@
       "options": {
         "electricity": "Electricity",
         "gas": "Gas"
+      }
+    },
+    "weekday": {
+      "options": {
+        "mon": "Segunda-feira",
+        "tue": "Terça-feira",
+        "wed": "Quarta-feira",
+        "thu": "Quinta-feira",
+        "fri": "Sexta-feira",
+        "sat": "Sábado",
+        "sun": "Domingo"
+      }
+    },
+    "holiday_rule": {
+      "options": {
+        "normal": "Como qualquer outro dia",
+        "weekend": "Como um dia de fim de semana",
+        "sunday": "Como um domingo"
       }
     }
   },
