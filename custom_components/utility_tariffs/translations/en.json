@@ -99,13 +99,17 @@
           "name": "Name",
           "rate": "Rate",
           "start": "From",
-          "end": "To"
+          "end": "To",
+          "days": "Days",
+          "holidays": "Public holidays"
         },
         "data_description": {
           "name": "A name for this timed rate, such as Night.",
           "rate": "The price of one kWh while this rate applies.",
           "start": "The time this rate starts each day.",
-          "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight."
+          "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight.",
+          "days": "The days this rate applies on. Leave empty for every day.",
+          "holidays": "How a public holiday is priced. It can count as a weekend day or as a Sunday. The holidays come from the store's calendar for your country."
         }
       },
       "options": {
@@ -664,13 +668,17 @@
           "name": "Name",
           "rate": "Rate",
           "start": "From",
-          "end": "To"
+          "end": "To",
+          "days": "Days",
+          "holidays": "Public holidays"
         },
         "data_description": {
           "name": "A name for this timed rate, such as Night.",
           "rate": "The price of one kWh while this rate applies.",
           "start": "The time this rate starts each day.",
-          "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight."
+          "end": "The time this rate ends. It may be earlier than the start, for a rate that runs overnight.",
+          "days": "The days this rate applies on. Leave empty for every day.",
+          "holidays": "How a public holiday is priced. It can count as a weekend day or as a Sunday. The holidays come from the store's calendar for your country."
         }
       },
       "new_options": {
@@ -873,6 +881,24 @@
       "options": {
         "electricity": "Electricity",
         "gas": "Gas"
+      }
+    },
+    "weekday": {
+      "options": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "holiday_rule": {
+      "options": {
+        "normal": "Same as any other day",
+        "weekend": "Like a weekend day",
+        "sunday": "Like a Sunday"
       }
     }
   },

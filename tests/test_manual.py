@@ -238,3 +238,52 @@ async def test_the_form_starts_from_the_countrys_currency_and_vat(
         if str(key) == "base_rate"
     )
     assert unit == "EUR/kWh"
+
+
+async def _make_weekend(hass: HomeAssistant, holidays: str):
+    await hass.config.async_set_time_zone("Europe/Dublin")
+    result = await _to_base_form(hass)
+    result = await _step(hass, result, BASE)
+    result = await _step(hass, result, {"next_step_id": "manual_period"})
+    result = await _step(
+        hass,
+        result,
+        {
+            "name": "Weekend", "rate": 0.10, "start": "00:00:00", "end": "23:59:00",
+            "days": ["sat", "sun"], "holidays": holidays,
+        },
+    )
+    result = await _step(hass, result, {"next_step_id": "manual_done"})
+    result = await _step(hass, result, {})
+    await hass.async_block_till_done()
+    return result
+
+
+async def test_a_rate_for_chosen_days_applies_only_on_those_days(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to("2026-11-14 12:00:00+00:00")  # a Saturday
+    result = await _make_weekend(hass, "normal")
+
+    saved = _sub(result["result"]).data["manual"]["periods"][0]
+    assert saved["days"] == ["sat", "sun"]
+    assert hass.states.get("sensor.electricity_tariff_import_rate_band").state == "Weekend"
+
+
+async def test_a_rate_for_chosen_days_is_not_used_on_a_weekday(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to("2026-11-16 12:00:00+00:00")  # a Monday
+    await _make_weekend(hass, "normal")
+
+    assert hass.states.get("sensor.electricity_tariff_import_rate_band").state == "Day"
+
+
+async def test_a_holiday_rule_is_saved_and_the_tariff_still_prices_without_a_calendar(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, use_store: Callable[..., Path]
+) -> None:
+    freezer.move_to("2026-11-16 12:00:00+00:00")
+    result = await _make_weekend(hass, "weekend")
+
+    assert _sub(result["result"]).data["manual"]["periods"][0]["holidays"] == "weekend"
+    assert hass.states.get("sensor.electricity_tariff_import_rate_band").state == "Day"

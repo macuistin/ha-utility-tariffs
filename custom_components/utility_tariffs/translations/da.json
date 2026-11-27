@@ -99,13 +99,17 @@
           "name": "Navn",
           "rate": "Pris",
           "start": "Fra",
-          "end": "Til"
+          "end": "Til",
+          "days": "Dage",
+          "holidays": "Helligdage"
         },
         "data_description": {
           "name": "Et navn til denne tidsstyrede pris, fx Nat.",
           "rate": "Prisen for én kWh, mens denne pris gælder.",
           "start": "Det tidspunkt, hvor denne pris starter hver dag.",
-          "end": "Det tidspunkt, hvor denne pris slutter. Det kan være før starten, for en pris, der løber natten over."
+          "end": "Det tidspunkt, hvor denne pris slutter. Det kan være før starten, for en pris, der løber natten over.",
+          "days": "De dage, denne takst gælder. Lad feltet stå tomt for alle dage.",
+          "holidays": "Hvordan en helligdag prissættes: som en weekenddag eller som en søndag. Helligdagene kommer fra butikkens kalender for dit land."
         }
       },
       "options": {
@@ -664,13 +668,17 @@
           "name": "Navn",
           "rate": "Pris",
           "start": "Fra",
-          "end": "Til"
+          "end": "Til",
+          "days": "Dage",
+          "holidays": "Helligdage"
         },
         "data_description": {
           "name": "Et navn til denne tidsstyrede pris, fx Nat.",
           "rate": "Prisen for én kWh, mens denne pris gælder.",
           "start": "Det tidspunkt, hvor denne pris starter hver dag.",
-          "end": "Det tidspunkt, hvor denne pris slutter. Det kan være før starten, for en pris, der løber natten over."
+          "end": "Det tidspunkt, hvor denne pris slutter. Det kan være før starten, for en pris, der løber natten over.",
+          "days": "De dage, denne takst gælder. Lad feltet stå tomt for alle dage.",
+          "holidays": "Hvordan en helligdag prissættes: som en weekenddag eller som en søndag. Helligdagene kommer fra butikkens kalender for dit land."
         }
       },
       "new_options": {
@@ -873,6 +881,24 @@
       "options": {
         "electricity": "Electricity",
         "gas": "Gas"
+      }
+    },
+    "weekday": {
+      "options": {
+        "mon": "Mandag",
+        "tue": "Tirsdag",
+        "wed": "Onsdag",
+        "thu": "Torsdag",
+        "fri": "Fredag",
+        "sat": "Lørdag",
+        "sun": "Søndag"
+      }
+    },
+    "holiday_rule": {
+      "options": {
+        "normal": "Som en almindelig dag",
+        "weekend": "Som en weekenddag",
+        "sunday": "Som en søndag"
       }
     }
   },

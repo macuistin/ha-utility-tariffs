@@ -99,13 +99,17 @@
           "name": "Ainm",
           "rate": "Ráta",
           "start": "Ó",
-          "end": "Go dtí"
+          "end": "Go dtí",
+          "days": "Laethanta",
+          "holidays": "Laethanta saoire poiblí"
         },
         "data_description": {
           "name": "Ainm don ráta ama seo, mar Oíche.",
           "rate": "Praghas aon kWh amháin fad a bhaineann an ráta seo.",
           "start": "An t-am a thosaíonn an ráta seo gach lá.",
-          "end": "An t-am a chríochnaíonn an ráta seo. Is féidir é a bheith níos luaithe ná an tosach, i gcás ráta a ritheann thar oíche."
+          "end": "An t-am a chríochnaíonn an ráta seo. Is féidir é a bheith níos luaithe ná an tosach, i gcás ráta a ritheann thar oíche.",
+          "days": "Na laethanta a bhfuil an ráta seo i bhfeidhm. Fág folamh le haghaidh gach lá.",
+          "holidays": "Conas a phraghsáiltear lá saoire poiblí: mar lá deireadh seachtaine nó mar Domhnach. Tagann na laethanta saoire ó fhéilire an stórais do do thír."
         }
       },
       "options": {
@@ -664,13 +668,17 @@
           "name": "Ainm",
           "rate": "Ráta",
           "start": "Ó",
-          "end": "Go dtí"
+          "end": "Go dtí",
+          "days": "Laethanta",
+          "holidays": "Laethanta saoire poiblí"
         },
         "data_description": {
           "name": "Ainm don ráta ama seo, mar Oíche.",
           "rate": "Praghas aon kWh amháin fad a bhaineann an ráta seo.",
           "start": "An t-am a thosaíonn an ráta seo gach lá.",
-          "end": "An t-am a chríochnaíonn an ráta seo. Is féidir é a bheith níos luaithe ná an tosach, i gcás ráta a ritheann thar oíche."
+          "end": "An t-am a chríochnaíonn an ráta seo. Is féidir é a bheith níos luaithe ná an tosach, i gcás ráta a ritheann thar oíche.",
+          "days": "Na laethanta a bhfuil an ráta seo i bhfeidhm. Fág folamh le haghaidh gach lá.",
+          "holidays": "Conas a phraghsáiltear lá saoire poiblí: mar lá deireadh seachtaine nó mar Domhnach. Tagann na laethanta saoire ó fhéilire an stórais do do thír."
         }
       },
       "new_options": {
@@ -873,6 +881,24 @@
       "options": {
         "electricity": "Electricity",
         "gas": "Gas"
+      }
+    },
+    "weekday": {
+      "options": {
+        "mon": "Luan",
+        "tue": "Máirt",
+        "wed": "Céadaoin",
+        "thu": "Déardaoin",
+        "fri": "Aoine",
+        "sat": "Satharn",
+        "sun": "Domhnach"
+      }
+    },
+    "holiday_rule": {
+      "options": {
+        "normal": "Mar aon lá eile",
+        "weekend": "Mar lá deireadh seachtaine",
+        "sunday": "Mar Domhnach"
       }
     }
   },
